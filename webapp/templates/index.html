@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Prediction - Dự đoán Doanh thu</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #1a73e8; margin: 30px 0; font-size: 1.8em; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 30px; margin-bottom: 20px; }
+        .card h2 { color: #1a73e8; margin-bottom: 20px; font-size: 1.2em; border-bottom: 2px solid #e8eaed; padding-bottom: 10px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { margin-bottom: 5px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #555; font-size: 0.9em; }
+        .form-group select, .form-group input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95em; transition: border 0.3s; }
+        .form-group select:focus, .form-group input:focus { border-color: #1a73e8; outline: none; box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
+        .btn { display: block; width: 100%; padding: 14px; background: #1a73e8; color: #fff; border: none; border-radius: 8px; font-size: 1.1em; font-weight: 600; cursor: pointer; margin-top: 20px; transition: background 0.3s; }
+        .btn:hover { background: #1557b0; }
+        .info { background: #e8f0fe; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 0.85em; color: #1a73e8; }
+        .footer { text-align: center; margin-top: 30px; color: #999; font-size: 0.85em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔮 Dự đoán Doanh thu Bán hàng</h1>
+        <p class="subtitle">Sử dụng Azure ML Endpoint - Hệ thống trực quan dữ liệu bán hàng thời gian thực</p>
+
+        <form action="/predict" method="POST">
+            <div class="card">
+                <h2>📅 Thời gian</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Giờ (0-23)</label>
+                        <input type="number" name="hour" min="0" max="23" value="14" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ngày trong tuần</label>
+                        <select name="day_of_week">
+                            <option value="0">Thứ Hai</option>
+                            <option value="1">Thứ Ba</option>
+                            <option value="2" selected>Thứ Tư</option>
+                            <option value="3">Thứ Năm</option>
+                            <option value="4">Thứ Sáu</option>
+                            <option value="5">Thứ Bảy</option>
+                            <option value="6">Chủ Nhật</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tháng</label>
+                        <select name="month">
+                            {% for m in range(1, 13) %}
+                            <option value="{{ m }}" {% if m == 6 %}selected{% endif %}>Tháng {{ m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Kênh bán</label>
+                        <select name="is_online">
+                            <option value="0">Cửa hàng (Offline)</option>
+                            <option value="1">Online</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🛍️ Sản phẩm</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Sản phẩm</label>
+                        <select name="product_id" id="product_select" onchange="updatePrice()">
+                            {% for p in products %}
+                            <option value="{{ loop.index0 }}" data-price="{{ p.base_price }}" data-category="{{ p.category }}">
+                                {{ p.name }} (${{ p.base_price }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Danh mục</label>
+                        <select name="category_id">
+                            <option value="0">Electronics</option>
+                            <option value="1">Clothing</option>
+                            <option value="2">Food</option>
+                            <option value="3">Home</option>
+                            <option value="4">Sports</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Giá cơ bản ($)</label>
+                        <input type="number" name="base_price" id="base_price" step="0.01" value="50" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Số lượng</label>
+                        <input type="number" name="quantity" value="2" min="1" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Giảm giá (%)</label>
+                        <select name="discount_percent">
+                            <option value="0">0%</option>
+                            <option value="5">5%</option>
+                            <option value="10" selected>10%</option>
+                            <option value="15">15%</option>
+                            <option value="20">20%</option>
+                            <option value="25">25%</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📍 Thị trường</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Khu vực</label>
+                        <select name="region_id">
+                            {% for r in regions %}
+                            <option value="{{ loop.index0 }}">{{ r }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn">🚀 Dự đoán Doanh thu</button>
+        </form>
+
+        <div class="info">
+            <strong>Lưu ý:</strong> Hệ thống gọi Azure ML Online Endpoint để dự đoán.
+            Nếu endpoint chưa được cấu hình, sẽ sử dụng mock prediction để demo.
+        </div>
+
+        <div class="footer">
+            <p>Đồ án Cloud Computing - Hệ thống trực quan dữ liệu bán hàng thời gian thực trên Azure</p>
+        </div>
+    </div>
+
+    <script>
+        function updatePrice() {
+            const sel = document.getElementById('product_select');
+            const opt = sel.options[sel.selectedIndex];
+            document.getElementById('base_price').value = opt.dataset.price || 50;
+        }
+    </script>
+</body>
+</html>

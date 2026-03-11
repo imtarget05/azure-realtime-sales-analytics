@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả Dự đoán - Sales Prediction</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #1a73e8; margin: 30px 0 10px; font-size: 1.8em; }
+        .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 30px; margin-bottom: 20px; }
+        .card h2 { color: #1a73e8; margin-bottom: 20px; font-size: 1.2em; border-bottom: 2px solid #e8eaed; padding-bottom: 10px; }
+        .prediction-value { font-size: 2.5em; color: #0d47a1; text-align: center; font-weight: bold; margin: 20px 0; }
+        .confidence { display: flex; justify-content: center; gap: 40px; margin: 15px 0; }
+        .confidence-item { text-align: center; }
+        .confidence-item .label { font-size: 0.85em; color: #666; }
+        .confidence-item .value { font-size: 1.3em; font-weight: 600; }
+        .confidence-item.lower .value { color: #e53935; }
+        .confidence-item.upper .value { color: #43a047; }
+        .input-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .input-item { display: flex; justify-content: space-between; padding: 8px 12px; background: #f8f9fa; border-radius: 6px; }
+        .input-item .key { color: #666; }
+        .input-item .val { font-weight: 600; }
+        .source-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8em; margin-top: 10px; }
+        .source-azure { background: #e3f2fd; color: #1565c0; }
+        .source-mock { background: #fff3e0; color: #e65100; }
+        .source-center { text-align: center; margin-top: 15px; }
+        .status-success { border-left: 4px solid #4caf50; }
+        .status-error { border-left: 4px solid #f44336; }
+        .btn { display: inline-block; padding: 12px 30px; background: #1a73e8; color: #fff; border: none; border-radius: 8px; font-size: 1em; cursor: pointer; text-decoration: none; margin-top: 20px; }
+        .btn:hover { background: #1557b0; }
+        .btn-back { background: #5f6368; }
+        .btn-back:hover { background: #3c4043; }
+        .actions { text-align: center; margin: 30px 0; }
+        .error-msg { background: #fce4ec; color: #c62828; padding: 15px; border-radius: 8px; }
+        .chart-container { margin-top: 20px; text-align: center; }
+        .chart-label { font-size: 0.9em; color: #666; margin-bottom: 10px; }
+        .bar-outer { background: #e8eaed; border-radius: 8px; height: 40px; position: relative; overflow: hidden; }
+        .bar-inner { position: absolute; left: 0; top: 0; height: 100%; background: linear-gradient(90deg, #e53935, #fb8c00, #43a047); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; }
+        .bar-labels { display: flex; justify-content: space-between; font-size: 0.8em; color: #666; margin-top: 5px; }
+        .bar { height: 30px; border-radius: 4px; margin: 5px 0; position: relative; }
+        .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 10px; color: #fff; font-weight: 600; font-size: 0.85em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Kết quả Dự đoán</h1>
+
+        {% if result.status == 'success' %}
+        <div class="card status-success">
+            <h2>💰 Doanh thu Dự đoán</h2>
+            <div class="prediction-value">
+                ${{ "%.2f"|format(result.prediction.predicted_revenue) }}
+            </div>
+
+            {% if result.prediction.confidence_interval %}
+            <div class="confidence">
+                <div class="confidence-item lower">
+                    <div class="label">Cận dưới (85%)</div>
+                    <div class="value">${{ "%.2f"|format(result.prediction.confidence_interval.lower) }}</div>
+                </div>
+                <div class="confidence-item">
+                    <div class="label">Dự đoán</div>
+                    <div class="value" style="color: #0d47a1;">${{ "%.2f"|format(result.prediction.predicted_revenue) }}</div>
+                </div>
+                <div class="confidence-item upper">
+                    <div class="label">Cận trên (115%)</div>
+                    <div class="value">${{ "%.2f"|format(result.prediction.confidence_interval.upper) }}</div>
+                </div>
+            </div>
+
+            <!-- Visual bar -->
+            <div class="chart-container">
+                <p class="chart-label">Khoảng tin cậy</p>
+                {% set lower = result.prediction.confidence_interval.lower %}
+                {% set upper = result.prediction.confidence_interval.upper %}
+                {% set predicted = result.prediction.predicted_revenue %}
+                <div class="bar-outer">
+                    <div class="bar-inner" id="confidence-bar"
+                         data-lower="{{ lower }}"
+                         data-upper="{{ upper }}"
+                         data-predicted="{{ predicted }}">
+                        ${{ "%.2f"|format(predicted) }}
+                    </div>
+                </div>
+                <div class="bar-labels">
+                    <span>${{ "%.2f"|format(lower) }}</span>
+                    <span>${{ "%.2f"|format(upper) }}</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="source-center">
+                {% if 'Mock' in result.source %}
+                <span class="source-badge source-mock">{{ result.source }}</span>
+                {% else %}
+                <span class="source-badge source-azure">{{ result.source }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% else %}
+        <div class="card status-error">
+            <h2>❌ Lỗi</h2>
+            <div class="error-msg">{{ result.message }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Input Summary -->
+        <div class="card">
+            <h2>📋 Tham số đầu vào</h2>
+            <div class="input-summary">
+                <div class="input-item"><span class="key">Giờ</span><span class="val">{{ input_data.get('hour', 'N/A') }}h</span></div>
+                <div class="input-item"><span class="key">Ngày trong tuần</span><span class="val">{{ input_data.get('day_of_week', 'N/A') }}</span></div>
+                <div class="input-item"><span class="key">Tháng</span><span class="val">{{ input_data.get('month', 'N/A') }}</span></div>
+                <div class="input-item"><span class="key">Online</span><span class="val">{{ 'Có' if input_data.get('is_online') == 1 else 'Không' }}</span></div>
+                <div class="input-item"><span class="key">Giá cơ bản</span><span class="val">${{ input_data.get('base_price', 'N/A') }}</span></div>
+                <div class="input-item"><span class="key">Số lượng</span><span class="val">{{ input_data.get('quantity', 'N/A') }}</span></div>
+                <div class="input-item"><span class="key">Giảm giá</span><span class="val">{{ input_data.get('discount_percent', 0) }}%</span></div>
+                <div class="input-item"><span class="key">Khu vực ID</span><span class="val">{{ input_data.get('region_id', 'N/A') }}</span></div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/" class="btn btn-back">← Dự đoán lại</a>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='result.js') }}"></script>
+</body>
+</html>

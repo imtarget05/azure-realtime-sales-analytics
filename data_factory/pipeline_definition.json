@@ -1,0 +1,182 @@
+{
+    "name": "SalesAnalyticsPipeline",
+    "properties": {
+        "description": "Pipeline tổng hợp: Copy dữ liệu Blob → SQL → ML Prediction → Power BI",
+        "activities": [
+            {
+                "name": "CopyBlobToSQL",
+                "type": "Copy",
+                "description": "Copy dữ liệu từ Blob Storage staging vào Azure SQL",
+                "inputs": [
+                    {
+                        "referenceName": "BlobStagingDataset",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "SqlSalesDataset",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "typeProperties": {
+                    "source": {
+                        "type": "BlobSource",
+                        "recursive": true
+                    },
+                    "sink": {
+                        "type": "SqlSink",
+                        "writeBehavior": "insert",
+                        "sqlWriterCleanupScript": null
+                    }
+                }
+            },
+            {
+                "name": "PrepareTrainingData",
+                "type": "SqlServerStoredProcedure",
+                "description": "Chạy stored procedure chuẩn bị dữ liệu huấn luyện",
+                "dependsOn": [
+                    {
+                        "activity": "CopyBlobToSQL",
+                        "dependencyConditions": ["Succeeded"]
+                    }
+                ],
+                "linkedServiceName": {
+                    "referenceName": "AzureSqlDatabaseLS",
+                    "type": "LinkedServiceReference"
+                },
+                "typeProperties": {
+                    "storedProcedureName": "sp_PrepareTrainingData"
+                }
+            },
+            {
+                "name": "RunMLPipeline",
+                "type": "AzureMLExecutePipeline",
+                "description": "Trigger Azure ML pipeline để huấn luyện model",
+                "dependsOn": [
+                    {
+                        "activity": "PrepareTrainingData",
+                        "dependencyConditions": ["Succeeded"]
+                    }
+                ],
+                "linkedServiceName": {
+                    "referenceName": "AzureMLServiceLS",
+                    "type": "LinkedServiceReference"
+                },
+                "typeProperties": {
+                    "mlPipelineId": "<ml-pipeline-id>",
+                    "experimentName": "sales-forecast-experiment"
+                }
+            },
+            {
+                "name": "UpdateForecasts",
+                "type": "SqlServerStoredProcedure",
+                "description": "Cập nhật bảng dự đoán sau khi ML hoàn thành",
+                "dependsOn": [
+                    {
+                        "activity": "RunMLPipeline",
+                        "dependencyConditions": ["Succeeded"]
+                    }
+                ],
+                "linkedServiceName": {
+                    "referenceName": "AzureSqlDatabaseLS",
+                    "type": "LinkedServiceReference"
+                },
+                "typeProperties": {
+                    "storedProcedureName": "sp_UpdateForecasts"
+                }
+            }
+        ]
+    },
+    "linkedServices": [
+        {
+            "name": "AzureBlobStorageLS",
+            "properties": {
+                "type": "AzureBlobStorage",
+                "typeProperties": {
+                    "connectionString": "@{linkedService().blobConnectionString}"
+                }
+            }
+        },
+        {
+            "name": "AzureSqlDatabaseLS",
+            "properties": {
+                "type": "AzureSqlDatabase",
+                "typeProperties": {
+                    "connectionString": "@{linkedService().sqlConnectionString}"
+                }
+            }
+        },
+        {
+            "name": "AzureMLServiceLS",
+            "properties": {
+                "type": "AzureMLService",
+                "typeProperties": {
+                    "subscriptionId": "<subscription-id>",
+                    "resourceGroupName": "<resource-group>",
+                    "mlWorkspaceName": "<ml-workspace-name>"
+                }
+            }
+        }
+    ],
+    "datasets": [
+        {
+            "name": "BlobStagingDataset",
+            "properties": {
+                "type": "AzureBlob",
+                "linkedServiceName": {
+                    "referenceName": "AzureBlobStorageLS",
+                    "type": "LinkedServiceReference"
+                },
+                "typeProperties": {
+                    "folderPath": "data-factory-staging",
+                    "format": {
+                        "type": "JsonFormat"
+                    }
+                }
+            }
+        },
+        {
+            "name": "SqlSalesDataset",
+            "properties": {
+                "type": "AzureSqlTable",
+                "linkedServiceName": {
+                    "referenceName": "AzureSqlDatabaseLS",
+                    "type": "LinkedServiceReference"
+                },
+                "typeProperties": {
+                    "tableName": "dbo.SalesTransactions"
+                }
+            }
+        }
+    ],
+    "triggers": [
+        {
+            "name": "DailyMLTrigger",
+            "properties": {
+                "type": "ScheduleTrigger",
+                "description": "Trigger chạy pipeline ML hàng ngày lúc 02:00 UTC",
+                "pipelines": [
+                    {
+                        "pipelineReference": {
+                            "referenceName": "MLOrchestration",
+                            "type": "PipelineReference"
+                        }
+                    }
+                ],
+                "typeProperties": {
+                    "recurrence": {
+                        "frequency": "Day",
+                        "interval": 1,
+                        "startTime": "2026-03-01T02:00:00Z",
+                        "timeZone": "UTC",
+                        "schedule": {
+                            "hours": [2],
+                            "minutes": [0]
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
