@@ -31,3 +31,9 @@ flask>=3.0.0
 
 # Utilities
 requests>=2.31.0
+
+# Log
+python-json-logger>=4.0.0,<5.0.0
+
+# Requests
+requests==2.32.5
