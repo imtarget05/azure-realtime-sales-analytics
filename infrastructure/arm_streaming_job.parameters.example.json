@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "eastus"
+    },
+    "eventHubNamespaceName": {
+      "value": "ehns-sales-prod"
+    },
+    "eventHubName": {
+      "value": "sales-events"
+    },
+    "eventHubPartitionCount": {
+      "value": 4
+    },
+    "eventHubRetentionDays": {
+      "value": 3
+    },
+    "eventHubPolicyName": {
+      "value": "asa-policy"
+    },
+    "streamAnalyticsJobName": {
+      "value": "sa-sales-realtime"
+    },
+    "streamingUnits": {
+      "value": 3
+    },
+    "consumerGroupName": {
+      "value": "stream-analytics-cg"
+    },
+    "sqlServerName": {
+      "value": "sql-sales-xxxx.database.windows.net"
+    },
+    "sqlDatabaseName": {
+      "value": "SalesAnalyticsDB"
+    },
+    "sqlUser": {
+      "value": "sqladmin"
+    },
+    "sqlPassword": {
+      "value": "<replace-with-secure-value>"
+    },
+    "enablePowerBIOutput": {
+      "value": false
+    },
+    "powerBIGroupId": {
+      "value": ""
+    },
+    "powerBIDataset": {
+      "value": "sales_realtime_dataset"
+    },
+    "powerBITable": {
+      "value": "sales_realtime"
+    }
+  }
+}

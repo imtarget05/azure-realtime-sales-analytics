@@ -1,0 +1,245 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "eastus"
+    },
+    "eventHubNamespaceName": {
+      "type": "string"
+    },
+    "eventHubName": {
+      "type": "string",
+      "defaultValue": "sales-events"
+    },
+    "eventHubPartitionCount": {
+      "type": "int",
+      "defaultValue": 4
+    },
+    "eventHubRetentionDays": {
+      "type": "int",
+      "defaultValue": 3
+    },
+    "eventHubPolicyName": {
+      "type": "string",
+      "defaultValue": "asa-policy"
+    },
+    "streamAnalyticsJobName": {
+      "type": "string"
+    },
+    "streamingUnits": {
+      "type": "int",
+      "defaultValue": 3
+    },
+    "consumerGroupName": {
+      "type": "string",
+      "defaultValue": "stream-analytics-cg"
+    },
+    "sqlServerName": {
+      "type": "string"
+    },
+    "sqlDatabaseName": {
+      "type": "string"
+    },
+    "sqlUser": {
+      "type": "string"
+    },
+    "sqlPassword": {
+      "type": "secureString"
+    },
+    "enablePowerBIOutput": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "powerBIGroupId": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "powerBIDataset": {
+      "type": "string",
+      "defaultValue": "sales_realtime_dataset"
+    },
+    "powerBITable": {
+      "type": "string",
+      "defaultValue": "sales_realtime"
+    }
+  },
+  "variables": {
+    "asaQuery": "WITH Cleaned AS ( SELECT TRY_CAST([timestamp] AS datetime) AS event_time, CAST(store_id AS nvarchar(20)) AS store_id, CAST(product_id AS nvarchar(20)) AS product_id, TRY_CAST(quantity AS bigint) AS quantity, TRY_CAST(price AS float) AS price, TRY_CAST(temperature AS float) AS temperature, CAST(weather AS nvarchar(30)) AS weather, TRY_CAST(holiday AS bigint) AS holiday, EventEnqueuedUtcTime AS enqueued_time FROM SalesInput WHERE TRY_CAST([timestamp] AS datetime) IS NOT NULL AND store_id IS NOT NULL AND product_id IS NOT NULL AND TRY_CAST(quantity AS bigint) IS NOT NULL AND TRY_CAST(price AS float) IS NOT NULL ), Enriched AS ( SELECT event_time, store_id, product_id, CAST(quantity AS bigint) AS units_sold, CAST(price AS float) AS unit_price, CAST(quantity * price AS float) AS revenue, CAST(temperature AS float) AS temperature, CASE WHEN weather IS NULL OR LTRIM(RTRIM(weather)) = '' THEN 'unknown' ELSE LOWER(weather) END AS weather, CASE WHEN holiday IS NULL THEN 0 ELSE CAST(holiday AS bigint) END AS holiday, enqueued_time, CASE WHEN product_id IN ('COKE','PEPSI') THEN 'Beverage' WHEN product_id = 'MILK' THEN 'Dairy' WHEN product_id = 'BREAD' THEN 'Bakery' ELSE 'Other' END AS category FROM Cleaned ), Agg5m AS ( SELECT DATEADD(minute, -5, System.Timestamp()) AS window_start, System.Timestamp() AS window_end, store_id, product_id, category, SUM(units_sold) AS units_sold, SUM(revenue) AS revenue, AVG(unit_price) AS avg_price, COUNT(*) AS tx_count FROM Enriched TIMESTAMP BY event_time GROUP BY store_id, product_id, category, TumblingWindow(minute, 5) ), Rolling15m AS ( SELECT DATEADD(minute, -15, System.Timestamp()) AS window_start, System.Timestamp() AS window_end, store_id, product_id, SUM(units_sold) AS rolling_15m_units, SUM(revenue) AS rolling_15m_revenue FROM Enriched TIMESTAMP BY event_time GROUP BY store_id, product_id, HoppingWindow(minute, 15, 5) ) SELECT event_time, store_id, product_id, units_sold, unit_price, revenue, temperature, weather, holiday, category, enqueued_time, DATEDIFF(second, event_time, enqueued_time) AS ingest_lag_seconds INTO SalesRawOutput FROM Enriched; SELECT a.window_start, a.window_end, a.store_id, a.product_id, a.category, a.units_sold, a.revenue, a.avg_price, a.tx_count, ISNULL(LAG(a.revenue, 1) OVER (PARTITION BY a.store_id, a.product_id LIMIT DURATION(hour, 1)), 0) AS prev_5m_revenue, a.revenue - ISNULL(LAG(a.revenue, 1) OVER (PARTITION BY a.store_id, a.product_id LIMIT DURATION(hour, 1)), 0) AS revenue_delta_5m, ISNULL(r.rolling_15m_units, 0) AS rolling_15m_units, ISNULL(r.rolling_15m_revenue, 0) AS rolling_15m_revenue INTO SalesAggOutput FROM Agg5m a TIMESTAMP BY a.window_end LEFT JOIN Rolling15m r TIMESTAMP BY r.window_end ON a.store_id = r.store_id AND a.product_id = r.product_id AND DATEDIFF(minute, a, r) BETWEEN 0 AND 0;"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.EventHub/namespaces",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[parameters('eventHubNamespaceName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard",
+        "tier": "Standard",
+        "capacity": 1
+      },
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.EventHub/namespaces/eventhubs",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[concat(parameters('eventHubNamespaceName'), '/', parameters('eventHubName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces', parameters('eventHubNamespaceName'))]"
+      ],
+      "properties": {
+        "partitionCount": "[parameters('eventHubPartitionCount')]",
+        "messageRetentionInDays": "[parameters('eventHubRetentionDays')]"
+      }
+    },
+    {
+      "type": "Microsoft.EventHub/namespaces/authorizationRules",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[concat(parameters('eventHubNamespaceName'), '/', parameters('eventHubPolicyName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.EventHub/namespaces', parameters('eventHubNamespaceName'))]"
+      ],
+      "properties": {
+        "rights": [
+          "Listen",
+          "Send"
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.StreamAnalytics/streamingjobs",
+      "apiVersion": "2021-10-01-preview",
+      "name": "[parameters('streamAnalyticsJobName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "name": "Standard"
+        },
+        "eventsOutOfOrderPolicy": "Adjust",
+        "outputErrorPolicy": "Drop",
+        "eventsOutOfOrderMaxDelayInSeconds": 5,
+        "eventsLateArrivalMaxDelayInSeconds": 30,
+        "dataLocale": "en-US",
+        "compatibilityLevel": "1.2",
+        "streamingUnits": "[parameters('streamingUnits')]"
+      }
+    },
+    {
+      "type": "Microsoft.StreamAnalytics/streamingjobs/inputs",
+      "apiVersion": "2021-10-01-preview",
+      "name": "[concat(parameters('streamAnalyticsJobName'), '/SalesInput')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.StreamAnalytics/streamingjobs', parameters('streamAnalyticsJobName'))]",
+        "[resourceId('Microsoft.EventHub/namespaces/eventhubs', parameters('eventHubNamespaceName'), parameters('eventHubName'))]",
+        "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', parameters('eventHubNamespaceName'), parameters('eventHubPolicyName'))]"
+      ],
+      "properties": {
+        "type": "Stream",
+        "datasource": {
+          "type": "Microsoft.EventHub/EventHub",
+          "properties": {
+            "serviceBusNamespace": "[parameters('eventHubNamespaceName')]",
+            "sharedAccessPolicyName": "[parameters('eventHubPolicyName')]",
+            "sharedAccessPolicyKey": "",
+            "eventHubName": "[parameters('eventHubName')]",
+            "consumerGroupName": "[parameters('consumerGroupName')]"
+          }
+        },
+        "serialization": {
+          "type": "Json",
+          "properties": {
+            "encoding": "UTF8"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.StreamAnalytics/streamingjobs/outputs",
+      "apiVersion": "2021-10-01-preview",
+      "name": "[concat(parameters('streamAnalyticsJobName'), '/SalesRawOutput')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.StreamAnalytics/streamingjobs', parameters('streamAnalyticsJobName'))]"
+      ],
+      "properties": {
+        "datasource": {
+          "type": "Microsoft.Sql/Server/Database",
+          "properties": {
+            "server": "[parameters('sqlServerName')]",
+            "database": "[parameters('sqlDatabaseName')]",
+            "user": "[parameters('sqlUser')]",
+            "password": "[parameters('sqlPassword')]",
+            "table": "SalesRaw"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.StreamAnalytics/streamingjobs/outputs",
+      "apiVersion": "2021-10-01-preview",
+      "name": "[concat(parameters('streamAnalyticsJobName'), '/SalesAggOutput')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.StreamAnalytics/streamingjobs', parameters('streamAnalyticsJobName'))]"
+      ],
+      "properties": {
+        "datasource": {
+          "type": "Microsoft.Sql/Server/Database",
+          "properties": {
+            "server": "[parameters('sqlServerName')]",
+            "database": "[parameters('sqlDatabaseName')]",
+            "user": "[parameters('sqlUser')]",
+            "password": "[parameters('sqlPassword')]",
+            "table": "SalesAgg5m"
+          }
+        }
+      }
+    },
+    {
+      "condition": "[parameters('enablePowerBIOutput')]",
+      "type": "Microsoft.StreamAnalytics/streamingjobs/outputs",
+      "apiVersion": "2021-10-01-preview",
+      "name": "[concat(parameters('streamAnalyticsJobName'), '/PowerBIOutput')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.StreamAnalytics/streamingjobs', parameters('streamAnalyticsJobName'))]"
+      ],
+      "properties": {
+        "datasource": {
+          "type": "PowerBI",
+          "properties": {
+            "groupId": "[parameters('powerBIGroupId')]",
+            "dataset": "[parameters('powerBIDataset')]",
+            "table": "[parameters('powerBITable')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.StreamAnalytics/streamingjobs/transformations",
+      "apiVersion": "2021-10-01-preview",
+      "name": "[concat(parameters('streamAnalyticsJobName'), '/Transformation')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.StreamAnalytics/streamingjobs/inputs', parameters('streamAnalyticsJobName'), 'SalesInput')]",
+        "[resourceId('Microsoft.StreamAnalytics/streamingjobs/outputs', parameters('streamAnalyticsJobName'), 'SalesRawOutput')]",
+        "[resourceId('Microsoft.StreamAnalytics/streamingjobs/outputs', parameters('streamAnalyticsJobName'), 'SalesAggOutput')]"
+      ],
+      "properties": {
+        "streamingUnits": "[parameters('streamingUnits')]",
+        "query": "[variables('asaQuery')]"
+      }
+    }
+  ],
+  "outputs": {
+    "eventHubNamespace": {
+      "type": "string",
+      "value": "[parameters('eventHubNamespaceName')]"
+    },
+    "eventHubName": {
+      "type": "string",
+      "value": "[parameters('eventHubName')]"
+    },
+    "streamAnalyticsJob": {
+      "type": "string",
+      "value": "[parameters('streamAnalyticsJobName')]"
+    }
+  }
+}
