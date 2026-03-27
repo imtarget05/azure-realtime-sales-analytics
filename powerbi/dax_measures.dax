@@ -1,0 +1,518 @@
+-- ╔══════════════════════════════════════════════════════════════════╗
+-- ║  DAX Measures — Real-time Sales Analytics Dashboard             ║
+-- ║  Power BI DirectQuery → Databricks Serverless SQL Warehouse     ║
+-- ║                                                                  ║
+-- ║  Bảng nguồn (Gold Layer):                                       ║
+-- ║    • hourly_summary   — KPIs theo giờ × cửa hàng × danh mục    ║
+-- ║    • product_summary  — Hiệu suất sản phẩm + viral             ║
+-- ║    • customer_summary — CLV, phân khúc, xếp hạng               ║
+-- ║    • similarity_scores — Similarity bins phân phối              ║
+-- ║                                                                  ║
+-- ║  Sử dụng: Copy từng measure vào Power BI Desktop                ║
+-- ║           hoặc import qua Tabular Editor 3 / ALM Toolkit        ║
+-- ╚══════════════════════════════════════════════════════════════════╝
+
+
+-- ====================================================================
+-- 1. CORE KPI MEASURES
+-- ====================================================================
+
+-- 1.1  Tổng doanh thu — phản ứng với mọi filter context (slicer ngày,
+--      region, category…).  Dùng hourly_summary vì đã pre-aggregated
+--      → DirectQuery chỉ cần SUM, không cần quét Silver.
+Revenue Total =
+    SUM ( hourly_summary[total_revenue] )
+
+
+-- 1.2  Tổng đơn hàng
+Order Total =
+    SUM ( hourly_summary[order_count] )
+
+
+-- 1.3  Giá trị đơn trung bình — DIVIDE tránh /0
+Average Order Value =
+    DIVIDE (
+        [Revenue Total],
+        [Order Total],
+        0
+    )
+
+
+-- 1.4  Tổng sản phẩm bán ra
+Units Sold =
+    SUM ( hourly_summary[total_quantity] )
+
+
+-- 1.5  Khách hàng hoạt động — count unique customer_id từ bảng detail
+Active Customers =
+    SUM ( hourly_summary[unique_customers] )
+
+
+-- 1.6  Tổng chiết khấu
+Total Discounts =
+    SUM ( hourly_summary[total_discount_amount] )
+
+
+-- 1.7  Doanh thu trung bình / khách
+Revenue per Customer =
+    DIVIDE (
+        [Revenue Total],
+        [Active Customers],
+        0
+    )
+
+
+-- ====================================================================
+-- 2. TIME INTELLIGENCE MEASURES
+--    Yêu cầu: Calendar table đánh dấu Date column
+-- ====================================================================
+
+-- 2.1  Doanh thu hôm nay (real-time card)
+Revenue Today =
+    CALCULATE (
+        [Revenue Total],
+        'Calendar'[Date] = TODAY ()
+    )
+
+
+-- 2.2  Doanh thu hôm qua
+Revenue Yesterday =
+    CALCULATE (
+        [Revenue Total],
+        'Calendar'[Date] = TODAY () - 1
+    )
+
+
+-- 2.3  Tăng trưởng so với hôm qua (%)
+Revenue DoD Growth % =
+    VAR _today     = [Revenue Today]
+    VAR _yesterday = [Revenue Yesterday]
+    RETURN
+        DIVIDE (
+            _today - _yesterday,
+            _yesterday,
+            BLANK ()
+        )
+
+
+-- 2.4  MTD — Month-to-Date
+Revenue MTD =
+    CALCULATE (
+        [Revenue Total],
+        DATESMTD ( 'Calendar'[Date] )
+    )
+
+
+-- 2.5  YTD — Year-to-Date
+Revenue YTD =
+    CALCULATE (
+        [Revenue Total],
+        DATESYTD ( 'Calendar'[Date] )
+    )
+
+
+-- 2.6  Cùng kỳ tháng trước
+Revenue Prior Month =
+    CALCULATE (
+        [Revenue Total],
+        DATEADD ( 'Calendar'[Date], -1, MONTH )
+    )
+
+
+-- 2.7  MoM Growth %
+Revenue MoM Growth % =
+    VAR _current = [Revenue MTD]
+    VAR _prior   = [Revenue Prior Month]
+    RETURN
+        DIVIDE (
+            _current - _prior,
+            _prior,
+            BLANK ()
+        )
+
+
+-- 2.8  Rolling 7 Days
+Revenue Rolling 7D =
+    CALCULATE (
+        [Revenue Total],
+        DATESINPERIOD ( 'Calendar'[Date], MAX ( 'Calendar'[Date] ), -7, DAY )
+    )
+
+
+-- 2.9  Rolling 30 Days
+Revenue Rolling 30D =
+    CALCULATE (
+        [Revenue Total],
+        DATESINPERIOD ( 'Calendar'[Date], MAX ( 'Calendar'[Date] ), -30, DAY )
+    )
+
+
+-- ====================================================================
+-- 3. TOP N - CUSTOMERS
+-- ====================================================================
+
+-- 3.1  Tổng chi tiêu khách hàng (dùng trong TOPN)
+Customer Total Spent =
+    SUM ( customer_summary[total_spent] )
+
+
+-- 3.2  Top 5 Customers by Revenue — respects time filter
+--      Cơ chế: TOPN chọn 5 customer_id có tổng cao nhất trong
+--      filter context hiện tại (khi user chọn ngày / region).
+Top 5 Customer Revenue =
+    CALCULATE (
+        [Customer Total Spent],
+        KEEPFILTERS (
+            TOPN (
+                5,
+                VALUES ( customer_summary[customer_id] ),
+                [Customer Total Spent],
+                DESC
+            )
+        )
+    )
+
+
+-- 3.3  Đánh dấu Top-5 cho conditional formatting
+Is Top 5 Customer =
+    VAR _currentSpent =
+        CALCULATE (
+            [Customer Total Spent],
+            ALLEXCEPT ( customer_summary, customer_summary[customer_id] )
+        )
+    VAR _top5Threshold =
+        CALCULATE (
+            PERCENTILEX.EXC (
+                VALUES ( customer_summary[customer_id] ),
+                [Customer Total Spent],
+                0.95
+            ),
+            ALL ( customer_summary )
+        )
+    RETURN
+        IF ( _currentSpent >= _top5Threshold, 1, 0 )
+
+
+-- 3.4  Top 5 Customers — Tên + doanh thu (Table visual)
+--      Sử dụng RANKX để hiện rank number
+Customer Revenue Rank =
+    IF (
+        HASONEVALUE ( customer_summary[customer_id] ),
+        RANKX (
+            ALL ( customer_summary[customer_id] ),
+            [Customer Total Spent],
+            ,
+            DESC,
+            DENSE
+        )
+    )
+
+
+-- ====================================================================
+-- 4. PRODUCT ANALYSIS
+-- ====================================================================
+
+-- 4.1  Doanh thu sản phẩm
+Product Revenue =
+    SUM ( product_summary[total_revenue] )
+
+
+-- 4.2  % doanh thu so tổng
+Product Revenue % =
+    DIVIDE (
+        [Product Revenue],
+        CALCULATE ( [Product Revenue], ALL ( product_summary ) ),
+        0
+    )
+
+
+-- 4.3  Viral Rate trung bình (từ ML prediction)
+Avg Viral Rate =
+    AVERAGE ( product_summary[viral_rate] )
+
+
+-- 4.4  Unique Buyers
+Unique Buyers =
+    SUM ( product_summary[unique_buyers] )
+
+
+-- ====================================================================
+-- 5. SIMILARITY SCORE BINS
+--    Phân bổ dữ liệu từ bảng similarity_scores đã được band sẵn
+--    (0.0, 0.1, 0.2 … 1.0) ở Gold Layer (notebook 03).
+-- ====================================================================
+
+-- 5.1  Tổng giao dịch trong bin
+Similarity Bin Count =
+    SUM ( similarity_scores[txn_count] )
+
+
+-- 5.2  Doanh thu trung bình
+Similarity Bin Avg Amount =
+    DIVIDE (
+        SUMX (
+            similarity_scores,
+            similarity_scores[avg_amount] * similarity_scores[txn_count]
+        ),
+        [Similarity Bin Count],
+        0
+    )
+
+
+-- 5.3  % giao dịch viral trong bin
+Similarity Viral % =
+    DIVIDE (
+        SUM ( similarity_scores[viral_count] ),
+        [Similarity Bin Count],
+        0
+    )
+
+
+-- 5.4  Phân phối % — mỗi bin chiếm bao nhiêu % tổng
+Similarity Bin Distribution % =
+    DIVIDE (
+        [Similarity Bin Count],
+        CALCULATE (
+            [Similarity Bin Count],
+            ALL ( similarity_scores[similarity_bin] )
+        ),
+        0
+    )
+
+
+-- ====================================================================
+-- 6. DISCOUNT & WEATHER IMPACT
+-- ====================================================================
+
+-- 6.1  Discount Rate trung bình
+Avg Discount Rate =
+    AVERAGE ( hourly_summary[avg_discount] )
+
+
+-- 6.2  Revenue chỉ từ Holiday
+Revenue Holiday =
+    CALCULATE (
+        [Revenue Total],
+        hourly_summary[is_holiday] = 1
+    )
+
+
+-- 6.3  Revenue Non-Holiday
+Revenue Non-Holiday =
+    CALCULATE (
+        [Revenue Total],
+        hourly_summary[is_holiday] = 0
+    )
+
+
+-- 6.4  Holiday Uplift %
+Holiday Uplift % =
+    VAR _holiday    = [Revenue Holiday]
+    VAR _nonHoliday = [Revenue Non-Holiday]
+    RETURN
+        DIVIDE (
+            _holiday - _nonHoliday,
+            _nonHoliday,
+            BLANK ()
+        )
+
+
+-- ====================================================================
+-- 7. CONDITIONAL FORMATTING HELPERS
+-- ====================================================================
+
+-- 7.1  Revenue vs Target (KPI card)
+--      Thay 1000000 bằng target thực tế hoặc dùng target table
+Revenue vs Target % =
+    VAR _target = 1000000
+    RETURN
+        DIVIDE ( [Revenue Total], _target, 0 )
+
+
+-- 7.2  Color coding cho AOV card
+AOV Color =
+    SWITCH (
+        TRUE (),
+        [Average Order Value] >= 200, "#2ECC71",   -- Green
+        [Average Order Value] >= 100, "#F39C12",   -- Orange
+        "#E74C3C"                                   -- Red
+    )
+
+
+-- 7.3  Arrow indicator — DoD
+DoD Arrow =
+    VAR _growth = [Revenue DoD Growth %]
+    RETURN
+        SWITCH (
+            TRUE (),
+            _growth > 0.05,  "▲ " & FORMAT ( _growth, "0.0%" ),
+            _growth < -0.05, "▼ " & FORMAT ( _growth, "0.0%" ),
+            "► " & FORMAT ( _growth, "0.0%" )
+        )
+
+
+-- ====================================================================
+-- 8. CALCULATED TABLE: Calendar (Auto)
+--    Tạo trong Power BI Desktop hoặc Tabular Editor.
+--    Áp dụng khi chưa có Date dimension table.
+-- ====================================================================
+
+-- Calendar =
+--     VAR _minDate = MIN ( hourly_summary[event_date] )
+--     VAR _maxDate = MAX ( hourly_summary[event_date] )
+--     RETURN
+--         ADDCOLUMNS (
+--             CALENDAR ( _minDate, _maxDate ),
+--             "Year",        YEAR ( [Date] ),
+--             "Month",       MONTH ( [Date] ),
+--             "MonthName",   FORMAT ( [Date], "MMMM" ),
+--             "Quarter",     "Q" & FORMAT ( [Date], "Q" ),
+--             "WeekDay",     FORMAT ( [Date], "dddd" ),
+--             "WeekDayNum",  WEEKDAY ( [Date], 2 ),
+--             "IsWeekend",   IF ( WEEKDAY ( [Date], 2 ) >= 6, TRUE (), FALSE () ),
+--             "YearMonth",   FORMAT ( [Date], "YYYY-MM" )
+--         )
+
+
+-- ====================================================================
+-- 9. ACCESS RIGHT MEASURES
+--    Bảng nguồn:
+--      • access_rights         — Chi tiết quyền truy cập (Fact)
+--      • access_rights_monthly — Tổng hợp theo tháng (Trend)
+-- ====================================================================
+
+-- 9.1  Tổng số user có quyền truy cập (Active)
+AR Total Users =
+    COUNTROWS (
+        FILTER (
+            access_rights,
+            access_rights[status] = "Active"
+        )
+    )
+
+
+-- 9.2  Tổng user theo tất cả status
+AR All Users =
+    COUNTROWS ( access_rights )
+
+
+-- 9.3  User count theo role — dùng cho horizontal bar chart
+AR Users by Role =
+    COUNTROWS ( access_rights )
+
+
+-- 9.4  Tăng trưởng so với tháng trước (từ bảng monthly)
+AR Monthly User Count =
+    SUM ( access_rights_monthly[user_count] )
+
+
+AR Monthly Growth =
+    VAR _current =
+        CALCULATE (
+            [AR Monthly User Count],
+            LASTDATE ( access_rights_monthly[month_date] )
+        )
+    VAR _prev =
+        CALCULATE (
+            [AR Monthly User Count],
+            DATEADD ( access_rights_monthly[month_date], -1, MONTH )
+        )
+    RETURN
+        _current - _prev
+
+
+AR Monthly Growth % =
+    VAR _current =
+        CALCULATE (
+            [AR Monthly User Count],
+            LASTDATE ( access_rights_monthly[month_date] )
+        )
+    VAR _prev =
+        CALCULATE (
+            [AR Monthly User Count],
+            DATEADD ( access_rights_monthly[month_date], -1, MONTH )
+        )
+    RETURN
+        DIVIDE ( _current - _prev, _prev, BLANK () )
+
+
+-- 9.5  Số quyền mới cấp trong tháng
+AR New Grants =
+    SUM ( access_rights_monthly[new_grants] )
+
+
+-- 9.6  Số quyền thu hồi
+AR Revoked Count =
+    SUM ( access_rights_monthly[revoked_count] )
+
+
+-- 9.7  Pending requests — cần phê duyệt
+AR Pending Count =
+    CALCULATE (
+        COUNTROWS ( access_rights ),
+        access_rights[status] = "Pending"
+    )
+
+
+-- 9.8  Active Rate (%)
+AR Active Rate % =
+    DIVIDE (
+        [AR Total Users],
+        [AR All Users],
+        0
+    )
+
+
+-- 9.9  Revoked Rate (%)
+AR Revoked Rate % =
+    DIVIDE (
+        CALCULATE (
+            COUNTROWS ( access_rights ),
+            access_rights[status] = "Revoked"
+        ),
+        [AR All Users],
+        0
+    )
+
+
+-- 9.10  Users by Department — cho stacked column chart
+AR Users by Department =
+    COUNTROWS ( access_rights )
+
+
+-- 9.11  Top resources by access count
+AR Resource Access Count =
+    COUNTROWS ( access_rights )
+
+
+-- 9.12  Color coding cho status (conditional formatting)
+AR Status Color =
+    SWITCH (
+        SELECTEDVALUE ( access_rights[status] ),
+        "Active",  "#22C55E",
+        "Pending", "#F59E0B",
+        "Revoked", "#EF4444",
+        "#94A3B8"
+    )
+
+
+-- 9.13  Arrow indicator — Monthly Growth
+AR Growth Arrow =
+    VAR _growth = [AR Monthly Growth %]
+    RETURN
+        SWITCH (
+            TRUE (),
+            _growth > 0,  "▲ " & FORMAT ( _growth, "0.0%" ),
+            _growth < 0,  "▼ " & FORMAT ( _growth, "0.0%" ),
+            "► 0.0%"
+        )
+
+
+-- 9.14  Unique departments
+AR Department Count =
+    DISTINCTCOUNT ( access_rights[department] )
+
+
+-- 9.15  Unique resources
+AR Resource Count =
+    DISTINCTCOUNT ( access_rights[resource_name] )

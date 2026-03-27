@@ -1,0 +1,66 @@
+{
+  "model_name": "XGBoost",
+  "feature_columns": [
+    "Store",
+    "DayOfWeek",
+    "Promo",
+    "SchoolHoliday",
+    "IsWeekend",
+    "StoreType",
+    "Assortment",
+    "CompetitionDistance",
+    "CompetitionOpenMonths",
+    "Promo2",
+    "IsPromoMonth",
+    "Year",
+    "Month",
+    "Day",
+    "WeekOfYear",
+    "Sales_lag_1",
+    "Sales_lag_3",
+    "Sales_lag_7"
+  ],
+  "target": "Sales",
+  "metrics": {
+    "MAE": 794.45,
+    "RMSE": 1141.21,
+    "R2": 0.8585,
+    "MAPE": 12.27
+  },
+  "training_samples": 100000,
+  "validation_samples": 196029,
+  "total_stores": 1115,
+  "date_range": "2013-01-01 -> 2015-07-31",
+  "trained_at": "2026-03-27T03:00:40.897133",
+  "model_version": "v2.0",
+  "all_models_comparison": [
+    {
+      "Model": "XGBoost",
+      "MAE": 794.4478149414062,
+      "RMSE": 1141.2113629823355,
+      "R2": 0.858529806137085,
+      "MAPE": 12.270350176931075
+    },
+    {
+      "Model": "LightGBM",
+      "MAE": 799.7325117229607,
+      "RMSE": 1144.9599617223187,
+      "R2": 0.8575989054663253,
+      "MAPE": 12.390153339007782
+    },
+    {
+      "Model": "Gradient Boosting",
+      "MAE": 818.8819328690588,
+      "RMSE": 1174.4331906884763,
+      "R2": 0.850173249642401,
+      "MAPE": 12.64291803888459
+    },
+    {
+      "Model": "Random Forest",
+      "MAE": 843.5002703919112,
+      "RMSE": 1220.8772634421225,
+      "R2": 0.8380888568276048,
+      "MAPE": 13.01486824770619
+    }
+  ]
+}

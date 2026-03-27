@@ -1,0 +1,349 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitintegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "name": "SalesAnalytics_SemanticModel",
+    "description": "Power BI Semantic Model — Real-time Sales Analytics DirectQuery to Databricks",
+    "version": "1.0.0",
+    "compatibilityLevel": 1604
+  },
+
+  "dataSources": [
+    {
+      "name": "DatabricksSQL",
+      "description": "Databricks Serverless SQL Warehouse via Databricks SQL Connector",
+      "connectionString": "Driver={Simba Spark ODBC Driver};Host=<workspace-url>.azuredatabricks.net;Port=443;HTTPPath=/sql/1.0/warehouses/<warehouse-id>;ThriftTransport=2;SSL=1;AuthMech=11;Auth_Flow=0;Auth_AccessToken=<PAT-or-AAD>;SparkServerType=3;",
+      "provider": "Databricks",
+      "mode": "DirectQuery",
+      "notes": "Thay <workspace-url>, <warehouse-id>, <PAT> bằng giá trị thực."
+    }
+  ],
+
+  "tables": [
+    {
+      "name": "hourly_summary",
+      "source": "sales_analytics.gold.hourly_summary",
+      "mode": "DirectQuery",
+      "description": "Gold — Doanh thu tổng hợp theo giờ × cửa hàng × danh mục",
+      "columns": [
+        { "name": "event_date",            "dataType": "DateTime",  "isKey": false, "description": "Ngày" },
+        { "name": "event_hour",            "dataType": "Int64",     "isKey": false },
+        { "name": "store_id",              "dataType": "String",    "isKey": false },
+        { "name": "region",                "dataType": "String",    "isKey": false },
+        { "name": "category",              "dataType": "String",    "isKey": false },
+        { "name": "total_revenue",         "dataType": "Double",    "isKey": false },
+        { "name": "order_count",           "dataType": "Int64",     "isKey": false },
+        { "name": "avg_order_value",       "dataType": "Double",    "isKey": false },
+        { "name": "total_quantity",        "dataType": "Int64",     "isKey": false },
+        { "name": "unique_products",       "dataType": "Int64",     "isKey": false },
+        { "name": "unique_customers",      "dataType": "Int64",     "isKey": false },
+        { "name": "avg_temperature",       "dataType": "Double",    "isKey": false },
+        { "name": "dominant_weather",      "dataType": "String",    "isKey": false },
+        { "name": "is_holiday",            "dataType": "Int64",     "isKey": false },
+        { "name": "avg_discount",          "dataType": "Double",    "isKey": false },
+        { "name": "total_discount_amount", "dataType": "Double",    "isKey": false },
+        { "name": "hour_timestamp",        "dataType": "DateTime",  "isKey": false },
+        { "name": "revenue_per_customer",  "dataType": "Double",    "isKey": false }
+      ]
+    },
+    {
+      "name": "product_summary",
+      "source": "sales_analytics.gold.product_summary",
+      "mode": "DirectQuery",
+      "description": "Gold — Hiệu suất sản phẩm, viral rate, category rank",
+      "columns": [
+        { "name": "product_id",      "dataType": "String",    "isKey": true },
+        { "name": "product_name",    "dataType": "String",    "isKey": false },
+        { "name": "category",        "dataType": "String",    "isKey": false },
+        { "name": "total_revenue",   "dataType": "Double",    "isKey": false },
+        { "name": "total_orders",    "dataType": "Int64",     "isKey": false },
+        { "name": "total_quantity",  "dataType": "Int64",     "isKey": false },
+        { "name": "avg_price",       "dataType": "Double",    "isKey": false },
+        { "name": "avg_order_value", "dataType": "Double",    "isKey": false },
+        { "name": "unique_buyers",   "dataType": "Int64",     "isKey": false },
+        { "name": "stores_sold",     "dataType": "Int64",     "isKey": false },
+        { "name": "first_sale_date", "dataType": "DateTime",  "isKey": false },
+        { "name": "last_sale_date",  "dataType": "DateTime",  "isKey": false },
+        { "name": "category_rank",   "dataType": "Int64",     "isKey": false },
+        { "name": "days_active",     "dataType": "Int64",     "isKey": false },
+        { "name": "orders_per_day",  "dataType": "Double",    "isKey": false },
+        { "name": "viral_rate",      "dataType": "Double",    "isKey": false },
+        { "name": "avg_viral_prob",  "dataType": "Double",    "isKey": false }
+      ]
+    },
+    {
+      "name": "customer_summary",
+      "source": "sales_analytics.gold.customer_summary",
+      "mode": "DirectQuery",
+      "description": "Gold — CLV, phân khúc, xếp hạng khách hàng",
+      "columns": [
+        { "name": "customer_id",             "dataType": "String",    "isKey": true },
+        { "name": "customer_segment",        "dataType": "String",    "isKey": false },
+        { "name": "region",                  "dataType": "String",    "isKey": false },
+        { "name": "total_spent",             "dataType": "Double",    "isKey": false },
+        { "name": "total_orders",            "dataType": "Int64",     "isKey": false },
+        { "name": "avg_order_value",         "dataType": "Double",    "isKey": false },
+        { "name": "total_items",             "dataType": "Int64",     "isKey": false },
+        { "name": "last_purchase_date",      "dataType": "DateTime",  "isKey": false },
+        { "name": "first_purchase_date",     "dataType": "DateTime",  "isKey": false },
+        { "name": "unique_products_bought",  "dataType": "Int64",     "isKey": false },
+        { "name": "unique_categories",       "dataType": "Int64",     "isKey": false },
+        { "name": "stores_visited",          "dataType": "Int64",     "isKey": false },
+        { "name": "preferred_payment",       "dataType": "String",    "isKey": false },
+        { "name": "tenure_days",             "dataType": "Int64",     "isKey": false },
+        { "name": "purchase_frequency",      "dataType": "Double",    "isKey": false },
+        { "name": "clv_tier",                "dataType": "String",    "isKey": false },
+        { "name": "revenue_rank",            "dataType": "Int64",     "isKey": false },
+        { "name": "region_revenue_rank",     "dataType": "Int64",     "isKey": false }
+      ]
+    },
+    {
+      "name": "similarity_scores",
+      "source": "sales_analytics.gold.similarity_scores",
+      "mode": "DirectQuery",
+      "description": "Gold — Similarity bins phân phối, viral pct",
+      "columns": [
+        { "name": "category",        "dataType": "String",  "isKey": false },
+        { "name": "similarity_bin",  "dataType": "Double",  "isKey": false },
+        { "name": "txn_count",       "dataType": "Int64",   "isKey": false },
+        { "name": "avg_amount",      "dataType": "Double",  "isKey": false },
+        { "name": "viral_count",     "dataType": "Int64",   "isKey": false }
+      ]
+    },
+    {
+      "name": "SecurityMapping",
+      "source": "sales_analytics.gold.security_mapping",
+      "mode": "Import",
+      "description": "RLS — Ánh xạ user email → allowed region (Import vì bảng nhỏ)",
+      "columns": [
+        { "name": "user_email",      "dataType": "String",  "isKey": false },
+        { "name": "display_name",    "dataType": "String",  "isKey": false },
+        { "name": "role",            "dataType": "String",  "isKey": false },
+        { "name": "allowed_region",  "dataType": "String",  "isKey": false }
+      ]
+    },
+    {
+      "name": "Calendar",
+      "mode": "Calculated",
+      "description": "Date dimension — tạo bằng DAX CALENDAR(), đánh dấu Date table",
+      "daxExpression": "VAR _minDate = MIN ( hourly_summary[event_date] ) VAR _maxDate = MAX ( hourly_summary[event_date] ) RETURN ADDCOLUMNS ( CALENDAR ( _minDate, _maxDate ), \"Year\", YEAR ( [Date] ), \"Month\", MONTH ( [Date] ), \"MonthName\", FORMAT ( [Date], \"MMMM\" ), \"Quarter\", \"Q\" & FORMAT ( [Date], \"Q\" ), \"WeekDay\", FORMAT ( [Date], \"dddd\" ), \"WeekDayNum\", WEEKDAY ( [Date], 2 ), \"IsWeekend\", IF ( WEEKDAY ( [Date], 2 ) >= 6, TRUE(), FALSE() ), \"YearMonth\", FORMAT ( [Date], \"YYYY-MM\" ) )",
+      "isDateTable": true,
+      "dateColumn": "Date",
+      "columns": [
+        { "name": "Date",         "dataType": "DateTime",  "isKey": true },
+        { "name": "Year",         "dataType": "Int64",     "isKey": false },
+        { "name": "Month",        "dataType": "Int64",     "isKey": false },
+        { "name": "MonthName",    "dataType": "String",    "isKey": false },
+        { "name": "Quarter",      "dataType": "String",    "isKey": false },
+        { "name": "WeekDay",      "dataType": "String",    "isKey": false },
+        { "name": "WeekDayNum",   "dataType": "Int64",     "isKey": false },
+        { "name": "IsWeekend",    "dataType": "Boolean",   "isKey": false },
+        { "name": "YearMonth",    "dataType": "String",    "isKey": false }
+      ]
+    },
+    {
+      "name": "access_rights",
+      "source": "sales_analytics.gold.access_rights",
+      "mode": "DirectQuery",
+      "description": "Gold — Chi tiết quyền truy cập (Fact) cho Access Right dashboard",
+      "columns": [
+        { "name": "access_id",        "dataType": "String",    "isKey": true },
+        { "name": "user_email",       "dataType": "String",    "isKey": false },
+        { "name": "display_name",     "dataType": "String",    "isKey": false },
+        { "name": "role",             "dataType": "String",    "isKey": false },
+        { "name": "department",       "dataType": "String",    "isKey": false },
+        { "name": "resource_type",    "dataType": "String",    "isKey": false },
+        { "name": "resource_name",    "dataType": "String",    "isKey": false },
+        { "name": "status",           "dataType": "String",    "isKey": false },
+        { "name": "granted_date",     "dataType": "DateTime",  "isKey": false },
+        { "name": "last_access_date", "dataType": "DateTime",  "isKey": false },
+        { "name": "region",           "dataType": "String",    "isKey": false }
+      ]
+    },
+    {
+      "name": "access_rights_monthly",
+      "source": "sales_analytics.gold.access_rights_monthly",
+      "mode": "DirectQuery",
+      "description": "Gold — Tổng hợp quyền truy cập theo tháng cho line chart trend",
+      "columns": [
+        { "name": "month_date",    "dataType": "DateTime",  "isKey": false },
+        { "name": "role",          "dataType": "String",    "isKey": false },
+        { "name": "department",    "dataType": "String",    "isKey": false },
+        { "name": "status",        "dataType": "String",    "isKey": false },
+        { "name": "user_count",    "dataType": "Int64",     "isKey": false },
+        { "name": "new_grants",    "dataType": "Int64",     "isKey": false },
+        { "name": "revoked_count", "dataType": "Int64",     "isKey": false }
+      ]
+    }
+  ],
+
+  "relationships": [
+    {
+      "name": "Calendar_to_HourlySummary",
+      "fromTable": "Calendar",
+      "fromColumn": "Date",
+      "toTable": "hourly_summary",
+      "toColumn": "event_date",
+      "cardinality": "OneToMany",
+      "crossFilterDirection": "Both",
+      "isActive": true,
+      "description": "Date dim → Fact hourly. Cho phép Time Intelligence hoạt động."
+    },
+    {
+      "name": "Calendar_to_CustomerSummary_Last",
+      "fromTable": "Calendar",
+      "fromColumn": "Date",
+      "toTable": "customer_summary",
+      "toColumn": "last_purchase_date",
+      "cardinality": "OneToMany",
+      "crossFilterDirection": "Single",
+      "isActive": false,
+      "description": "Inactive — dùng USERELATIONSHIP() khi cần filter theo last purchase."
+    },
+    {
+      "name": "HourlySummary_to_ProductSummary",
+      "fromTable": "hourly_summary",
+      "fromColumn": "category",
+      "toTable": "product_summary",
+      "toColumn": "category",
+      "cardinality": "ManyToMany",
+      "crossFilterDirection": "Both",
+      "isActive": true,
+      "description": "Category bridge giữa hourly và product (ManyToMany)."
+    },
+    {
+      "name": "HourlySummary_to_SimilarityScores",
+      "fromTable": "hourly_summary",
+      "fromColumn": "category",
+      "toTable": "similarity_scores",
+      "toColumn": "category",
+      "cardinality": "ManyToMany",
+      "crossFilterDirection": "Single",
+      "isActive": true,
+      "description": "Category filter → Similarity distribution."
+    },
+    {
+      "name": "SecurityMapping_to_HourlySummary",
+      "fromTable": "SecurityMapping",
+      "fromColumn": "allowed_region",
+      "toTable": "hourly_summary",
+      "toColumn": "region",
+      "cardinality": "ManyToMany",
+      "crossFilterDirection": "Both",
+      "securityFilterDirection": "Both",
+      "isActive": true,
+      "description": "RLS — SecurityMapping lọc region cho hourly_summary."
+    },
+    {
+      "name": "SecurityMapping_to_CustomerSummary",
+      "fromTable": "SecurityMapping",
+      "fromColumn": "allowed_region",
+      "toTable": "customer_summary",
+      "toColumn": "region",
+      "cardinality": "ManyToMany",
+      "crossFilterDirection": "Both",
+      "securityFilterDirection": "Both",
+      "isActive": true,
+      "description": "RLS — SecurityMapping lọc region cho customer_summary."
+    },
+    {
+      "name": "SecurityMapping_to_AccessRights",
+      "fromTable": "SecurityMapping",
+      "fromColumn": "allowed_region",
+      "toTable": "access_rights",
+      "toColumn": "region",
+      "cardinality": "ManyToMany",
+      "crossFilterDirection": "Both",
+      "securityFilterDirection": "Both",
+      "isActive": true,
+      "description": "RLS — SecurityMapping lọc region cho access_rights. Manager chỉ thấy access rights thuộc region mình."
+    },
+    {
+      "name": "Calendar_to_AccessRights_Granted",
+      "fromTable": "Calendar",
+      "fromColumn": "Date",
+      "toTable": "access_rights",
+      "toColumn": "granted_date",
+      "cardinality": "OneToMany",
+      "crossFilterDirection": "Single",
+      "isActive": true,
+      "description": "Date dim → access_rights.granted_date. Cho phép filter theo ngày cấp quyền."
+    },
+    {
+      "name": "Calendar_to_AccessRightsMonthly",
+      "fromTable": "Calendar",
+      "fromColumn": "Date",
+      "toTable": "access_rights_monthly",
+      "toColumn": "month_date",
+      "cardinality": "OneToMany",
+      "crossFilterDirection": "Single",
+      "isActive": true,
+      "description": "Date dim → access_rights_monthly.month_date. Cho phép Time Intelligence trên trend."
+    }
+  ],
+
+  "roles": [
+    {
+      "name": "RegionManager",
+      "description": "Dynamic RLS — Lọc dữ liệu theo region dựa trên user email",
+      "tablePermissions": [
+        {
+          "table": "SecurityMapping",
+          "filterExpression": "[user_email] = USERPRINCIPALNAME()"
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "description": "Unrestricted — Xem toàn bộ dữ liệu",
+      "tablePermissions": []
+    },
+    {
+      "name": "AccessRightAdmin",
+      "description": "IT Admin — Xem toàn bộ access_rights, không thấy dữ liệu sales",
+      "tablePermissions": [
+        {
+          "table": "hourly_summary",
+          "filterExpression": "FALSE()"
+        },
+        {
+          "table": "customer_summary",
+          "filterExpression": "FALSE()"
+        }
+      ]
+    }
+  ],
+
+  "modelDiagram": {
+    "description": "Star Schema Diagram — 8 tables, 10 relationships, 3 roles",
+    "layout": [
+      "┌────────────────┐          ┌────────────────────┐",
+      "│   Calendar     │ 1──────M │  hourly_summary    │",
+      "│   (Date dim)   │          │  (Fact — Revenue)  │",
+      "└───────┬────────┘          └─────────┬──────────┘",
+      "        │ 1:M                         │ category (M:M)",
+      "        │                   ┌─────────┴──────────┐",
+      "        │                   │  product_summary   │",
+      "┌───────┴────────┐          │  (Dim — Product)   │",
+      "│ SecurityMapping│          └────────────────────┘",
+      "│ (RLS — Import) │",
+      "│                │ region   ┌────────────────────┐",
+      "│ allowed_region ├──M:M───► │ customer_summary   │",
+      "│                │          │ (Dim — Customer)   │",
+      "│ allowed_region ├──M:M───► │                    │",
+      "│     (hourly)   │          └────────────────────┘",
+      "│                │",
+      "│ allowed_region ├──M:M───► ┌────────────────────┐",
+      "│  (access_rts)  │          │  access_rights     │",
+      "└────────────────┘          │  (Fact — Quyền)   │",
+      "                            └────────────────────┘",
+      "  Calendar ──1:M──►         ┌────────────────────┐",
+      "                            │access_rights_monthly│",
+      "                            │  (Fact — Trend)    │",
+      "                            └────────────────────┘",
+      "                            ┌────────────────────┐",
+      "                            │ similarity_scores  │",
+      "                            │ (Fact — NLP bins)  │",
+      "                            └────────────────────┘"
+    ]
+  }
+}

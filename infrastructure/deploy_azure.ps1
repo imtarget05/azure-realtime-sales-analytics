@@ -20,6 +20,10 @@ $STREAM_ANALYTICS_JOB = "sa-sales-analytics"
 $AML_WORKSPACE = "aml-sales-forecast"
 $STORAGE_ACCOUNT = "stsales$suffix"
 $DATA_FACTORY_NAME = "adf-sales-$suffix"
+$KEY_VAULT_NAME = "kv-sales-$suffix"
+$FUNCTION_APP_NAME = "func-sales-validation-$suffix"
+$APP_INSIGHTS_NAME = "appi-sales-analytics"
+$LOG_ANALYTICS_NAME = "log-sales-analytics"
 
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host "  TRIEN KHAI HA TANG AZURE - HE THONG PHAN TICH BAN HANG" -ForegroundColor Cyan
@@ -197,6 +201,102 @@ if ($LASTEXITCODE -ne 0) { Write-Host "  [WARN] Event Hub Capture can cau hinh t
 # 9-10. Stream Analytics IO
 Write-Host "[9-10/10] Stream Analytics Input/Output can cau hinh tren Azure Portal." -ForegroundColor Yellow
 
+# 11. Key Vault
+Write-Host "[11/14] Tao Azure Key Vault..." -ForegroundColor Yellow
+az keyvault create `
+  --name $KEY_VAULT_NAME `
+  --resource-group $RESOURCE_GROUP `
+  --location $LOCATION `
+  --sku standard `
+  --enable-rbac-authorization true `
+  --output table
+
+Write-Host "[11a] Luu Secrets vao Key Vault..." -ForegroundColor Yellow
+az keyvault secret set --vault-name $KEY_VAULT_NAME --name "event-hub-connection-string" --value $EH_CONNECTION_STRING --output none
+az keyvault secret set --vault-name $KEY_VAULT_NAME --name "sql-connection-string" --value "Server=$SQL_SERVER_NAME.database.windows.net;Database=$SQL_DB_NAME;User=$SQL_ADMIN_USER;Password=$SQL_ADMIN_PASSWORD" --output none
+az keyvault secret set --vault-name $KEY_VAULT_NAME --name "sql-admin-password" --value $SQL_ADMIN_PASSWORD --output none
+az keyvault secret set --vault-name $KEY_VAULT_NAME --name "blob-connection-string" --value $BLOB_CONNECTION_STRING --output none
+Write-Host "  Secrets da duoc luu vao Key Vault: $KEY_VAULT_NAME" -ForegroundColor Green
+
+# 12. Application Insights + Log Analytics
+Write-Host "[12/14] Tao Log Analytics Workspace..." -ForegroundColor Yellow
+az monitor log-analytics workspace create `
+  --workspace-name $LOG_ANALYTICS_NAME `
+  --resource-group $RESOURCE_GROUP `
+  --location $LOCATION `
+  --output table
+
+$LOG_ANALYTICS_ID = az monitor log-analytics workspace show `
+  --workspace-name $LOG_ANALYTICS_NAME `
+  --resource-group $RESOURCE_GROUP `
+  --query "id" --output tsv
+
+Write-Host "[12a] Tao Application Insights..." -ForegroundColor Yellow
+az monitor app-insights component create `
+  --app $APP_INSIGHTS_NAME `
+  --resource-group $RESOURCE_GROUP `
+  --location $LOCATION `
+  --workspace $LOG_ANALYTICS_ID `
+  --output table
+
+$APP_INSIGHTS_KEY = az monitor app-insights component show `
+  --app $APP_INSIGHTS_NAME `
+  --resource-group $RESOURCE_GROUP `
+  --query "connectionString" --output tsv
+
+az keyvault secret set --vault-name $KEY_VAULT_NAME --name "appinsights-connection-string" --value $APP_INSIGHTS_KEY --output none
+Write-Host "  App Insights Connection String saved to Key Vault" -ForegroundColor Green
+
+# 13. Azure Functions App (Validation Layer)
+Write-Host "[13/14] Tao Azure Functions App..." -ForegroundColor Yellow
+az functionapp create `
+  --name $FUNCTION_APP_NAME `
+  --resource-group $RESOURCE_GROUP `
+  --storage-account $STORAGE_ACCOUNT `
+  --consumption-plan-location $LOCATION `
+  --runtime python `
+  --runtime-version 3.10 `
+  --functions-version 4 `
+  --os-type Linux `
+  --output table
+
+Write-Host "[13a] Cau hinh App Settings cho Function App..." -ForegroundColor Yellow
+az functionapp config appsettings set `
+  --name $FUNCTION_APP_NAME `
+  --resource-group $RESOURCE_GROUP `
+  --settings `
+    "EventHubConnectionString=$EH_CONNECTION_STRING" `
+    "APPINSIGHTS_INSTRUMENTATIONKEY=$APP_INSIGHTS_KEY" `
+    "KEY_VAULT_NAME=$KEY_VAULT_NAME" `
+  --output none
+
+Write-Host "[13b] Bat System Managed Identity..." -ForegroundColor Yellow
+$FUNC_PRINCIPAL_ID = az functionapp identity assign `
+  --name $FUNCTION_APP_NAME `
+  --resource-group $RESOURCE_GROUP `
+  --query "principalId" --output tsv
+
+Write-Host "[13c] Grant Key Vault access cho Function App..." -ForegroundColor Yellow
+$KV_ID = az keyvault show --name $KEY_VAULT_NAME --resource-group $RESOURCE_GROUP --query "id" --output tsv
+az role assignment create `
+  --assignee $FUNC_PRINCIPAL_ID `
+  --role "Key Vault Secrets User" `
+  --scope $KV_ID `
+  --output none
+Write-Host "  Function App: $FUNCTION_APP_NAME (Managed Identity enabled)" -ForegroundColor Green
+
+# 14. Diagnostic Settings (Monitor)
+Write-Host "[14/14] Cau hinh Diagnostic Settings..." -ForegroundColor Yellow
+$EH_NS_ID = az eventhubs namespace show --name $EVENT_HUB_NAMESPACE --resource-group $RESOURCE_GROUP --query "id" --output tsv
+az monitor diagnostic-settings create `
+  --name "diag-eventhub" `
+  --resource $EH_NS_ID `
+  --workspace $LOG_ANALYTICS_ID `
+  --logs '[{"category":"OperationalLogs","enabled":true}]' `
+  --metrics '[{"category":"AllMetrics","enabled":true}]' `
+  --output none 2>$null
+if ($LASTEXITCODE -ne 0) { Write-Host "  [WARN] Diagnostic settings co the can cau hinh thu cong." -ForegroundColor DarkYellow }
+
 # ========================
 # Tong ket
 # ========================
@@ -217,6 +317,10 @@ Write-Host "ML Workspace:        $AML_WORKSPACE"
 Write-Host "Storage Account:     $STORAGE_ACCOUNT"
 Write-Host "Blob Conn String:    $BLOB_CONNECTION_STRING"
 Write-Host "Data Factory:        $DATA_FACTORY_NAME"
+Write-Host "Key Vault:           $KEY_VAULT_NAME"
+Write-Host "Function App:        $FUNCTION_APP_NAME"
+Write-Host "App Insights:        $APP_INSIGHTS_NAME"
+Write-Host "Log Analytics:       $LOG_ANALYTICS_NAME"
 
 # Luu thong tin
 $output = @"
@@ -232,6 +336,9 @@ AML_WORKSPACE=$AML_WORKSPACE
 STORAGE_ACCOUNT=$STORAGE_ACCOUNT
 BLOB_CONNECTION_STRING=$BLOB_CONNECTION_STRING
 DATA_FACTORY_NAME=$DATA_FACTORY_NAME
+KEY_VAULT_NAME=$KEY_VAULT_NAME
+FUNCTION_APP_NAME=$FUNCTION_APP_NAME
+APP_INSIGHTS_CONNECTION_STRING=$APP_INSIGHTS_KEY
 "@
 
 $output | Out-File -FilePath "deployment_output.txt" -Encoding UTF8

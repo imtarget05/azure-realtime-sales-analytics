@@ -1,0 +1,361 @@
+{
+  "$schema": "custom",
+  "metadata": {
+    "name": "SalesAnalytics_Mobile_Layout",
+    "description": "Mobile layout (360×640) theo Z-Pattern reading flow. Tạo trong Power BI Desktop: View → Mobile Layout.",
+    "version": "1.0.0",
+    "canvas": { "width": 360, "height": 640 },
+    "readingPattern": "Z-Pattern: Top-Left → Top-Right → diagonal → Bottom-Left → Bottom-Right"
+  },
+
+  "designPrinciples": {
+    "zPattern": [
+      "Mắt đọc theo hình chữ Z trên mobile:",
+      "1. Z-Top (Hàng 1):  KPI chính nhất ← → KPI phụ",
+      "2. Z-Diagonal:       Chéo xuống chart chính",
+      "3. Z-Bottom (Hàng cuối): Chart/Table phụ ← → Action button",
+      "",
+      "Vì vậy: KPI cards luôn ở ĐẦU, chart trend ở GIỮA, table/detail ở CUỐI."
+    ],
+    "touchTargets": "Minimum tap target: 44×44px (Apple HIG). Tất cả buttons/slicers ≥ 48px chiều cao.",
+    "scrollBehavior": "Vertical scroll only. Tránh horizontal scroll ngoại trừ table.",
+    "fontScaling": "Label ≥ 10pt, KPI value ≥ 20pt, title ≥ 14pt",
+    "spacing": "Margin 8px giữa các visuals, padding 12px mỗi card"
+  },
+
+  "pages": [
+
+    {
+      "name": "01_Overview_Mobile",
+      "sourcePage": "01_Overview",
+      "description": "Z-Pattern: KPIs → Revenue trend → Region bars → Top 5 table",
+
+      "navigation": {
+        "type": "topbar",
+        "description": "Topbar 4 tab thay cho sidebar (sidebar không thể hiện trên mobile)",
+        "bounds": { "x": 0, "y": 0, "width": 360, "height": 48 },
+        "background": "#0B1120",
+        "tabs": [
+          { "label": "📊", "targetPage": "01_Overview_Mobile", "active": true },
+          { "label": "🏷️", "targetPage": "02_Products_Mobile" },
+          { "label": "👥", "targetPage": "03_Customers_Mobile" },
+          { "label": "⚡", "targetPage": "04_Anomaly_Mobile" },
+          { "label": "🔐", "targetPage": "05_AccessRights_Mobile" }
+        ],
+        "tabStyle": {
+          "width": 72,
+          "height": 48,
+          "fontSize": 18,
+          "fillActive": "#1E293B",
+          "fillDefault": "#0B1120",
+          "borderBottom_active": "2px solid #00D4AA"
+        }
+      },
+
+      "visuals": [
+        {
+          "zone": "Z-Top-Left",
+          "type": "card",
+          "measure": "Revenue Total",
+          "subtitle": "Doanh thu",
+          "bounds": { "x": 8, "y": 56, "width": 168, "height": 80 },
+          "style": { "valueSize": 24, "subtitleSize": 10, "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Top-Right",
+          "type": "card",
+          "measure": "Order Total",
+          "subtitle": "Đơn hàng",
+          "bounds": { "x": 184, "y": 56, "width": 168, "height": 80 },
+          "style": { "valueSize": 24, "subtitleSize": 10, "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Top-Row2-Left",
+          "type": "card",
+          "measure": "Average Order Value",
+          "subtitle": "AOV",
+          "bounds": { "x": 8, "y": 144, "width": 168, "height": 70 },
+          "style": { "valueSize": 20, "subtitleSize": 10, "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Top-Row2-Right",
+          "type": "card",
+          "measure": "Revenue DoD Growth %",
+          "subtitle": "vs Hôm qua",
+          "bounds": { "x": 184, "y": 144, "width": 168, "height": 70 },
+          "style": {
+            "valueSize": 20,
+            "conditionalColor": {
+              "positive": "#22C55E",
+              "negative": "#EF4444"
+            },
+            "borderRadius": 12
+          }
+        },
+        {
+          "zone": "Z-Diagonal (Center)",
+          "type": "lineChart",
+          "title": "Revenue Trend",
+          "axis_x": "hourly_summary[hour_timestamp]",
+          "values": ["Revenue Total"],
+          "bounds": { "x": 8, "y": 222, "width": 344, "height": 180 },
+          "style": {
+            "lineWidth": 2,
+            "showMarker": false,
+            "showLegend": false,
+            "borderRadius": 12
+          }
+        },
+        {
+          "zone": "Z-Bottom-Left",
+          "type": "clusteredBarChart",
+          "title": "Revenue theo vùng",
+          "axis": "hourly_summary[region]",
+          "values": ["Revenue Total"],
+          "bounds": { "x": 8, "y": 410, "width": 344, "height": 150 },
+          "style": { "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Bottom-Right (Scroll)",
+          "type": "table",
+          "title": "Top 5 Customers",
+          "columns": [
+            "customer_summary[customer_id]",
+            "Customer Total Spent",
+            "customer_summary[clv_tier]"
+          ],
+          "topNFilter": { "n": 5, "direction": "DESC" },
+          "bounds": { "x": 8, "y": 568, "width": 344, "height": 180 },
+          "style": {
+            "fontSize": 9,
+            "compact": true,
+            "borderRadius": 12
+          },
+          "notes": "Nằm ở cuối — user scroll xuống để xem"
+        }
+      ]
+    },
+
+    {
+      "name": "02_Products_Mobile",
+      "sourcePage": "02_Products",
+      "description": "Z-Pattern: Viral Rate gauge → Top products bar → Treemap → Similarity",
+
+      "navigation": {
+        "type": "topbar",
+        "bounds": { "x": 0, "y": 0, "width": 360, "height": 48 }
+      },
+
+      "visuals": [
+        {
+          "zone": "Z-Top-Left",
+          "type": "gauge",
+          "measure": "Avg Viral Rate",
+          "bounds": { "x": 8, "y": 56, "width": 168, "height": 130 },
+          "style": { "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Top-Right",
+          "type": "card",
+          "measure": "Product Revenue",
+          "subtitle": "Tổng DT sản phẩm",
+          "bounds": { "x": 184, "y": 56, "width": 168, "height": 60 },
+          "style": { "valueSize": 20, "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Top-Right-2",
+          "type": "card",
+          "measure": "Unique Buyers",
+          "subtitle": "Người mua",
+          "bounds": { "x": 184, "y": 124, "width": 168, "height": 60 },
+          "style": { "valueSize": 20, "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Center",
+          "type": "clusteredBarChart",
+          "title": "Top 10 sản phẩm",
+          "bounds": { "x": 8, "y": 194, "width": 344, "height": 200 },
+          "style": { "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Bottom",
+          "type": "columnChart",
+          "title": "Similarity Distribution",
+          "axis": "similarity_scores[similarity_bin]",
+          "values": ["Similarity Bin Count"],
+          "bounds": { "x": 8, "y": 402, "width": 344, "height": 180 },
+          "style": { "borderRadius": 12 }
+        }
+      ]
+    },
+
+    {
+      "name": "03_Customers_Mobile",
+      "sourcePage": "03_Customers",
+      "description": "Z-Pattern: KPI cards → Customer table → CLV donut",
+
+      "navigation": {
+        "type": "topbar",
+        "bounds": { "x": 0, "y": 0, "width": 360, "height": 48 }
+      },
+
+      "visuals": [
+        {
+          "zone": "Z-Top-Left",
+          "type": "card",
+          "measure": "Active Customers",
+          "subtitle": "Khách hoạt động",
+          "bounds": { "x": 8, "y": 56, "width": 168, "height": 70 },
+          "style": { "valueSize": 22, "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Top-Right",
+          "type": "card",
+          "measure": "Revenue per Customer",
+          "subtitle": "DT TB/khách",
+          "bounds": { "x": 184, "y": 56, "width": 168, "height": 70 },
+          "style": { "valueSize": 22, "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Center",
+          "type": "table",
+          "title": "Top Customers",
+          "columns": [
+            "Customer Revenue Rank",
+            "customer_summary[customer_id]",
+            "Customer Total Spent",
+            "customer_summary[clv_tier]"
+          ],
+          "topNFilter": { "n": 10, "direction": "DESC" },
+          "bounds": { "x": 8, "y": 134, "width": 344, "height": 250 },
+          "style": { "fontSize": 9, "compact": true, "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Bottom-Left",
+          "type": "donutChart",
+          "title": "CLV Tiers",
+          "category": "customer_summary[clv_tier]",
+          "values": ["Active Customers"],
+          "bounds": { "x": 8, "y": 392, "width": 168, "height": 160 },
+          "style": { "borderRadius": 12, "showLegend": false }
+        },
+        {
+          "zone": "Z-Bottom-Right",
+          "type": "donutChart",
+          "title": "Phân khúc",
+          "category": "customer_summary[customer_segment]",
+          "values": ["Active Customers"],
+          "bounds": { "x": 184, "y": 392, "width": 168, "height": 160 },
+          "style": { "borderRadius": 12, "showLegend": false }
+        }
+      ]
+    },
+
+    {
+      "name": "04_Anomaly_Mobile",
+      "sourcePage": "04_Anomaly",
+      "description": "Z-Pattern: Holiday Uplift card → Discount card → Temperature scatter → Rolling trend",
+
+      "navigation": {
+        "type": "topbar",
+        "bounds": { "x": 0, "y": 0, "width": 360, "height": 48 }
+      },
+
+      "visuals": [
+        {
+          "zone": "Z-Top-Left",
+          "type": "card",
+          "measure": "Holiday Uplift %",
+          "subtitle": "Holiday Uplift",
+          "bounds": { "x": 8, "y": 56, "width": 168, "height": 70 },
+          "style": { "valueSize": 22, "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Top-Right",
+          "type": "card",
+          "measure": "Avg Discount Rate",
+          "subtitle": "Chiết khấu TB",
+          "bounds": { "x": 184, "y": 56, "width": 168, "height": 70 },
+          "style": { "valueSize": 22, "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Center",
+          "type": "scatterChart",
+          "title": "Nhiệt độ vs Revenue",
+          "bounds": { "x": 8, "y": 134, "width": 344, "height": 200 },
+          "style": { "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Bottom",
+          "type": "lineChart",
+          "title": "Revenue Rolling 7D vs 30D",
+          "bounds": { "x": 8, "y": 342, "width": 344, "height": 200 },
+          "style": { "borderRadius": 12, "lineWidth": 2 }
+        }
+      ]
+    },
+
+    {
+      "name": "05_AccessRights_Mobile",
+      "sourcePage": "05_AccessRights",
+      "description": "Z-Pattern: KPI cards → Roles bar → Status stacked → Detail table",
+
+      "navigation": {
+        "type": "topbar",
+        "bounds": { "x": 0, "y": 0, "width": 360, "height": 48 }
+      },
+
+      "visuals": [
+        {
+          "zone": "Z-Top-Left",
+          "type": "card",
+          "measure": "AR Total Users",
+          "subtitle": "Active Users",
+          "bounds": { "x": 8, "y": 56, "width": 168, "height": 70 },
+          "style": { "valueSize": 22, "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Top-Right",
+          "type": "card",
+          "measure": "AR Pending Count",
+          "subtitle": "Chờ duyệt",
+          "bounds": { "x": 184, "y": 56, "width": 168, "height": 70 },
+          "style": { "valueSize": 22, "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Center-Top",
+          "type": "clusteredBarChart",
+          "title": "Users theo Role",
+          "orientation": "horizontal",
+          "axis": "access_rights[role]",
+          "values": ["AR Users by Role"],
+          "bounds": { "x": 8, "y": 134, "width": 344, "height": 170 },
+          "style": { "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Center-Bottom",
+          "type": "stackedColumnChart",
+          "title": "Status × Department",
+          "axis": "access_rights[department]",
+          "values": ["AR Users by Department"],
+          "legend": "access_rights[status]",
+          "bounds": { "x": 8, "y": 312, "width": 344, "height": 170 },
+          "style": { "borderRadius": 12 }
+        },
+        {
+          "zone": "Z-Bottom (Scroll)",
+          "type": "table",
+          "title": "Top Resources",
+          "columns": [
+            "access_rights[resource_name]",
+            "access_rights[role]",
+            "access_rights[status]"
+          ],
+          "topNFilter": { "n": 10, "direction": "DESC" },
+          "bounds": { "x": 8, "y": 490, "width": 344, "height": 180 },
+          "style": { "fontSize": 9, "compact": true, "borderRadius": 12 }
+        }
+      ]
+    }
+  ]
+}

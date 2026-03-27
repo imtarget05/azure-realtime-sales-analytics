@@ -1,0 +1,51 @@
+name: Deploy ML Endpoint
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ml/**'
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.10'
+  AML_WORKSPACE: aml-sales-forecast
+  RESOURCE_GROUP: rg-sales-analytics
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  train-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install azure-ai-ml azure-identity scikit-learn lightgbm xgboost pandas numpy joblib python-dotenv
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Register model & deploy endpoint
+        env:
+          AML_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AML_RESOURCE_GROUP: ${{ env.RESOURCE_GROUP }}
+          AML_WORKSPACE_NAME: ${{ env.AML_WORKSPACE }}
+        run: |
+          python ml/deploy_model.py \
+            --model-dir ./ml/model_output \
+            --endpoint-name sales-forecast-endpoint

@@ -1,0 +1,193 @@
+{
+  "$schema": "custom",
+  "metadata": {
+    "name": "SalesAnalytics_AutoRefresh",
+    "description": "Auto Page Refresh configuration cho Power BI DirectQuery reports. Cấu hình ở 2 nơi: Power BI Desktop (.pbix) và Power BI Service (Capacity admin).",
+    "version": "1.0.0"
+  },
+
+  "autoPageRefresh": {
+    "description": "Auto Page Refresh (APR) cho phép Dashboard cập nhật tự động mà không cần user interaction. Chỉ hoạt động với DirectQuery / Streaming datasets.",
+
+    "desktopConfig": {
+      "description": "Cấu hình trong Power BI Desktop: Format pane → Page → Auto page refresh",
+      "perPage": {
+        "01_Overview": {
+          "enabled": true,
+          "type": "Fixed interval",
+          "interval_seconds": 5,
+          "reason": "Real-time monitoring — cần thấy doanh thu cập nhật liên tục"
+        },
+        "02_Products": {
+          "enabled": true,
+          "type": "Fixed interval",
+          "interval_seconds": 30,
+          "reason": "Product summary ít thay đổi — 30s đủ"
+        },
+        "03_Customers": {
+          "enabled": true,
+          "type": "Fixed interval",
+          "interval_seconds": 60,
+          "reason": "Customer CLV aggregation — refresh 1 phút"
+        },
+        "04_Anomaly": {
+          "enabled": true,
+          "type": "Fixed interval",
+          "interval_seconds": 10,
+          "reason": "Cảnh báo cần phát hiện nhanh"
+        },
+        "05_AccessRights": {
+          "enabled": true,
+          "type": "Fixed interval",
+          "interval_seconds": 60,
+          "reason": "Access rights data ít thay đổi — 60s đủ"
+        }
+      },
+
+      "howToSetup": [
+        "1. Mở Power BI Desktop → chọn page cần APR",
+        "2. Format pane (paint roller) → Page information → Advanced options",
+        "3. Auto page refresh → ON",
+        "4. Refresh type: Fixed interval",
+        "5. Interval: nhập giá trị (giây/phút)",
+        "6. Repeat cho mỗi page"
+      ]
+    },
+
+    "changeDetection": {
+      "description": "Change Detection là chế độ APR nâng cao — chỉ refresh khi data thực sự thay đổi, tối ưu chi phí query.",
+      "enabled": true,
+      "detectionMeasure": "Revenue Total",
+      "pollingInterval_seconds": 5,
+      "executionInterval_seconds": 1,
+
+      "howToSetup": [
+        "1. Auto page refresh → Change detection",
+        "2. Add a change detection measure: chọn [Revenue Total]",
+        "3. Check for changes every: 5 seconds",
+        "4. Refresh the page when a change is detected (minimum execution interval): 1 second",
+        "Khi Revenue Total thay đổi (có giao dịch mới), page tự refresh trong 1 giây."
+      ],
+
+      "perPage": {
+        "01_Overview": {
+          "detectionMeasure": "Revenue Total",
+          "pollingInterval": 5,
+          "executionInterval": 1,
+          "notes": "Detect revenue changes → instant refresh"
+        },
+        "04_Anomaly": {
+          "detectionMeasure": "Revenue Total",
+          "pollingInterval": 10,
+          "executionInterval": 2,
+          "notes": "Anomaly page — poll ít thường xuyên hơn"
+        }
+      }
+    },
+
+    "serviceConfig": {
+      "description": "Cấu hình trên Power BI Service (Admin / Capacity)",
+
+      "capacitySettings": {
+        "description": "Admin Portal → Capacity settings → Workloads → Datasets",
+        "minimumRefreshInterval": {
+          "adminPortalPath": "Settings → Admin portal → Capacity settings → Select capacity → Workloads → Datasets → Auto page refresh",
+          "value_seconds": 1,
+          "notes": "Capacity admin phải set minimum interval ≤ report interval. Nếu admin set 30s mà report set 5s → Power BI sẽ dùng 30s."
+        },
+        "changeDetection": {
+          "adminPortalPath": "Settings → Admin portal → Capacity settings → Workloads → Datasets → Change detection",
+          "enabled": true,
+          "minimumExecutionInterval_seconds": 1,
+          "notes": "Phải enable ở capacity level trước khi report sử dụng được."
+        }
+      },
+
+      "workspaceSettings": {
+        "description": "Workspace → Settings → Premium → Auto page refresh",
+        "steps": [
+          "1. Mở Power BI Service → Workspace → Settings",
+          "2. Premium tab (hoặc Premium per user)",
+          "3. Auto page refresh → cho phép (chọn minimum interval)",
+          "4. Change detection → enable"
+        ]
+      },
+
+      "licenseRequirements": {
+        "fixedInterval": {
+          "powerBI_Pro": "Minimum 30 minutes",
+          "powerBI_Premium": "Minimum 1 second",
+          "powerBI_PremiumPerUser": "Minimum 1 second",
+          "powerBI_Embedded": "Minimum 1 second",
+          "powerBI_Fabric": "Minimum 1 second"
+        },
+        "changeDetection": {
+          "powerBI_Pro": "Not available",
+          "powerBI_Premium": "Minimum 1 second execution",
+          "powerBI_PremiumPerUser": "Minimum 1 second execution",
+          "powerBI_Fabric": "Minimum 1 second execution"
+        },
+        "recommendation": "Premium Per User (PPU) hoặc Fabric F2+ là lựa chọn cost-effective nhất cho real-time dashboard."
+      }
+    },
+
+    "performanceOptimization": {
+      "description": "Tối ưu hiệu suất khi APR chạy 1-5 giây",
+
+      "databricksSQL": {
+        "serverlessWarehouse": {
+          "reason": "Auto-scale, no cold start, pay per query",
+          "autoStop_minutes": 10,
+          "clusterSize": "Small (hoặc 2X-Small cho dev)",
+          "caching": "Databricks SQL cache + result caching tự động"
+        },
+        "queryOptimization": [
+          "Gold tables đã pre-aggregated → mỗi query chỉ scan vài MB",
+          "ZORDER BY (store_id, event_hour) giảm file scan",
+          "Partition by event_date → query chỉ đọc partition hiện tại",
+          "OPTIMIZE đã compact small files"
+        ]
+      },
+
+      "powerBITips": [
+        "1. Giới hạn số visuals trên 1 page: ≤ 8 (mỗi visual = 1 query mỗi refresh)",
+        "2. Tránh complex DAX trong APR page — dùng pre-aggregated Gold measures",
+        "3. Dùng Bookmarks thay vì nhiều pages cùng lúc",
+        "4. Table visual: giới hạn Top N rows (không load toàn bộ)",
+        "5. Card visuals rẻ nhất — ưu tiên cards cho KPIs",
+        "6. Change Detection hiệu quả hơn Fixed Interval (chỉ refresh khi có data mới)",
+        "7. Dùng DirectQuery Query Caching (Dataset settings → DirectQuery → Turn on caching)"
+      ],
+
+      "monitorMetrics": {
+        "description": "Monitor hiệu suất APR",
+        "tools": [
+          "Power BI → Dataset settings → Query diagnostics",
+          "Databricks SQL → Query History → filter by Power BI user",
+          "Azure Monitor → Databricks workspace → SQL Warehouse metrics"
+        ],
+        "thresholds": {
+          "queryDuration_target_ms": 500,
+          "queriesPerMinute_max": 100,
+          "warehouseCPU_alert_pct": 80
+        }
+      }
+    }
+  },
+
+  "streamingTile": {
+    "description": "Alternative: Streaming tiles trên Power BI Dashboard (< 1 giây delay)",
+    "howToSetup": [
+      "1. Power BI Service → Dashboard → + Add tile → Custom Streaming Data",
+      "2. Chọn Streaming Dataset 'SalesRealtimeStream'",
+      "3. Card/Gauge/Line chart visualization",
+      "4. Time window: Last 5 minutes / 1 hour"
+    ],
+    "limitations": [
+      "Streaming tiles không hỗ trợ DAX measures",
+      "Chỉ visual đơn giản (Card, Gauge, Line)",
+      "Không có cross-filtering",
+      "Dùng song song với DirectQuery pages cho trải nghiệm tốt nhất"
+    ]
+  }
+}

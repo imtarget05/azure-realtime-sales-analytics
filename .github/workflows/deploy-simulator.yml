@@ -1,0 +1,67 @@
+name: Deploy Data Simulator
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data_generator/**'
+      - 'config/**'
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.10'
+  RESOURCE_GROUP: rg-sales-analytics
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint data generator
+        run: |
+          pip install flake8
+          flake8 data_generator/ --max-line-length=120 --ignore=E501,W503,E402,F401
+
+      - name: Validate config loads
+        run: |
+          python -c "from config.settings import PRODUCTS, STORE_IDS; print(f'OK: {len(PRODUCTS)} products, {len(STORE_IDS)} stores')"
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy simulator to Container Instance
+        run: |
+          az container create \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name sales-simulator \
+            --image python:3.10-slim \
+            --cpu 1 --memory 1 \
+            --restart-policy Always \
+            --gitrepo-url https://github.com/${{ github.repository }}.git \
+            --gitrepo-revision ${{ github.sha }} \
+            --gitrepo-mount-path /mnt/repo \
+            --environment-variables \
+              EVENT_HUB_CONNECTION_STRING='${{ secrets.EVENT_HUB_CONNECTION_STRING }}' \
+              EVENT_HUB_NAME='sales-events' \
+            --command-line "/bin/bash -c 'cd /mnt/repo && pip install -r requirements.txt && python -m data_generator.sales_generator'" \
+            --output table

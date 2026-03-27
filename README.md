@@ -113,19 +113,33 @@ azure-realtime-sales-analytics/
 │   └── upload_reference_data.py      # Upload dữ liệu tham chiếu lên Blob
 │
 ├── 📂 stream_analytics/              # ETL thời gian thực
-│   └── queries.sql                   # 9 queries: aggregation, anomaly, JOIN
+│   ├── queries.sql                   # 9 queries: aggregation, anomaly, JOIN
+│   └── stream_query.sql              # Stream Analytics query bổ sung
 │
 ├── 📂 sql/                           # Cơ sở dữ liệu
 │   ├── create_tables.sql             # Schema: 7 bảng + 3 view + index
+│   ├── create_streaming_tables.sql   # Schema bảng streaming
 │   └── stored_procedures.sql         # Stored procedures cho Data Factory
 │
 ├── 📂 ml/                            # Machine Learning
+│   ├── data/                         # Rossmann dataset (train/test/store.csv)
+│   ├── model_output/                 # Outputs: model.pkl, charts/, metadata
+│   │   ├── charts/                   # 5 biểu đồ từ notebook
+│   │   └── evaluation_charts/        # 6 biểu đồ so sánh pipeline
+│   ├── train.ipynb                   # Notebook chính – train + visualization
+│   ├── evaluate_pipelines.py         # So sánh 10 models × 2 datasets
 │   ├── train_model.py                # Huấn luyện Gradient Boosting
-│   ├── deploy_model.py               # Triển khai lên Azure ML Endpoint
-│   ├── score.py                      # Script chấm điểm cho endpoint
-│   ├── realtime_forecast.py          # Gọi endpoint để dự báo real-time
 │   ├── compare_models.py             # So sánh 9 mô hình ML + biểu đồ
+│   ├── score.py                      # Script chấm điểm cho endpoint
+│   ├── score_rossmann.py             # Batch scoring Rossmann
+│   ├── deploy_model.py               # Triển khai lên Azure ML Endpoint
+│   ├── realtime_forecast.py          # Gọi endpoint để dự báo real-time
 │   └── conda_env.yml                 # Môi trường Conda cho Azure ML
+│
+├── 📂 azure_functions/               # Azure Functions
+│   ├── host.json
+│   ├── requirements.txt
+│   └── ValidateSalesEvent/           # Validate incoming events
 │
 ├── 📂 data_factory/                  # Orchestration
 │   ├── create_pipeline.py            # Tạo pipelines qua Python SDK
@@ -133,7 +147,16 @@ azure-realtime-sales-analytics/
 │
 ├── 📂 infrastructure/                # Triển khai hạ tầng (IaC)
 │   ├── deploy_azure.sh               # Bash script (Linux/macOS)
-│   └── deploy_azure.ps1              # PowerShell script (Windows)
+│   ├── deploy_azure.ps1              # PowerShell script (Windows)
+│   ├── arm_streaming_job.json        # ARM template Stream Analytics
+│   └── arm_streaming_job.parameters.example.json
+│
+├── 📂 monitoring/                    # Giám sát & Telemetry
+│   ├── telemetry.py                  # Thu thập metrics
+│   └── arm_monitoring.json           # ARM template monitoring
+│
+├── 📂 security/                      # Bảo mật
+│   └── key_vault.py                  # Azure Key Vault integration
 │
 ├── 📂 powerbi/                       # Power BI
 │   ├── push_to_powerbi.py            # Đẩy dữ liệu tổng hợp lên Power BI
@@ -141,6 +164,7 @@ azure-realtime-sales-analytics/
 │
 ├── 📂 webapp/                        # Web Application (Flask)
 │   ├── app.py                        # Flask app gọi ML endpoint
+│   ├── static/result.js
 │   └── templates/
 │       ├── index.html                # Form nhập tham số dự đoán
 │       └── result.html               # Hiển thị kết quả dự đoán
@@ -154,11 +178,19 @@ azure-realtime-sales-analytics/
 │   ├── ly_thuyet_va_phan_loai.md     # Lý thuyết + phân loại IaaS/PaaS/SaaS
 │   ├── toi_uu_luu_tru.md             # Chiến lược tối ưu lưu trữ & chi phí
 │   ├── de_cuong_bao_cao.md           # Đề cương báo cáo Word/PPT
-│   └── ke_hoach_mlops.md             # Kế hoạch phát triển MLOps
+│   ├── ke_hoach_mlops.md             # Kế hoạch phát triển MLOps
+│   └── streaming_mapping.md          # Mapping streaming data
+│
+├── 📂 .github/workflows/            # CI/CD
+│   ├── ci.yml
+│   ├── deploy-functions.yml
+│   ├── deploy-ml-endpoint.yml
+│   └── deploy-simulator.yml
 │
 ├── .env.example                      # Mẫu biến môi trường (copy → .env)
 ├── .gitignore
 ├── requirements.txt                  # Danh sách thư viện Python
+├── sample_events.jsonl               # Dữ liệu mẫu Event Hub
 └── README.md
 ```
 

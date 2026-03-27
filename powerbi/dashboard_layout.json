@@ -1,0 +1,754 @@
+{
+  "$schema": "custom",
+  "metadata": {
+    "name": "SalesAnalytics_Dashboard_Layout",
+    "description": "Power BI report layout — 4 pages + navigation sidebar. Áp dụng qua Tabular Editor hoặc tham chiếu khi xây dựng báo cáo thủ công.",
+    "version": "1.0.0",
+    "theme": "powerbi/themes/SalesAnalytics_Dark.json",
+    "canvasSize": {
+      "desktop": { "width": 1280, "height": 720 },
+      "mobile":  { "width": 360, "height": 640 }
+    }
+  },
+
+  "navigation": {
+    "type": "sidebar",
+    "position": "left",
+    "description": "Sidebar cố định bên trái (80px desktop, ẩn trên mobile). Dùng Buttons + Bookmarks để chuyển page.",
+    "width": 80,
+    "background": "#0B1120",
+    "borderRight": "1px solid #1E293B",
+
+    "logo": {
+      "type": "image",
+      "position": { "x": 10, "y": 12, "width": 60, "height": 60 },
+      "description": "Logo công ty (60×60 PNG, transparent background). Insert → Image."
+    },
+
+    "items": [
+      {
+        "id": "nav_overview",
+        "icon": "📊",
+        "iconUnicode": "U+1F4CA",
+        "label": "Tổng quan",
+        "tooltip": "Tổng quan thời gian thực",
+        "targetPage": "01_Overview",
+        "position": { "x": 10, "y": 90, "width": 60, "height": 48 },
+        "style": {
+          "fillDefault": "#0B1120",
+          "fillActive": "#1E293B",
+          "fillHover": "#162032",
+          "iconColor": "#94A3B8",
+          "iconColorActive": "#00D4AA",
+          "borderRadius": 12,
+          "borderLeft_active": "3px solid #00D4AA"
+        },
+        "bookmark": "BM_Page_Overview"
+      },
+      {
+        "id": "nav_products",
+        "icon": "🏷️",
+        "iconUnicode": "U+1F3F7",
+        "label": "Sản phẩm",
+        "tooltip": "Phân tích sản phẩm + ML Viral",
+        "targetPage": "02_Products",
+        "position": { "x": 10, "y": 148, "width": 60, "height": 48 },
+        "style": {
+          "fillDefault": "#0B1120",
+          "fillHover": "#162032",
+          "iconColor": "#94A3B8",
+          "iconColorActive": "#3B82F6",
+          "borderRadius": 12,
+          "borderLeft_active": "3px solid #3B82F6"
+        },
+        "bookmark": "BM_Page_Products"
+      },
+      {
+        "id": "nav_customers",
+        "icon": "👥",
+        "iconUnicode": "U+1F465",
+        "label": "Khách hàng",
+        "tooltip": "Customer Insights + CLV",
+        "targetPage": "03_Customers",
+        "position": { "x": 10, "y": 206, "width": 60, "height": 48 },
+        "style": {
+          "fillDefault": "#0B1120",
+          "fillHover": "#162032",
+          "iconColor": "#94A3B8",
+          "iconColorActive": "#F59E0B",
+          "borderRadius": 12,
+          "borderLeft_active": "3px solid #F59E0B"
+        },
+        "bookmark": "BM_Page_Customers"
+      },
+      {
+        "id": "nav_anomaly",
+        "icon": "⚡",
+        "iconUnicode": "U+26A1",
+        "label": "Bất thường",
+        "tooltip": "Cảnh báo & Tác động",
+        "targetPage": "04_Anomaly",
+        "position": { "x": 10, "y": 264, "width": 60, "height": 48 },
+        "style": {
+          "fillDefault": "#0B1120",
+          "fillHover": "#162032",
+          "iconColor": "#94A3B8",
+          "iconColorActive": "#EF4444",
+          "borderRadius": 12,
+          "borderLeft_active": "3px solid #EF4444"
+        },
+        "bookmark": "BM_Page_Anomaly"
+      },
+      {
+        "id": "nav_access_rights",
+        "icon": "🔐",
+        "iconUnicode": "U+1F510",
+        "label": "Quyền truy cập",
+        "tooltip": "Access Right — Quản lý quyền",
+        "targetPage": "05_AccessRights",
+        "position": { "x": 10, "y": 322, "width": 60, "height": 48 },
+        "style": {
+          "fillDefault": "#0B1120",
+          "fillHover": "#162032",
+          "iconColor": "#94A3B8",
+          "iconColorActive": "#A855F7",
+          "borderRadius": 12,
+          "borderLeft_active": "3px solid #A855F7"
+        },
+        "bookmark": "BM_Page_AccessRights"
+      }
+    ],
+
+    "footer": {
+      "description": "Hiển thị Current User Name + Role (từ RLS DAX measures)",
+      "position": { "x": 10, "y": 640, "width": 60, "height": 60 },
+      "measures": ["Current User Name", "Current User Role"]
+    },
+
+    "howToCreate": [
+      "1. Trên mỗi page, thêm Rectangle shape (x=0, y=0, w=80, h=720), fill=#0B1120",
+      "2. Thêm 5 Action Buttons bên trong rectangle tại vị trí y tương ứng",
+      "3. Mỗi button: Action = Bookmark, Bookmark = BM_Page_xxx",
+      "4. Tạo 5 Bookmarks (View → Bookmarks): BM_Page_Overview, BM_Page_Products, BM_Page_Customers, BM_Page_Anomaly, BM_Page_AccessRights",
+      "5. Mỗi bookmark: Display tab = trang tương ứng, Data = giữ nguyên filters",
+      "6. Copy rectangle + buttons sang tất cả 5 pages (Ctrl+C / Ctrl+V)",
+      "7. Trên mỗi page, highlight button active bằng fill=#1E293B + border-left accent color"
+    ]
+  },
+
+  "pages": [
+
+    {
+      "name": "01_Overview",
+      "displayName": "Tổng quan thời gian thực",
+      "description": "KPI cards + revenue time-series + regional breakdown. Auto Page Refresh enabled.",
+      "contentArea": {
+        "x": 80, "y": 0, "width": 1200, "height": 720,
+        "note": "Vùng nội dung = canvas trừ sidebar (1280 - 80 = 1200)"
+      },
+
+      "header": {
+        "description": "Topbar: tiêu đề + slicers ngày & region",
+        "bounds": { "x": 80, "y": 0, "width": 1200, "height": 60 },
+        "background": "#0F172A",
+        "elements": [
+          {
+            "type": "textbox",
+            "text": "📊 Real-time Sales Overview",
+            "fontSize": 18,
+            "fontWeight": "semibold",
+            "color": "#F1F5F9",
+            "bounds": { "x": 96, "y": 12, "width": 350, "height": 36 }
+          },
+          {
+            "type": "slicer",
+            "field": "Calendar[Date]",
+            "slicerType": "RelativeDate",
+            "defaultValue": "Last 7 days",
+            "bounds": { "x": 680, "y": 10, "width": 240, "height": 40 }
+          },
+          {
+            "type": "slicer",
+            "field": "hourly_summary[region]",
+            "slicerType": "Dropdown",
+            "bounds": { "x": 940, "y": 10, "width": 160, "height": 40 }
+          },
+          {
+            "type": "slicer",
+            "field": "hourly_summary[category]",
+            "slicerType": "Dropdown",
+            "bounds": { "x": 1120, "y": 10, "width": 150, "height": 40 }
+          }
+        ]
+      },
+
+      "kpiRow": {
+        "description": "4 KPI cards ngang — bo góc, đổ bóng, conditional color",
+        "bounds": { "x": 96, "y": 70, "width": 1168, "height": 110 },
+        "cards": [
+          {
+            "measure": "Revenue Total",
+            "subtitle": "Tổng doanh thu",
+            "format": "#,##0",
+            "icon": "💰",
+            "accentColor": "#00D4AA",
+            "subMeasure": "DoD Arrow",
+            "bounds": { "x": 96, "y": 70, "width": 275, "height": 110 }
+          },
+          {
+            "measure": "Order Total",
+            "subtitle": "Tổng đơn hàng",
+            "format": "#,##0",
+            "icon": "📦",
+            "accentColor": "#3B82F6",
+            "bounds": { "x": 387, "y": 70, "width": 275, "height": 110 }
+          },
+          {
+            "measure": "Average Order Value",
+            "subtitle": "Giá trị TB/đơn",
+            "format": "#,##0.00",
+            "icon": "📈",
+            "accentColor": "#F59E0B",
+            "conditionalColor": "AOV Color",
+            "bounds": { "x": 678, "y": 70, "width": 275, "height": 110 }
+          },
+          {
+            "measure": "Active Customers",
+            "subtitle": "Khách hoạt động",
+            "format": "#,##0",
+            "icon": "👥",
+            "accentColor": "#8B5CF6",
+            "bounds": { "x": 969, "y": 70, "width": 275, "height": 110 }
+          }
+        ]
+      },
+
+      "visuals": [
+        {
+          "type": "lineChart",
+          "title": "Doanh thu theo giờ",
+          "axis_x": "hourly_summary[hour_timestamp]",
+          "values": ["Revenue Total"],
+          "legend": "hourly_summary[region]",
+          "bounds": { "x": 96, "y": 195, "width": 750, "height": 250 },
+          "notes": "Trend line chính — real-time. Tooltip: revenue, order_count, avg_temperature"
+        },
+        {
+          "type": "clusteredBarChart",
+          "title": "Doanh thu theo vùng",
+          "axis": "hourly_summary[region]",
+          "values": ["Revenue Total"],
+          "conditionalFormatting": {
+            "dataBar": true,
+            "color": "#3B82F6"
+          },
+          "bounds": { "x": 862, "y": 195, "width": 390, "height": 250 },
+          "notes": "Bar ngang, sort DESC"
+        },
+        {
+          "type": "donutChart",
+          "title": "Revenue % theo danh mục",
+          "category": "hourly_summary[category]",
+          "values": ["Revenue Total"],
+          "bounds": { "x": 96, "y": 460, "width": 350, "height": 245 },
+          "notes": "Inner label: % of total"
+        },
+        {
+          "type": "table",
+          "title": "Top 5 Khách hàng",
+          "columns": [
+            "customer_summary[customer_id]",
+            "customer_summary[customer_segment]",
+            "Customer Total Spent",
+            "customer_summary[total_orders]",
+            "customer_summary[clv_tier]"
+          ],
+          "topNFilter": { "measure": "Customer Total Spent", "n": 5, "direction": "DESC" },
+          "conditionalFormatting": {
+            "clv_tier": {
+              "Platinum": "#00D4AA",
+              "Gold": "#F59E0B",
+              "Silver": "#94A3B8",
+              "Bronze": "#78716C"
+            }
+          },
+          "bounds": { "x": 462, "y": 460, "width": 470, "height": 245 }
+        },
+        {
+          "type": "card",
+          "title": "Revenue MTD",
+          "measure": "Revenue MTD",
+          "format": "#,##0",
+          "bounds": { "x": 948, "y": 460, "width": 150, "height": 115 }
+        },
+        {
+          "type": "card",
+          "title": "Revenue YTD",
+          "measure": "Revenue YTD",
+          "format": "#,##0",
+          "bounds": { "x": 1108, "y": 460, "width": 150, "height": 115 }
+        },
+        {
+          "type": "kpi",
+          "title": "MoM Growth",
+          "measure": "Revenue MoM Growth %",
+          "trendAxis": "Calendar[YearMonth]",
+          "bounds": { "x": 948, "y": 590, "width": 310, "height": 115 }
+        }
+      ]
+    },
+
+    {
+      "name": "02_Products",
+      "displayName": "Sản phẩm & ML Predictions",
+      "description": "Product performance, viral rate, similarity distribution.",
+      "contentArea": {
+        "x": 80, "y": 0, "width": 1200, "height": 720
+      },
+
+      "header": {
+        "bounds": { "x": 80, "y": 0, "width": 1200, "height": 60 },
+        "elements": [
+          {
+            "type": "textbox",
+            "text": "🏷️ Phân tích Sản phẩm & ML Viral Prediction",
+            "bounds": { "x": 96, "y": 12, "width": 500, "height": 36 }
+          },
+          {
+            "type": "slicer",
+            "field": "product_summary[category]",
+            "slicerType": "Dropdown",
+            "bounds": { "x": 940, "y": 10, "width": 160, "height": 40 }
+          }
+        ]
+      },
+
+      "visuals": [
+        {
+          "type": "treemap",
+          "title": "Revenue theo sản phẩm",
+          "group": "product_summary[category]",
+          "details": "product_summary[product_name]",
+          "values": ["Product Revenue"],
+          "bounds": { "x": 96, "y": 70, "width": 580, "height": 310 },
+          "notes": "Tooltip: total_orders, avg_price, viral_rate"
+        },
+        {
+          "type": "clusteredBarChart",
+          "title": "Top 10 sản phẩm — Đơn hàng",
+          "axis": "product_summary[product_name]",
+          "values": ["product_summary[total_orders]"],
+          "topNFilter": { "n": 10, "direction": "DESC" },
+          "bounds": { "x": 692, "y": 70, "width": 560, "height": 310 },
+          "notes": "Sort by total_orders DESC, conditional color by viral_rate"
+        },
+        {
+          "type": "gauge",
+          "title": "Avg Viral Rate",
+          "measure": "Avg Viral Rate",
+          "min": 0,
+          "max": 1,
+          "target": 0.15,
+          "bounds": { "x": 96, "y": 395, "width": 280, "height": 230 },
+          "notes": "Target = threshold P95 từ notebook 04. Green > 0.15, Red < 0.05."
+        },
+        {
+          "type": "clusteredColumnChart",
+          "title": "Similarity Score Distribution",
+          "axis": "similarity_scores[similarity_bin]",
+          "values": ["Similarity Bin Count"],
+          "legend": "similarity_scores[category]",
+          "bounds": { "x": 392, "y": 395, "width": 480, "height": 310 },
+          "notes": "Stacked columns — mỗi bin (0.0–1.0) hiện % phân phối"
+        },
+        {
+          "type": "scatterChart",
+          "title": "Similarity vs Viral %",
+          "axis_x": "similarity_scores[similarity_bin]",
+          "axis_y": "Similarity Viral %",
+          "legend": "similarity_scores[category]",
+          "bounds": { "x": 888, "y": 395, "width": 370, "height": 310 },
+          "notes": "Scatter: mỗi bin × category → tỷ lệ viral. Trend line optional."
+        }
+      ]
+    },
+
+    {
+      "name": "03_Customers",
+      "displayName": "Khách hàng & CLV",
+      "description": "Customer lifetime value, segments, top customers by revenue with time filter.",
+      "contentArea": {
+        "x": 80, "y": 0, "width": 1200, "height": 720
+      },
+
+      "header": {
+        "bounds": { "x": 80, "y": 0, "width": 1200, "height": 60 },
+        "elements": [
+          {
+            "type": "textbox",
+            "text": "👥 Customer Insights & Lifetime Value",
+            "bounds": { "x": 96, "y": 12, "width": 450, "height": 36 }
+          },
+          {
+            "type": "slicer",
+            "field": "customer_summary[region]",
+            "slicerType": "Dropdown",
+            "bounds": { "x": 800, "y": 10, "width": 160, "height": 40 }
+          },
+          {
+            "type": "slicer",
+            "field": "customer_summary[clv_tier]",
+            "slicerType": "Dropdown",
+            "bounds": { "x": 980, "y": 10, "width": 160, "height": 40 }
+          }
+        ]
+      },
+
+      "kpiRow": {
+        "bounds": { "x": 96, "y": 70, "width": 1168, "height": 100 },
+        "cards": [
+          {
+            "measure": "Active Customers",
+            "subtitle": "Khách hoạt động",
+            "accentColor": "#8B5CF6",
+            "bounds": { "x": 96, "y": 70, "width": 280, "height": 100 }
+          },
+          {
+            "measure": "Revenue per Customer",
+            "subtitle": "Doanh thu TB/khách",
+            "accentColor": "#00D4AA",
+            "bounds": { "x": 392, "y": 70, "width": 280, "height": 100 }
+          },
+          {
+            "measure": "Top 5 Customer Revenue",
+            "subtitle": "Top 5 tổng chi tiêu",
+            "accentColor": "#F59E0B",
+            "bounds": { "x": 688, "y": 70, "width": 280, "height": 100 }
+          },
+          {
+            "measure": "Order Total",
+            "subtitle": "Tổng đơn hàng",
+            "accentColor": "#3B82F6",
+            "bounds": { "x": 984, "y": 70, "width": 280, "height": 100 }
+          }
+        ]
+      },
+
+      "visuals": [
+        {
+          "type": "table",
+          "title": "Top Customers (Xếp hạng)",
+          "columns": [
+            "Customer Revenue Rank",
+            "customer_summary[customer_id]",
+            "customer_summary[customer_segment]",
+            "customer_summary[region]",
+            "Customer Total Spent",
+            "customer_summary[total_orders]",
+            "customer_summary[clv_tier]",
+            "customer_summary[purchase_frequency]"
+          ],
+          "topNFilter": { "measure": "Customer Total Spent", "n": 20, "direction": "DESC" },
+          "conditionalFormatting": {
+            "clv_tier_background": {
+              "Platinum": "#00D4AA20",
+              "Gold": "#F59E0B20",
+              "Silver": "#94A3B820",
+              "Bronze": "#78716C20"
+            },
+            "total_spent_dataBar": "#00D4AA"
+          },
+          "bounds": { "x": 96, "y": 185, "width": 750, "height": 350 },
+          "notes": "Responsive — RLS tự lọc region cho mỗi manager"
+        },
+        {
+          "type": "donutChart",
+          "title": "Phân khúc khách hàng",
+          "category": "customer_summary[customer_segment]",
+          "values": ["Active Customers"],
+          "bounds": { "x": 862, "y": 185, "width": 390, "height": 170 }
+        },
+        {
+          "type": "donutChart",
+          "title": "CLV Tier Distribution",
+          "category": "customer_summary[clv_tier]",
+          "values": ["Active Customers"],
+          "colorMapping": {
+            "Platinum": "#00D4AA",
+            "Gold": "#F59E0B",
+            "Silver": "#94A3B8",
+            "Bronze": "#78716C"
+          },
+          "bounds": { "x": 862, "y": 370, "width": 390, "height": 170 }
+        },
+        {
+          "type": "clusteredBarChart",
+          "title": "Doanh thu theo phương thức thanh toán",
+          "axis": "customer_summary[preferred_payment]",
+          "values": ["Customer Total Spent"],
+          "bounds": { "x": 96, "y": 550, "width": 560, "height": 155 }
+        },
+        {
+          "type": "columnChart",
+          "title": "Tenure Days Distribution",
+          "axis": "customer_summary[tenure_days]",
+          "values": ["Active Customers"],
+          "bounds": { "x": 672, "y": 550, "width": 580, "height": 155 },
+          "notes": "Histogram — group by tenure bins"
+        }
+      ]
+    },
+
+    {
+      "name": "04_Anomaly",
+      "displayName": "Cảnh báo & Tác động",
+      "description": "Holiday / weather impact, discount analysis, anomaly detection.",
+      "contentArea": {
+        "x": 80, "y": 0, "width": 1200, "height": 720
+      },
+
+      "header": {
+        "bounds": { "x": 80, "y": 0, "width": 1200, "height": 60 },
+        "elements": [
+          {
+            "type": "textbox",
+            "text": "⚡ Cảnh báo & Phân tích Tác động",
+            "bounds": { "x": 96, "y": 12, "width": 450, "height": 36 }
+          }
+        ]
+      },
+
+      "kpiRow": {
+        "bounds": { "x": 96, "y": 70, "width": 1168, "height": 100 },
+        "cards": [
+          {
+            "measure": "Holiday Uplift %",
+            "subtitle": "Tác động ngày lễ",
+            "accentColor": "#EF4444",
+            "format": "0.0%",
+            "bounds": { "x": 96, "y": 70, "width": 280, "height": 100 }
+          },
+          {
+            "measure": "Avg Discount Rate",
+            "subtitle": "Tỷ lệ chiết khấu TB",
+            "accentColor": "#F59E0B",
+            "format": "0.00%",
+            "bounds": { "x": 392, "y": 70, "width": 280, "height": 100 }
+          },
+          {
+            "measure": "Total Discounts",
+            "subtitle": "Tổng chiết khấu",
+            "accentColor": "#EC4899",
+            "format": "#,##0",
+            "bounds": { "x": 688, "y": 70, "width": 280, "height": 100 }
+          },
+          {
+            "measure": "Revenue vs Target %",
+            "subtitle": "vs Mục tiêu",
+            "accentColor": "#06B6D4",
+            "format": "0.0%",
+            "bounds": { "x": 984, "y": 70, "width": 280, "height": 100 }
+          }
+        ]
+      },
+
+      "visuals": [
+        {
+          "type": "columnChart",
+          "title": "Revenue: Holiday vs Non-Holiday",
+          "categories": ["Holiday", "Non-Holiday"],
+          "values": ["Revenue Holiday", "Revenue Non-Holiday"],
+          "bounds": { "x": 96, "y": 185, "width": 560, "height": 250 },
+          "notes": "2 bars side-by-side. Conditional: Holiday > Non-Holiday = green indicator"
+        },
+        {
+          "type": "scatterChart",
+          "title": "Nhiệt độ vs Doanh thu",
+          "axis_x": "hourly_summary[avg_temperature]",
+          "axis_y": "Revenue Total",
+          "legend": "hourly_summary[dominant_weather]",
+          "bounds": { "x": 672, "y": 185, "width": 580, "height": 250 },
+          "notes": "Mỗi dot = 1 giờ × store. Color by weather. Trend line enabled."
+        },
+        {
+          "type": "lineChart",
+          "title": "Doanh thu Rolling 7D vs 30D",
+          "axis_x": "Calendar[Date]",
+          "values": ["Revenue Rolling 7D", "Revenue Rolling 30D"],
+          "bounds": { "x": 96, "y": 450, "width": 750, "height": 255 },
+          "notes": "Dual-line trend so sánh ngắn hạn vs dài hạn"
+        },
+        {
+          "type": "clusteredBarChart",
+          "title": "Revenue theo thời tiết",
+          "axis": "hourly_summary[dominant_weather]",
+          "values": ["Revenue Total", "Average Order Value"],
+          "bounds": { "x": 862, "y": 450, "width": 390, "height": 255 },
+          "notes": "Clustered: revenue + AOV theo từng weather condition"
+        }
+      ]
+    },
+
+    {
+      "name": "05_AccessRights",
+      "displayName": "Quyền truy cập (Access Right)",
+      "description": "Quản lý & phân tích quyền truy cập. Horizontal bar (Top Roles), line chart (trend), stacked column (Status×Department), detail table.",
+      "contentArea": {
+        "x": 80, "y": 0, "width": 1200, "height": 720
+      },
+
+      "header": {
+        "bounds": { "x": 80, "y": 0, "width": 1200, "height": 60 },
+        "background": "#0F172A",
+        "elements": [
+          {
+            "type": "textbox",
+            "text": "🔐 Access Right trong Dashboard",
+            "fontSize": 18,
+            "fontWeight": "semibold",
+            "color": "#F1F5F9",
+            "bounds": { "x": 96, "y": 12, "width": 350, "height": 36 }
+          },
+          {
+            "type": "slicer",
+            "field": "access_rights[department]",
+            "slicerType": "Dropdown",
+            "defaultValue": "All",
+            "bounds": { "x": 700, "y": 10, "width": 180, "height": 40 }
+          },
+          {
+            "type": "slicer",
+            "field": "access_rights[status]",
+            "slicerType": "Dropdown",
+            "defaultValue": "All",
+            "bounds": { "x": 900, "y": 10, "width": 150, "height": 40 }
+          },
+          {
+            "type": "slicer",
+            "field": "access_rights_monthly[month_date]",
+            "slicerType": "RelativeDate",
+            "defaultValue": "Last 12 months",
+            "bounds": { "x": 1070, "y": 10, "width": 190, "height": 40 }
+          }
+        ]
+      },
+
+      "kpiRow": {
+        "description": "4 KPI cards — tổng user, pending, growth, departments",
+        "bounds": { "x": 96, "y": 70, "width": 1168, "height": 110 },
+        "cards": [
+          {
+            "measure": "AR Total Users",
+            "subtitle": "Tổng Users (Active)",
+            "format": "#,##0",
+            "icon": "👤",
+            "accentColor": "#A855F7",
+            "bounds": { "x": 96, "y": 70, "width": 275, "height": 110 }
+          },
+          {
+            "measure": "AR Pending Count",
+            "subtitle": "Chờ phê duyệt",
+            "format": "#,##0",
+            "icon": "⏳",
+            "accentColor": "#F59E0B",
+            "bounds": { "x": 387, "y": 70, "width": 275, "height": 110 }
+          },
+          {
+            "measure": "AR Monthly Growth",
+            "subtitle": "Tăng trưởng tháng",
+            "format": "+#,##0;-#,##0;0",
+            "icon": "📈",
+            "accentColor": "#22C55E",
+            "subMeasure": "AR Growth Arrow",
+            "bounds": { "x": 678, "y": 70, "width": 275, "height": 110 }
+          },
+          {
+            "measure": "AR Department Count",
+            "subtitle": "Số phòng ban",
+            "format": "#,##0",
+            "icon": "🏢",
+            "accentColor": "#3B82F6",
+            "bounds": { "x": 969, "y": 70, "width": 275, "height": 110 }
+          }
+        ]
+      },
+
+      "visuals": [
+        {
+          "type": "clusteredBarChart",
+          "orientation": "horizontal",
+          "title": "Top 5 Roles — Số lượng User",
+          "axis": "access_rights[role]",
+          "values": ["AR Users by Role"],
+          "sortBy": "AR Users by Role",
+          "sortDirection": "DESC",
+          "conditionalFormatting": {
+            "dataBar": true,
+            "colorMapping": {
+              "Admin":       "#EF4444",
+              "Member":      "#3B82F6",
+              "Contributor": "#22C55E",
+              "Viewer":      "#F59E0B",
+              "Pending":     "#94A3B8"
+            }
+          },
+          "bounds": { "x": 96, "y": 195, "width": 560, "height": 250 },
+          "notes": "Horizontal bar chart — Top 5 roles. Color theo role type. Sort DESC by count."
+        },
+        {
+          "type": "lineChart",
+          "title": "Xu hướng User theo tháng",
+          "axis_x": "access_rights_monthly[month_date]",
+          "values": ["AR Monthly User Count", "AR New Grants"],
+          "legend": "access_rights_monthly[role]",
+          "bounds": { "x": 672, "y": 195, "width": 580, "height": 250 },
+          "notes": "Line chart — trend user count theo tháng. Legend by role. Secondary axis: new_grants."
+        },
+        {
+          "type": "stackedColumnChart",
+          "title": "Phân bổ Status theo Department",
+          "axis": "access_rights[department]",
+          "values": ["AR Users by Department"],
+          "legend": "access_rights[status]",
+          "colorMapping": {
+            "Active":  "#22C55E",
+            "Pending": "#F59E0B",
+            "Revoked": "#EF4444"
+          },
+          "bounds": { "x": 96, "y": 460, "width": 560, "height": 245 },
+          "notes": "Stacked column chart — mỗi department hiện Active/Pending/Revoked stack. Giúp thấy tỷ lệ trạng thái."
+        },
+        {
+          "type": "table",
+          "title": "Chi tiết quyền truy cập — Top Resources",
+          "columns": [
+            "access_rights[resource_name]",
+            "access_rights[resource_type]",
+            "access_rights[role]",
+            "access_rights[department]",
+            "access_rights[status]",
+            "access_rights[granted_date]",
+            "access_rights[last_access_date]"
+          ],
+          "topNFilter": { "measure": "AR Resource Access Count", "n": 20, "direction": "DESC" },
+          "conditionalFormatting": {
+            "status_background": {
+              "Active":  "#22C55E20",
+              "Pending": "#F59E0B20",
+              "Revoked": "#EF444420"
+            },
+            "role_textColor": {
+              "Admin":       "#EF4444",
+              "Member":      "#3B82F6",
+              "Contributor": "#22C55E",
+              "Viewer":      "#F59E0B",
+              "Pending":     "#94A3B8"
+            }
+          },
+          "bounds": { "x": 672, "y": 460, "width": 580, "height": 245 },
+          "notes": "Detail table — top resources by access count. Conditional color by status & role. Scrollable."
+        }
+      ]
+    }
+  ]
+}

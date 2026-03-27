@@ -1,0 +1,230 @@
+-- ╔══════════════════════════════════════════════════════════════════╗
+-- ║  Row-Level Security (RLS) — Power BI Dynamic Security          ║
+-- ║                                                                  ║
+-- ║  Mô hình: Dynamic RLS dựa trên USERPRINCIPALNAME()             ║
+-- ║  Manager chỉ thấy dữ liệu vùng mình quản lý.                  ║
+-- ║                                                                  ║
+-- ║  Cách triển khai:                                                ║
+-- ║  1. Tạo bảng SecurityMapping (trong Power BI hoặc Databricks)   ║
+-- ║  2. Tạo Roles + DAX filters                                     ║
+-- ║  3. Assign user/group vào Role trên Power BI Service            ║
+-- ╚══════════════════════════════════════════════════════════════════╝
+
+
+-- ====================================================================
+-- BƯỚC 1: Tạo bảng SecurityMapping
+--         Lưu trong Gold layer hoặc Import trực tiếp vào Power BI.
+-- ====================================================================
+
+-- Option A: Tạo trên Databricks (recommended — Single Source of Truth)
+-- Chạy trên Databricks notebook hoặc SQL Warehouse:
+
+-- CREATE TABLE IF NOT EXISTS sales_analytics.gold.security_mapping (
+--     user_email       STRING   NOT NULL COMMENT 'UPN — email Azure AD',
+--     display_name     STRING   NOT NULL COMMENT 'Tên hiển thị',
+--     role             STRING   NOT NULL COMMENT 'Manager / Analyst / Director',
+--     allowed_region   STRING   NOT NULL COMMENT 'Region được phép xem',
+--     PRIMARY KEY (user_email, allowed_region)
+-- );
+--
+-- INSERT INTO sales_analytics.gold.security_mapping VALUES
+--     ('manager_north@contoso.com', 'Nguyễn Văn A', 'Manager', 'North'),
+--     ('manager_south@contoso.com', 'Trần Thị B',   'Manager', 'South'),
+--     ('manager_east@contoso.com',  'Lê Văn C',     'Manager', 'East'),
+--     ('manager_west@contoso.com',  'Phạm Thị D',   'Manager', 'West'),
+--     ('director@contoso.com',      'Hoàng Văn E',  'Director', 'North'),
+--     ('director@contoso.com',      'Hoàng Văn E',  'Director', 'South'),
+--     ('director@contoso.com',      'Hoàng Văn E',  'Director', 'East'),
+--     ('director@contoso.com',      'Hoàng Văn E',  'Director', 'West'),
+--     ('analyst_01@contoso.com',    'Đỗ Văn F',     'Analyst', 'North'),
+--     ('analyst_01@contoso.com',    'Đỗ Văn F',     'Analyst', 'South');
+
+-- Option B: Nhập trực tiếp trong Power BI (Enter Data / blank query)
+-- Power Query M:
+-- let
+--     Source = Table.FromRecords({
+--         [user_email = "manager_north@contoso.com", display_name = "Nguyễn Văn A", role = "Manager", allowed_region = "North"],
+--         [user_email = "manager_south@contoso.com", display_name = "Trần Thị B",   role = "Manager", allowed_region = "South"],
+--         [user_email = "manager_east@contoso.com",  display_name = "Lê Văn C",     role = "Manager", allowed_region = "East"],
+--         [user_email = "manager_west@contoso.com",  display_name = "Phạm Thị D",   role = "Manager", allowed_region = "West"],
+--         [user_email = "director@contoso.com",      display_name = "Hoàng Văn E",  role = "Director", allowed_region = "North"],
+--         [user_email = "director@contoso.com",      display_name = "Hoàng Văn E",  role = "Director", allowed_region = "South"],
+--         [user_email = "director@contoso.com",      display_name = "Hoàng Văn E",  role = "Director", allowed_region = "East"],
+--         [user_email = "director@contoso.com",      display_name = "Hoàng Văn E",  role = "Director", allowed_region = "West"],
+--         [user_email = "analyst_01@contoso.com",    display_name = "Đỗ Văn F",     role = "Analyst",  allowed_region = "North"],
+--         [user_email = "analyst_01@contoso.com",    display_name = "Đỗ Văn F",     role = "Analyst",  allowed_region = "South"]
+--     })
+-- in
+--     Source
+
+
+-- ====================================================================
+-- BƯỚC 2: Tạo Relationship trong Power BI Data Model
+-- ====================================================================
+--
+-- SecurityMapping[allowed_region]  ──M:1──► hourly_summary[region]
+-- SecurityMapping[allowed_region]  ──M:1──► customer_summary[region]
+--
+-- Relationship Direction: Single (SecurityMapping → Fact tables)
+-- Cross-filter: Both directions  ←  BẮT BUỘC cho RLS hoạt động
+-- Active: Yes
+--
+-- Lưu ý: Vì SecurityMapping là bảng nhỏ (Import mode),
+-- trong khi fact tables là DirectQuery, relationship bidirectional
+-- chỉ hoạt động khi enable "Apply security filter in both directions".
+
+
+-- ====================================================================
+-- BƯỚC 3: Tạo RLS Roles trong Power BI Desktop
+--         Modeling → Manage Roles → New
+-- ====================================================================
+
+-- ── ROLE 1: RegionManager ──────────────────────────────────────────
+-- Áp dụng cho: tất cả Manager / Analyst / Director
+-- Filter trên bảng: SecurityMapping
+-- DAX Expression:
+
+-- Role Name: RegionManager
+-- Table: SecurityMapping
+-- Filter:
+[user_email] = USERPRINCIPALNAME ()
+
+-- Giải thích:
+-- USERPRINCIPALNAME() trả về email Azure AD của user đang xem report.
+-- Filter này giữ lại chỉ các row mà user_email khớp.
+-- Qua relationship SecurityMapping → hourly_summary[region],
+-- Power BI tự động lọc fact table chỉ hiển thị region được phép.
+
+
+-- ── ROLE 2: Admin (unrestricted) ────────────────────────────────────
+-- Áp dụng cho: Super Admin — thấy tất cả dữ liệu
+-- Không cần filter → tạo role rỗng
+
+-- Role Name: Admin
+-- (No table filter — sees all data)
+
+
+-- ====================================================================
+-- BƯỚC 4: Assign Members trên Power BI Service
+--         Workspace → Dataset → Security → Add members to roles
+-- ====================================================================
+--
+-- ┌──────────────────────────────┬──────────────────┐
+-- │ Role                         │ Members          │
+-- ├──────────────────────────────┼──────────────────┤
+-- │ RegionManager                │ Manager_North    │
+-- │                              │ Manager_South    │
+-- │                              │ Manager_East     │
+-- │                              │ Manager_West     │
+-- │                              │ Analyst_01       │
+-- │                              │ Director         │
+-- ├──────────────────────────────┼──────────────────┤
+-- │ Admin                        │ admin@contoso.com│
+-- └──────────────────────────────┴──────────────────┘
+--
+-- Khi Manager_North (manager_north@contoso.com) mở report:
+-- 1. USERPRINCIPALNAME() = "manager_north@contoso.com"
+-- 2. SecurityMapping lọc → chỉ row allowed_region = "North"
+-- 3. Relationship truyền filter → hourly_summary, customer_summary
+-- 4. Tất cả visuals chỉ hiển thị dữ liệu vùng North
+
+
+-- ====================================================================
+-- BƯỚC 5: Test RLS trong Power BI Desktop
+--         Modeling → View As → chọn Role + nhập Other user
+-- ====================================================================
+--
+-- Test case 1: View as RegionManager + manager_north@contoso.com
+--   → Chỉ thấy region = North
+--
+-- Test case 2: View as RegionManager + director@contoso.com
+--   → Thấy North, South, East, West (vì director có 4 rows)
+--
+-- Test case 3: View as Admin
+--   → Thấy toàn bộ dữ liệu (không có filter)
+
+
+-- ====================================================================
+-- BƯỚC 6: DAX để hiện thông tin user hiện tại (optional)
+-- ====================================================================
+
+-- Hiển thị email user trên report header
+-- Current User Email =
+--     USERPRINCIPALNAME ()
+
+-- Hiển thị vùng được phép xem
+-- Current User Regions =
+--     CONCATENATEX (
+--         VALUES ( SecurityMapping[allowed_region] ),
+--         SecurityMapping[allowed_region],
+--         ", "
+--     )
+
+-- Hiển thị tên
+-- Current User Name =
+--     SELECTEDVALUE ( SecurityMapping[display_name], "Unknown" )
+
+-- Hiển thị vai trò
+-- Current User Role =
+--     SELECTEDVALUE ( SecurityMapping[role], "N/A" )
+
+
+-- ====================================================================
+-- BƯỚC 7: RLS cho bảng Access Rights
+--         Khi bật RegionManager Role, access_rights cũng được lọc
+--         theo region của user hiện tại.
+-- ====================================================================
+--
+-- Relationship cần thêm:
+--   SecurityMapping[allowed_region] ──M:M──► access_rights[region]
+--   Cross-filter: Both directions
+--   Security Filter Direction: Both
+--
+-- Với relationship này, RegionManager Role tự động lọc:
+--   • hourly_summary  (đã có)
+--   • customer_summary (đã có)
+--   • access_rights    (MỚI)
+--
+-- Kết quả:
+--   Manager North chỉ thấy access_rights có region = 'North'
+--   Director (có 4 regions) thấy tất cả
+--   Admin (role rỗng) thấy tất cả
+--
+-- ── ROLE 3: AccessRightAdmin ────────────────────────────────────────
+-- Áp dụng cho: IT Admin quản lý quyền truy cập — chỉ thấy
+-- access_rights, không bị giới hạn region
+--
+-- Role Name: AccessRightAdmin
+-- Table: access_rights
+-- Filter: (No filter — sees all access_rights data)
+-- Table: hourly_summary
+-- Filter: FALSE()  ← chặn xem dữ liệu sales
+--
+-- Mục đích: Tách biệt quyền xem sales vs quyền quản lý access.
+-- IT admin cần thấy toàn bộ access_rights nhưng không cần xem revenue.
+--
+-- ┌──────────────────────────────┬──────────────────┐
+-- │ Role                         │ Members          │
+-- ├──────────────────────────────┼──────────────────┤
+-- │ RegionManager                │ All managers     │
+-- │                              │ (thấy AR + sales │
+-- │                              │  theo region)    │
+-- ├──────────────────────────────┼──────────────────┤
+-- │ AccessRightAdmin             │ IT sysadmin      │
+-- │                              │ (thấy tất cả AR, │
+-- │                              │  không thấy sales│
+-- ├──────────────────────────────┼──────────────────┤
+-- │ Admin                        │ Super admin      │
+-- │                              │ (thấy tất cả)   │
+-- └──────────────────────────────┴──────────────────┘
+--
+-- Test case 4: View as RegionManager + manager_north@contoso.com
+--   → access_rights: chỉ region = North
+--   → hourly_summary: chỉ region = North
+--
+-- Test case 5: View as AccessRightAdmin
+--   → access_rights: tất cả regions
+--   → hourly_summary: không có dữ liệu (FALSE filter)
+--
+-- Test case 6: View as Admin
+--   → Tất cả bảng, tất cả region
