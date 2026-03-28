@@ -20,3 +20,15 @@ ml/model_output/evaluation_charts/
 # OS
 Thumbs.db
 .DS_Store
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/*.tfplan
+terraform/tfplan
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars
+
+# Drift reports (regenerated)
+ml/model_output/drift_report.json

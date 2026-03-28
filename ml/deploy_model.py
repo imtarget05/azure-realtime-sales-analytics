@@ -1,6 +1,10 @@
 """
 Script triển khai mô hình lên Azure Machine Learning
 dưới dạng Real-time Endpoint (Online Endpoint).
+
+NOTE: Phiên bản MLOps mới sử dụng mlops/deploy_to_endpoint.py
+với tích hợp Model Registry đầy đủ. Script này giữ lại cho
+backward compatibility và local development.
 """
 
 import os
@@ -39,13 +43,23 @@ def deploy_model(model_dir: str, endpoint_name: str = "sales-forecast-endpoint")
     )
     print(f"[INFO] Đã kết nối Azure ML Workspace: {AML_WORKSPACE_NAME}")
 
-    # 1. Đăng ký mô hình
-    print("[INFO] Đăng ký mô hình...")
+    # 1. Đăng ký mô hình vào Model Registry
+    print("[INFO] Đăng ký mô hình vào Model Registry...")
+    metadata_path = os.path.join(model_dir, "model_metadata.json")
+    model_tags = {"source": "local_deploy"}
+    if os.path.exists(metadata_path):
+        with open(metadata_path) as f:
+            metadata = json.load(f)
+        metrics = metadata.get("revenue_metrics", {})
+        for k, v in metrics.items():
+            model_tags[f"metric_{k}"] = str(v)
+
     model = Model(
         path=model_dir,
         name="sales-forecast-model",
         description="Mô hình dự đoán doanh thu và số lượng bán hàng",
         type="custom_model",
+        tags=model_tags,
     )
     registered_model = ml_client.models.create_or_update(model)
     print(f"  Model: {registered_model.name} v{registered_model.version}")

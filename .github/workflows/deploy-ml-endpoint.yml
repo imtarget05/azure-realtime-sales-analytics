@@ -1,37 +1,45 @@
-name: Deploy ML Endpoint
+##############################################################################
+# CD — Deploy ML Endpoint (standalone)
+#
+# Use this for quick model-only deploys without full pipeline.
+# For full MLOps (train → register → deploy), use cd-mlops workflow.
+##############################################################################
+
+name: "CD: ML Endpoint (Quick Deploy)"
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'ml/**'
   workflow_dispatch:
+    inputs:
+      model_version:
+        description: "Model version to deploy (blank = latest)"
+        required: false
+        default: ""
+        type: string
 
 env:
-  PYTHON_VERSION: '3.10'
-  AML_WORKSPACE: aml-sales-forecast
-  RESOURCE_GROUP: rg-sales-analytics
+  PYTHON_VERSION: "3.10"
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  train-and-deploy:
+  deploy:
+    name: Deploy Model
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install azure-ai-ml azure-identity scikit-learn lightgbm xgboost pandas numpy joblib python-dotenv
+          pip install -r requirements.txt
+          pip install azure-ai-ml azure-identity
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -40,12 +48,16 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Register model & deploy endpoint
+      - name: Deploy model
         env:
           AML_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          AML_RESOURCE_GROUP: ${{ env.RESOURCE_GROUP }}
-          AML_WORKSPACE_NAME: ${{ env.AML_WORKSPACE }}
+          AML_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          AML_WORKSPACE_NAME: ${{ secrets.AML_WORKSPACE_NAME }}
         run: |
-          python ml/deploy_model.py \
-            --model-dir ./ml/model_output \
-            --endpoint-name sales-forecast-endpoint
+          ARGS="--cleanup"
+          if [ -n "${{ inputs.model_version }}" ]; then
+            ARGS="$ARGS --version ${{ inputs.model_version }}"
+          else
+            ARGS="$ARGS --use-latest"
+          fi
+          python mlops/deploy_to_endpoint.py $ARGS

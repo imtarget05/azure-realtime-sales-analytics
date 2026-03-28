@@ -159,6 +159,25 @@ REGIONS = ["North", "South", "East", "West", "Central"]
 PAYMENT_METHODS = ["Credit Card", "Debit Card", "PayPal", "Bank Transfer", "Cash"]
 CUSTOMER_SEGMENTS = ["Regular", "Premium", "VIP", "New"]
 
+# ─────────────────────────────────────────────
+# MLOps — Training Pipeline & Drift Detection
+# ─────────────────────────────────────────────
+ML_TRAINING_COMPUTE = os.getenv("ML_TRAINING_COMPUTE", "training-cluster")
+ML_ENDPOINT_NAME = os.getenv("ML_ENDPOINT_NAME", "sales-forecast-endpoint")
+ML_MODEL_NAME = os.getenv("ML_MODEL_NAME", "sales-forecast-model")
+ML_EXPERIMENT_NAME = os.getenv("ML_EXPERIMENT_NAME", "sales-forecast-training")
+
+# Drift detection thresholds
+DRIFT_KS_PVALUE_MIN = _get_float("DRIFT_KS_PVALUE_MIN", 0.01)
+DRIFT_PSI_MAX = _get_float("DRIFT_PSI_MAX", 0.2)
+DRIFT_R2_DEGRADATION_MAX = _get_float("DRIFT_R2_DEGRADATION_MAX", 0.15)
+DRIFT_MAE_INCREASE_MAX = _get_float("DRIFT_MAE_INCREASE_MAX", 0.20)
+DRIFT_CHECK_DAYS = _get_int("DRIFT_CHECK_DAYS", 7)
+
+# Auto-retrain
+AUTO_RETRAIN_ENABLED = _get_bool("AUTO_RETRAIN_ENABLED", True)
+RETRAIN_MIN_SAMPLES = _get_int("RETRAIN_MIN_SAMPLES", 50000)
+
 
 def _is_missing(value: str) -> bool:
     return (not value) or value.startswith("<")

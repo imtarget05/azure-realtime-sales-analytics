@@ -1,0 +1,7 @@
+# Environment-specific values — Copy to terraform.tfvars and fill in
+environment           = "dev"
+location              = "eastus"
+sql_admin_username    = ""
+sql_admin_password    = ""
+ml_training_vm_size   = "Standard_DS3_v2"
+ml_endpoint_instance_type = "Standard_DS2_v2"
