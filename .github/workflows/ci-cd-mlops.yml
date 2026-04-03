@@ -135,7 +135,7 @@ jobs:
           terraform plan -out=tfplan \
             -var="sql_admin_username=${{ secrets.SQL_ADMIN_USERNAME }}" \
             -var="sql_admin_password=${{ secrets.SQL_ADMIN_PASSWORD }}" \
-            -var="environment=prod"
+            -var="environment=dev"
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}

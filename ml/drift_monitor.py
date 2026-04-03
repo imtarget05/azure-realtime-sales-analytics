@@ -329,9 +329,9 @@ def main() -> None:
     parser.add_argument("--cooldown-minutes", type=int, default=int(os.getenv("DRIFT_MONITOR_COOLDOWN_MINUTES", "120")))
     parser.add_argument(
         "--trigger-mode",
-        choices=["local", "azureml", "both"],
+        choices=["local", "azureml", "both", "none"],
         default=os.getenv("DRIFT_TRIGGER_MODE", "local"),
-        help="local: retrain_and_compare --promote, azureml: mlops pipeline, both: run both",
+        help="local: retrain_and_compare --promote, azureml: mlops pipeline, both: run both, none: measure only",
     )
     parser.add_argument(
         "--trigger-github-actions",

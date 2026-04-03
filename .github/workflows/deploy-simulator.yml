@@ -91,6 +91,7 @@ jobs:
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
             --name sales-simulator \
             --image python:3.10-slim \
+            --os-type Linux \
             --cpu 1 --memory 1 \
             --restart-policy Always \
             --gitrepo-url https://github.com/${{ github.repository }}.git \

@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_NAME: func-sales-validation
+  AZURE_FUNCTIONAPP_NAME: func-sales-validation-d9bt2m
   AZURE_FUNCTIONAPP_PACKAGE_PATH: azure_functions
   PYTHON_VERSION: "3.10"
 
