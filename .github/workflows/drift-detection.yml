@@ -1,18 +1,31 @@
 ##############################################################################
-# Drift Detection — Scheduled Monitor + Auto-Retrain
+# Monitor: Drift Detection + MAE Continuous Training
 #
-# Schedule: Daily 2:00 AM UTC
-# Flow: Check drift → if detected → call MLOps pipeline with force_retrain
+# Consolidated from: drift-detection.yml + mae-continuous-training.yml
 #
-# Fix: ci-cd-mlops.yml now supports workflow_call with force_retrain input
+# Schedule: Every 6 hours (drift check) — adjustable via cron
+# Flow: Check drift/MAE → if detected → call MLOps pipeline for retrain
+#
+# Manual: workflow_dispatch with configurable thresholds
 ##############################################################################
 
 name: "Monitor: Drift Detection"
 
 on:
   schedule:
-    - cron: "0 2 * * *"
+    - cron: "0 */6 * * *"
   workflow_dispatch:
+    inputs:
+      mae_threshold:
+        description: "MAE threshold to trigger retrain"
+        required: false
+        default: "25"
+        type: string
+      window_hours:
+        description: "Hours of data to evaluate"
+        required: false
+        default: "24"
+        type: string
 
 permissions:
   id-token: write
@@ -22,6 +35,9 @@ env:
   PYTHON_VERSION: "3.10"
 
 jobs:
+  # ─────────────────────────────────────────────
+  # Job 1: Statistical drift detection (mlops/drift_detector.py)
+  # ─────────────────────────────────────────────
   drift-check:
     name: Check Data & Model Drift
     runs-on: ubuntu-latest
@@ -59,10 +75,68 @@ jobs:
           SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
           SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
 
+  # ─────────────────────────────────────────────
+  # Job 2: MAE-based monitoring (ml/drift_monitor.py)
+  # ─────────────────────────────────────────────
+  mae-check:
+    name: Check MAE Forecast Accuracy
+    runs-on: ubuntu-latest
+    outputs:
+      mae_exceeded: ${{ steps.mae.outputs.mae_exceeded }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run MAE Monitor
+        id: mae
+        run: |
+          python ml/drift_monitor.py \
+            --threshold-mae ${{ inputs.mae_threshold || vars.DRIFT_MAE_ABS_THRESHOLD || '25' }} \
+            --window-hours ${{ inputs.window_hours || vars.DRIFT_MONITOR_WINDOW_HOURS || '24' }} \
+            --min-samples ${{ vars.DRIFT_MONITOR_MIN_SAMPLES || '24' }} \
+            --trigger-mode none
+          # Parse output to set GitHub output
+          if [ -f ml/drift_results.json ]; then
+            exceeded=$(python -c "import json; d=json.load(open('ml/drift_results.json')); print('true' if d.get('drift_detected') else 'false')")
+            echo "mae_exceeded=$exceeded" >> "$GITHUB_OUTPUT"
+          else
+            echo "mae_exceeded=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          SQL_SERVER: ${{ secrets.SQL_SERVER }}
+          SQL_DATABASE: ${{ secrets.SQL_DATABASE }}
+          SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
+          SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+          KEY_VAULT_URI: ${{ secrets.KEY_VAULT_URI }}
+
+  # ─────────────────────────────────────────────
+  # Job 3: Auto-retrain if either check detected drift
+  # ─────────────────────────────────────────────
   auto-retrain:
     name: Auto-Retrain (Drift Detected)
-    needs: drift-check
-    if: needs.drift-check.outputs.drift_detected == 'true'
+    needs: [drift-check, mae-check]
+    if: |
+      always() &&
+      (
+        needs.drift-check.outputs.drift_detected == 'true' ||
+        needs.mae-check.outputs.mae_exceeded == 'true'
+      )
     uses: ./.github/workflows/ci-cd-mlops.yml
     with:
       force_retrain: true

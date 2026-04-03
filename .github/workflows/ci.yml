@@ -36,7 +36,21 @@ jobs:
         run: pip install flake8
 
       - name: Run flake8
-        run: flake8 . ${{ env.FLAKE8_ARGS }}
+        run: |
+          flake8 \
+            config/ \
+            data_generator/ \
+            monitoring/ \
+            security/ \
+            ml/ \
+            mlops/ \
+            tests/ \
+            azure_functions/ \
+            webapp/ \
+            stream_analytics/ \
+            benchmarks/ \
+            blob_storage/ \
+            ${{ env.FLAKE8_ARGS }}
 
   validate:
     name: Validate Imports
