@@ -1,0 +1,280 @@
+2026-04-02T10:22:06  Fetching changes.
+2026-04-02T10:22:06    Starting  LocalZipHandler
+2026-04-02T10:22:06    Cleaning up temp folders from previous zip deployments and extracting pushed zip file /tmp/zipdeploy/d0ab3b1f-bb46-47de-ba5b-9086ee093d09.zip (0.01 MB) to /tmp/zipdeploy/extracted
+2026-04-02T10:22:10  Updating submodules.
+2026-04-02T10:22:10  Preparing deployment for commit id '3ab6e68b-3'.
+2026-04-02T10:22:10  PreDeployment: context.CleanOutputPath False
+2026-04-02T10:22:10  PreDeployment: context.OutputPath /home/site/wwwroot
+2026-04-02T10:22:11  Repository path is /tmp/zipdeploy/extracted
+2026-04-02T10:22:11  Running oryx build...
+2026-04-02T10:22:11    Command: oryx build /tmp/zipdeploy/extracted -o /home/site/wwwroot --platform python --platform-version 3.11 -p virtualenv_name=antenv --log-file /tmp/build-debug.log  -i /tmp/8de90a1b33b7008 --compress-destination-dir | tee /tmp/oryx-build.log
+2026-04-02T10:22:18    Operation performed by Microsoft Oryx, https://github.com/Microsoft/Oryx
+2026-04-02T10:22:19    You can report issues at https://github.com/Microsoft/Oryx/issues
+2026-04-02T10:22:19    
+2026-04-02T10:22:19    Oryx Version: 0.2.20260204.1+0fdbe200b286be083841ff7fa201c6c2316dc6b9, Commit: 0fdbe200b286be083841ff7fa201c6c2316dc6b9, ReleaseTagName: 20260204.1
+2026-04-02T10:22:19    
+2026-04-02T10:22:19    Build Operation ID: f7a35b95c06947fa
+2026-04-02T10:22:19    Repository Commit : 3ab6e68b-3372-4195-aa8c-351fd00497c3
+2026-04-02T10:22:19    OS Type           : bullseye
+2026-04-02T10:22:19    Image Type        : githubactions
+2026-04-02T10:22:20    
+2026-04-02T10:22:20    Primary SDK Storage URL: https://oryx-cdn.microsoft.io
+2026-04-02T10:22:20    Backup SDK Storage URL: 
+2026-04-02T10:22:20    Detecting platforms...
+2026-04-02T10:22:20    External SDK provider is enabled.
+2026-04-02T10:22:21    Requesting metadata for platform python from external SDK provider
+2026-04-02T10:22:24    Requesting metadata for platform python from external SDK provider
+2026-04-02T10:22:26    Detected following platforms:
+2026-04-02T10:22:26      python: 3.11.15
+2026-04-02T10:22:26    Requesting metadata for platform python from external SDK provider
+2026-04-02T10:22:30    Version '3.11.15' of platform 'python' is not installed. Generating script to install it...
+2026-04-02T10:22:30    
+2026-04-02T10:22:30    Using intermediate directory '/tmp/8de90a1b33b7008'.
+2026-04-02T10:22:30    
+2026-04-02T10:22:30    Copying files to the intermediate directory...
+2026-04-02T10:22:31    Copying files to intermediate directory done in 0 sec(s).
+2026-04-02T10:22:31    
+2026-04-02T10:22:31    Source directory     : /tmp/8de90a1b33b7008
+2026-04-02T10:22:31    Destination directory: /home/site/wwwroot
+2026-04-02T10:22:31    
+2026-04-02T10:22:31    Installing platform...
+2026-04-02T10:22:31    
+2026-04-02T10:22:31    Downloading and extracting 'python' version '3.11.15' to '/tmp/oryx/platforms/python/3.11.15'...
+2026-04-02T10:22:31    Detected image debian flavor: bullseye.
+2026-04-02T10:22:31    Skipping download of python version 3.11.15 as it is available in external sdk provider cache...
+2026-04-02T10:22:31    Extracting contents...
+2026-04-02T10:22:50    Successfully extracted python version 3.11.15 from external sdk provider cache...
+2026-04-02T10:22:50    
+2026-04-02T10:22:50    image detector file exists, platform is python..
+2026-04-02T10:22:50    OS detector file exists, OS is bullseye..
+2026-04-02T10:22:50    Platform installation done in 20 sec(s).
+2026-04-02T10:22:50    Running build script snippets...
+2026-04-02T10:22:50    Python Version: /tmp/oryx/platforms/python/3.11.15/bin/python3.11
+2026-04-02T10:22:50    Creating directory for command manifest file if it does not exist
+2026-04-02T10:22:51    Removing existing manifest file
+2026-04-02T10:22:51    Python Virtual Environment: antenv
+2026-04-02T10:22:51    Creating virtual environment...
+2026-04-02T10:22:51    Executing: /tmp/oryx/platforms/python/3.11.15/bin/python3.11 -m venv antenv --copies --system-site-packages
+2026-04-02T10:23:09    Activating virtual environment...
+2026-04-02T10:23:09    Fast build is enabled
+2026-04-02T10:23:09    Installing uv...
+2026-04-02T10:23:13    Collecting uv
+2026-04-02T10:23:13      Using cached uv-0.11.3-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (11 kB)
+2026-04-02T10:23:13    Using cached uv-0.11.3-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (24.6 MB)
+2026-04-02T10:23:14    Installing collected packages: uv
+2026-04-02T10:23:16    Successfully installed uv-0.11.3
+2026-04-02T10:23:16    
+2026-04-02T10:23:16    [notice] A new release of pip is available: 24.0 -> 26.0.1
+2026-04-02T10:23:16    [notice] To update, run: pip install --upgrade pip
+2026-04-02T10:23:17    Running uv pip install...
+2026-04-02T10:31:18    Using Python 3.11.15 environment at: antenv
+2026-04-02T10:31:18    Resolved 138 packages in 2.34s
+2026-04-02T10:31:18    Downloading azure-ai-ml (12.6MiB)
+2026-04-02T10:31:18    Downloading xgboost (125.6MiB)
+2026-04-02T10:31:18    Downloading plotly (9.5MiB)
+2026-04-02T10:31:18    Downloading scikit-learn (8.7MiB)
+2026-04-02T10:31:18    Downloading pillow (6.8MiB)
+2026-04-02T10:31:18    Downloading cryptography (4.3MiB)
+2026-04-02T10:31:18    Downloading azure-mgmt-containerregistry (1.6MiB)
+2026-04-02T10:31:18    Downloading scipy (33.7MiB)
+2026-04-02T10:31:18    Downloading azure-mgmt-resource (3.4MiB)
+2026-04-02T10:31:18    Downloading nvidia-nccl-cu12 (280.0MiB)
+2026-04-02T10:31:18    Downloading fonttools (4.8MiB)
+2026-04-02T10:31:18    Downloading lightgbm (3.4MiB)
+2026-04-02T10:31:18    Downloading pynacl (1.4MiB)
+2026-04-02T10:31:18    Downloading pandas (10.7MiB)
+2026-04-02T10:31:18    Downloading pygments (1.2MiB)
+2026-04-02T10:31:18    Downloading kiwisolver (1.4MiB)
+2026-04-02T10:31:18    Downloading matplotlib (8.3MiB)
+2026-04-02T10:31:19    Downloading azure-mgmt-authorization (1.0MiB)
+2026-04-02T10:31:19    Downloading azureml-core (3.2MiB)
+2026-04-02T10:31:19    Downloading numpy (16.1MiB)
+2026-04-02T10:31:19     Downloaded pynacl
+2026-04-02T10:31:19     Downloaded pygments
+2026-04-02T10:31:19     Downloaded kiwisolver
+2026-04-02T10:31:19     Downloaded azure-mgmt-containerregistry
+2026-04-02T10:31:19     Downloaded azure-mgmt-authorization
+2026-04-02T10:31:19     Downloaded lightgbm
+2026-04-02T10:31:19     Downloaded cryptography
+2026-04-02T10:31:19     Downloaded fonttools
+2026-04-02T10:31:19     Downloaded azureml-core
+2026-04-02T10:31:19     Downloaded azure-mgmt-resource
+2026-04-02T10:31:19     Downloaded pillow
+2026-04-02T10:31:19     Downloaded matplotlib
+2026-04-02T10:31:20     Downloaded scikit-learn
+2026-04-02T10:31:20     Downloaded plotly
+2026-04-02T10:31:20     Downloaded numpy
+2026-04-02T10:31:20     Downloaded pandas
+2026-04-02T10:31:20     Downloaded azure-ai-ml
+2026-04-02T10:31:20     Downloaded scipy
+2026-04-02T10:31:20     Downloaded xgboost
+2026-04-02T10:31:20     Downloaded nvidia-nccl-cu12
+2026-04-02T10:31:20    Prepared 138 packages in 51.85s
+2026-04-02T10:31:20    Installed 138 packages in 3.19s
+2026-04-02T10:31:20    Bytecode compiled 16717 files in 7m 01s
+2026-04-02T10:31:20     + adal==1.2.7
+2026-04-02T10:31:20     + argcomplete==3.6.3
+2026-04-02T10:31:20     + asgiref==3.11.1
+2026-04-02T10:31:20     + attrs==26.1.0
+2026-04-02T10:31:20     + azure-ai-ml==1.32.0
+2026-04-02T10:31:20     + azure-common==1.1.28
+2026-04-02T10:31:20     + azure-core==1.39.0
+2026-04-02T10:31:21     + azure-core-tracing-opentelemetry==1.0.0b12
+2026-04-02T10:31:21     + azure-eventhub==5.15.1
+2026-04-02T10:31:21     + azure-graphrbac==0.61.2
+2026-04-02T10:31:21     + azure-identity==1.25.3
+2026-04-02T10:31:21     + azure-keyvault-secrets==4.10.0
+2026-04-02T10:31:21     + azure-mgmt-authorization==4.0.0
+2026-04-02T10:31:21     + azure-mgmt-containerregistry==14.0.0
+2026-04-02T10:31:21     + azure-mgmt-core==1.6.0
+2026-04-02T10:31:21     + azure-mgmt-datafactory==9.3.0
+2026-04-02T10:31:21     + azure-mgmt-keyvault==11.0.0
+2026-04-02T10:31:21     + azure-mgmt-network==30.0.0
+2026-04-02T10:31:21     + azure-mgmt-resource==24.0.0
+2026-04-02T10:31:21     + azure-mgmt-storage==24.0.0
+2026-04-02T10:31:21     + azure-monitor-opentelemetry==1.8.7
+2026-04-02T10:31:21     + azure-monitor-opentelemetry-exporter==1.0.0b49
+2026-04-02T10:31:21     + azure-storage-blob==12.28.0
+2026-04-02T10:31:21     + azure-storage-file-datalake==12.23.0
+2026-04-02T10:31:21     + azure-storage-file-share==12.24.0
+2026-04-02T10:31:22     + azureml-core==1.61.0.post3
+2026-04-02T10:31:22     + backports-tempfile==1.0
+2026-04-02T10:31:22     + backports-weakref==1.0.post1
+2026-04-02T10:31:22     + bcrypt==5.0.0
+2026-04-02T10:31:22     + blinker==1.9.0
+2026-04-02T10:31:22     + certifi==2026.2.25
+2026-04-02T10:31:22     + cffi==2.0.0
+2026-04-02T10:31:22     + charset-normalizer==3.4.7
+2026-04-02T10:31:22     + click==8.3.1
+2026-04-02T10:31:22     + colorama==0.4.6
+2026-04-02T10:31:22     + contextlib2==21.6.0
+2026-04-02T10:31:22     + contourpy==1.3.3
+2026-04-02T10:31:22     + cryptography==46.0.6
+2026-04-02T10:31:22     + cycler==0.12.1
+2026-04-02T10:31:22     + databricks-sdk==0.102.0
+2026-04-02T10:31:22     + docker==7.1.0
+2026-04-02T10:31:22     + flask==3.1.3
+2026-04-02T10:31:22     + fonttools==4.62.1
+2026-04-02T10:31:22     + google-api-core==2.30.1
+2026-04-02T10:31:22     + google-auth==2.49.1
+2026-04-02T10:31:22     + googleapis-common-protos==1.73.1
+2026-04-02T10:31:22     + humanfriendly==10.0
+2026-04-02T10:31:22     + idna==3.11
+2026-04-02T10:31:22     + importlib-metadata==8.7.1
+2026-04-02T10:31:22     + isodate==0.7.2
+2026-04-02T10:31:22     + itsdangerous==2.2.0
+2026-04-02T10:31:22     + jeepney==0.9.0
+2026-04-02T10:31:22     + jinja2==3.1.6
+2026-04-02T10:31:23     + jmespath==1.1.0
+2026-04-02T10:31:23     + joblib==1.5.3
+2026-04-02T10:31:23     + jsonpickle==4.1.1
+2026-04-02T10:31:23     + jsonschema==4.26.0
+2026-04-02T10:31:23     + jsonschema-specifications==2025.9.1
+2026-04-02T10:31:23     + kiwisolver==1.5.0
+2026-04-02T10:31:23     + knack==0.12.0
+2026-04-02T10:31:23     + lightgbm==4.6.0
+2026-04-02T10:31:23     + markupsafe==3.0.3
+2026-04-02T10:31:23     + marshmallow==3.26.2
+2026-04-02T10:31:23     + matplotlib==3.10.8
+2026-04-02T10:31:23     + msal==1.35.1
+2026-04-02T10:31:23     + msal-extensions==1.3.1
+2026-04-02T10:31:23     + msrest==0.7.1
+2026-04-02T10:31:23     + msrestazure==0.6.4.post1
+2026-04-02T10:31:23     + narwhals==2.18.1
+2026-04-02T10:31:23     + ndg-httpsclient==0.5.1
+2026-04-02T10:31:23     + numpy==2.4.4
+2026-04-02T10:31:23     + nvidia-nccl-cu12==2.29.7
+2026-04-02T10:31:23     + oauthlib==3.3.1
+2026-04-02T10:31:23     + opencensus==0.11.4
+2026-04-02T10:31:24     + opencensus-context==0.1.3
+2026-04-02T10:31:24     + opencensus-ext-azure==1.1.15
+2026-04-02T10:31:24     + opencensus-ext-logging==0.1.1
+2026-04-02T10:31:24     + opentelemetry-api==1.40.0
+2026-04-02T10:31:24     + opentelemetry-instrumentation==0.61b0
+2026-04-02T10:31:24     + opentelemetry-instrumentation-asgi==0.61b0
+2026-04-02T10:31:24     + opentelemetry-instrumentation-dbapi==0.61b0
+2026-04-02T10:31:24     + opentelemetry-instrumentation-django==0.61b0
+2026-04-02T10:31:24     + opentelemetry-instrumentation-fastapi==0.61b0
+2026-04-02T10:31:24     + opentelemetry-instrumentation-flask==0.61b0
+2026-04-02T10:31:24     + opentelemetry-instrumentation-logging==0.61b0
+2026-04-02T10:31:24     + opentelemetry-instrumentation-psycopg2==0.61b0
+2026-04-02T10:31:24     + opentelemetry-instrumentation-requests==0.61b0
+2026-04-02T10:31:24     + opentelemetry-instrumentation-urllib==0.61b0
+2026-04-02T10:31:24     + opentelemetry-instrumentation-urllib3==0.61b0
+2026-04-02T10:31:24     + opentelemetry-instrumentation-wsgi==0.61b0
+2026-04-02T10:31:24     + opentelemetry-resource-detector-azure==0.1.5
+2026-04-02T10:31:24     + opentelemetry-sdk==1.40.0
+2026-04-02T10:31:24     + opentelemetry-semantic-conventions==0.61b0
+2026-04-02T10:31:24     + opentelemetry-util-http==0.61b0
+2026-04-02T10:31:24     + packaging==25.0
+2026-04-02T10:31:24     + pandas==3.0.2
+2026-04-02T10:31:25     + paramiko==3.5.1
+2026-04-02T10:31:25     + pathspec==0.12.1
+2026-04-02T10:31:25     + pillow==12.2.0
+2026-04-02T10:31:25     + pkginfo==1.12.1.2
+2026-04-02T10:31:25     + plotly==6.6.0
+2026-04-02T10:31:25     + proto-plus==1.27.2
+2026-04-02T10:31:25     + protobuf==6.33.6
+2026-04-02T10:31:25     + psutil==7.2.2
+2026-04-02T10:31:25     + pyasn1==0.6.3
+2026-04-02T10:31:25     + pyasn1-modules==0.4.2
+2026-04-02T10:31:25     + pycparser==3.0
+2026-04-02T10:31:25     + pydash==8.0.6
+2026-04-02T10:31:25     + pygments==2.20.0
+2026-04-02T10:31:25     + pyjwt==2.12.1
+2026-04-02T10:31:25     + pynacl==1.6.2
+2026-04-02T10:31:25     + pyodbc==5.3.0
+2026-04-02T10:31:25     + pyopenssl==25.3.0
+2026-04-02T10:31:25     + pyparsing==3.3.2
+2026-04-02T10:31:25     + pysocks==1.7.1
+2026-04-02T10:31:25     + python-dateutil==2.9.0.post0
+2026-04-02T10:31:25     + python-dotenv==1.2.2
+2026-04-02T10:31:26     + python-json-logger==4.1.0
+2026-04-02T10:31:26     + pytz==2026.1.post1
+2026-04-02T10:31:26     + pyyaml==6.0.3
+2026-04-02T10:31:26     + referencing==0.37.0
+2026-04-02T10:31:26     + requests==2.33.1
+2026-04-02T10:31:26     + requests-oauthlib==2.0.0
+2026-04-02T10:31:26     + rpds-py==0.30.0
+2026-04-02T10:31:26     + scikit-learn==1.8.0
+2026-04-02T10:31:26     + scipy==1.17.1
+2026-04-02T10:31:26     + secretstorage==3.5.0
+2026-04-02T10:31:26     + six==1.17.0
+2026-04-02T10:31:26     + strictyaml==1.7.3
+2026-04-02T10:31:26     + tabulate==0.10.0
+2026-04-02T10:31:26     + threadpoolctl==3.6.0
+2026-04-02T10:31:26     + tqdm==4.67.3
+2026-04-02T10:31:26     + typing-extensions==4.15.0
+2026-04-02T10:31:26     + urllib3==2.6.3
+2026-04-02T10:31:26     + werkzeug==3.1.7
+2026-04-02T10:31:26     + wrapt==1.17.3
+2026-04-02T10:31:26     + xgboost==3.2.0
+2026-04-02T10:31:26     + zipp==3.23.0
+2026-04-02T10:31:27    uv pip install done in 488 sec(s).
+2026-04-02T10:31:27    Not a vso image, so not writing build commands
+2026-04-02T10:31:27    Build script snippets done in 508 sec(s).
+2026-04-02T10:31:27    Preparing output...
+2026-04-02T10:31:27    Compressing source directory directly to destination (optimized path)...
+2026-04-02T10:31:27    Using zstd for compression
+2026-04-02T10:35:11    Copied the compressed output to '/home/site/wwwroot'
+2026-04-02T10:35:11    Direct compression with zstd done in 233 sec(s).
+2026-04-02T10:35:11    
+2026-04-02T10:35:12    Removing existing manifest file
+2026-04-02T10:35:12    Creating a manifest file...
+2026-04-02T10:35:12    Manifest file created.
+2026-04-02T10:35:12    Copying .ostype to manifest output directory.
+2026-04-02T10:35:12    
+2026-04-02T10:35:12    Total execution done in 762 sec(s).
+2026-04-02T10:35:16  Running post deployment command(s)...
+2026-04-02T10:35:16  
+2026-04-02T10:35:16  Generating summary of Oryx build
+2026-04-02T10:35:17  Parsing the build logs
+2026-04-02T10:35:17  Found 0 issue(s)
+2026-04-02T10:35:17  
+2026-04-02T10:35:17  Build Summary :
+2026-04-02T10:35:18  ===============
+2026-04-02T10:35:18  Errors (0)
+2026-04-02T10:35:18  Warnings (0)
+2026-04-02T10:35:18  
+2026-04-02T10:35:18  Triggering container recycle for OneDeploy by adding/updating restartTrigger.txt to the site root path
+2026-04-02T10:35:19  Deployment successful. deployer = OneDeploy deploymentPath = OneDeploy

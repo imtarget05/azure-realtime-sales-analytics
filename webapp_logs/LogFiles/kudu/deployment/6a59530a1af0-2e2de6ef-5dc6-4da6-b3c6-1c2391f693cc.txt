@@ -1,0 +1,10 @@
+2026-04-02T10:21:01  Fetching changes.
+2026-04-02T10:21:01    Starting  LocalZipHandler
+2026-04-02T10:21:01    Cleaning up temp folders from previous zip deployments and extracting pushed zip file /tmp/zipdeploy/298595a7-7059-443c-8029-504687e9cd00.zip (0.01 MB) to /tmp/zipdeploy/extracted
+2026-04-02T10:21:08  Updating submodules.
+2026-04-02T10:21:08  Preparing deployment for commit id '261977e3-3'.
+2026-04-02T10:21:10  PreDeployment: context.CleanOutputPath False
+2026-04-02T10:21:11  PreDeployment: context.OutputPath /home/site/wwwroot
+2026-04-02T10:21:11  Repository path is /tmp/zipdeploy/extracted
+2026-04-02T10:21:12  Running oryx build...
+2026-04-02T10:21:12    Command: oryx build /tmp/zipdeploy/extracted -o /home/site/wwwroot --platform python --platform-version 3.11 -p virtualenv_name=antenv --log-file /tmp/build-debug.log  -i /tmp/8de90a18ed6eda0 --compress-destination-dir | tee /tmp/oryx-build.log

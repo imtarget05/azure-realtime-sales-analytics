@@ -23,13 +23,22 @@ from typing import Any
 
 import azure.functions as func
 
+# Import từ config (single source of truth) thay vì hardcode
+try:
+    import sys as _sys
+    _sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+    from config.settings import VALID_PRODUCT_IDS as _CFG_PRODUCTS, STORE_IDS as _CFG_STORES
+except ImportError:
+    _CFG_PRODUCTS = None
+    _CFG_STORES = None
+
 # ──────────────────────────────────────────────
-# Constants
+# Constants — derive từ config, fallback sang hardcode
 # ──────────────────────────────────────────────
 REQUIRED_FIELDS = {"timestamp", "store_id", "product_id", "quantity", "price"}
 
-VALID_STORES = {"S01", "S02", "S03"}
-VALID_PRODUCTS = {"COKE", "PEPSI", "BREAD", "MILK"}
+VALID_STORES = set(_CFG_STORES) if _CFG_STORES else {"S01", "S02", "S03"}
+VALID_PRODUCTS = _CFG_PRODUCTS if _CFG_PRODUCTS else {"COKE", "PEPSI", "BREAD", "MILK"}
 
 QUANTITY_MIN, QUANTITY_MAX = 1, 100
 PRICE_MIN, PRICE_MAX = 0.01, 10000.0

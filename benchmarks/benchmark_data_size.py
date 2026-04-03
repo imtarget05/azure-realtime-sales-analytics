@@ -11,7 +11,6 @@ import json
 import os
 import sys
 import time
-import uuid
 import random
 import statistics
 from datetime import datetime, timedelta
@@ -19,7 +18,7 @@ from datetime import datetime, timedelta
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from config.settings import (
     SQL_SERVER, SQL_DATABASE, SQL_USERNAME, SQL_PASSWORD, SQL_DRIVER,
-    PRODUCTS, REGIONS, PAYMENT_METHODS, CUSTOMER_SEGMENTS,
+    PRODUCTS, STORE_IDS,
 )
 
 try:
@@ -43,13 +42,10 @@ def generate_large_dataset(output_path: str, target_size_gb: float = 4.5, batch_
     """
     target_bytes = int(target_size_gb * 1024 * 1024 * 1024)
     header = [
-        "transaction_id", "timestamp", "date", "hour", "day_of_week",
-        "product_id", "product_name", "category", "quantity", "unit_price",
-        "total_amount", "discount_percent", "discount_amount", "final_amount",
-        "customer_id", "customer_segment", "region", "payment_method", "is_online", "rating"
+        "event_time", "store_id", "product_id", "units_sold", "unit_price",
+        "revenue", "temperature", "weather", "holiday", "category"
     ]
-    days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-    customer_ids = [f"C{str(i).zfill(5)}" for i in range(1, 5001)]
+    weather_choices = ["sunny", "rainy", "cloudy", "stormy"]
 
     print(f"[INFO] Sinh dữ liệu CSV mục tiêu {target_size_gb} GB...")
     print(f"[INFO] File: {output_path}")
@@ -66,33 +62,20 @@ def generate_large_dataset(output_path: str, target_size_gb: float = 4.5, batch_
             product = random.choice(PRODUCTS)
             quantity = random.randint(1, 10)
             unit_price = round(product["base_price"] * random.uniform(0.85, 1.15), 2)
-            total_amount = round(unit_price * quantity, 2)
-            discount_pct = random.choice([0, 0, 0, 5, 10, 15, 20, 25])
-            discount_amount = round(total_amount * discount_pct / 100, 2)
-            final_amount = round(total_amount - discount_amount, 2)
+            revenue = round(unit_price * quantity, 2)
             dt = start_date + timedelta(seconds=random.randint(0, 60_000_000))
 
             writer.writerow([
-                str(uuid.uuid4()),
                 dt.isoformat(),
-                dt.strftime("%Y-%m-%d"),
-                dt.hour,
-                days_of_week[dt.weekday()],
+                random.choice(STORE_IDS),
                 product["id"],
-                product["name"],
-                product["category"],
                 quantity,
                 unit_price,
-                total_amount,
-                discount_pct,
-                discount_amount,
-                final_amount,
-                random.choice(customer_ids),
-                random.choice(CUSTOMER_SEGMENTS),
-                random.choice(REGIONS),
-                random.choice(PAYMENT_METHODS),
-                random.choice([True, False]),
-                random.randint(1, 5) if random.random() > 0.3 else "",
+                revenue,
+                round(random.uniform(15, 40), 1),
+                random.choice(weather_choices),
+                random.choice([0, 0, 0, 1]),
+                product["category"],
             ])
             row_count += 1
 
@@ -136,11 +119,11 @@ def benchmark_local_processing(csv_path: str) -> dict:
         reader = csv.DictReader(f)
         for row in reader:
             row_count += 1
-            amount = float(row["final_amount"])
+            amount = float(row["revenue"])
             total_revenue += amount
 
-            region = row["region"]
-            region_revenue[region] = region_revenue.get(region, 0) + amount
+            store = row["store_id"]
+            region_revenue[store] = region_revenue.get(store, 0) + amount
 
             category = row["category"]
             category_count[category] = category_count.get(category, 0) + 1
@@ -165,7 +148,7 @@ def benchmark_local_processing(csv_path: str) -> dict:
     results["local_compute_time_sec"] = round(t_compute, 4)
 
     print(f"  Tính toán: {t_compute:.4f}s")
-    print(f"  Top region: {sorted_regions[0] if sorted_regions else 'N/A'}")
+    print(f"  Top store: {sorted_regions[0] if sorted_regions else 'N/A'}")
     print(f"  Doanh thu TB: ${avg_revenue:.2f}")
 
     results["local_total_time_sec"] = round(t_read + t_compute, 2)
@@ -210,11 +193,9 @@ def benchmark_cloud_processing(csv_path: str, max_insert_rows: int = 100_000) ->
     # 3a. Insert dữ liệu
     insert_sql = """
         INSERT INTO SalesTransactions
-            (transaction_id, event_timestamp, sale_date, sale_hour, day_of_week,
-             product_id, product_name, category, quantity, unit_price,
-             total_amount, discount_percent, discount_amount, final_amount,
-             customer_id, customer_segment, region, payment_method, is_online, rating)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (event_time, store_id, product_id, units_sold, unit_price,
+             revenue, temperature, weather, holiday, category)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
 
     t0 = time.time()
@@ -225,17 +206,12 @@ def benchmark_cloud_processing(csv_path: str, max_insert_rows: int = 100_000) ->
         for row in reader:
             if inserted >= max_insert_rows:
                 break
-            rating = int(row["rating"]) if row["rating"] else None
             batch.append((
-                row["transaction_id"], row["timestamp"], row["date"],
-                int(row["hour"]), row["day_of_week"],
-                row["product_id"], row["product_name"], row["category"],
-                int(row["quantity"]), float(row["unit_price"]),
-                float(row["total_amount"]), int(row["discount_percent"]),
-                float(row["discount_amount"]), float(row["final_amount"]),
-                row["customer_id"], row["customer_segment"],
-                row["region"], row["payment_method"],
-                1 if row["is_online"] == "True" else 0, rating,
+                row["event_time"], row["store_id"], row["product_id"],
+                int(row["units_sold"]), float(row["unit_price"]),
+                float(row["revenue"]), float(row["temperature"]),
+                row["weather"], int(row["holiday"]),
+                row["category"],
             ))
             if len(batch) >= 1000:
                 cursor.executemany(insert_sql, batch)
@@ -259,18 +235,18 @@ def benchmark_cloud_processing(csv_path: str, max_insert_rows: int = 100_000) ->
     # 3b. Query aggregation trên cloud
     queries = {
         "COUNT_ALL": "SELECT COUNT(*) FROM SalesTransactions",
-        "SUM_REVENUE": "SELECT SUM(final_amount) FROM SalesTransactions",
-        "GROUP_BY_REGION": """
-            SELECT region, SUM(final_amount) as revenue, COUNT(*) as cnt
-            FROM SalesTransactions GROUP BY region ORDER BY revenue DESC
+        "SUM_REVENUE": "SELECT SUM(revenue) FROM SalesTransactions",
+        "GROUP_BY_STORE": """
+            SELECT store_id, SUM(revenue) as total_revenue, COUNT(*) as cnt
+            FROM SalesTransactions GROUP BY store_id ORDER BY total_revenue DESC
         """,
         "GROUP_BY_CATEGORY": """
-            SELECT category, SUM(quantity) as qty, AVG(final_amount) as avg_amt
+            SELECT category, SUM(units_sold) as qty, AVG(revenue) as avg_rev
             FROM SalesTransactions GROUP BY category ORDER BY qty DESC
         """,
         "TOP_PRODUCTS": """
-            SELECT TOP 10 product_name, SUM(final_amount) as revenue
-            FROM SalesTransactions GROUP BY product_name ORDER BY revenue DESC
+            SELECT TOP 10 product_id, SUM(revenue) as total_revenue
+            FROM SalesTransactions GROUP BY product_id ORDER BY total_revenue DESC
         """,
     }
 

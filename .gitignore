@@ -1,6 +1,7 @@
 # Environment
 .env
 .venv/
+azure_functions/.python_packages/
 
 # Python
 __pycache__/
@@ -21,7 +22,7 @@ ml/model_output/evaluation_charts/
 Thumbs.db
 .DS_Store
 
-# Terraform
+# Terraform (all state files)
 terraform/.terraform/
 terraform/*.tfstate
 terraform/*.tfstate.backup
@@ -29,6 +30,10 @@ terraform/*.tfplan
 terraform/tfplan
 terraform/.terraform.lock.hcl
 terraform/terraform.tfvars
+terraform.tfstate
+terraform.tfstate.backup
 
 # Drift reports (regenerated)
 ml/model_output/drift_report.json
+ml/model_output/drift_monitor_report.json
+ml/model_output/drift_monitor_state.json

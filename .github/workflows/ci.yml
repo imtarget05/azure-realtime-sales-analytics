@@ -100,8 +100,7 @@ jobs:
       - name: Run tests
         run: |
           if [ -d "tests" ] && [ "$(find tests -name 'test_*.py' | head -1)" ]; then
-            pytest tests/ -v --tb=short --co -q 2>/dev/null && \
-            pytest tests/ -v --tb=short || true
+            pytest tests/ -v --tb=short
           else
             echo "No test files found — skipping"
           fi

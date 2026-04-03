@@ -1,9 +1,10 @@
-"""
-Script tạo Power BI Streaming Dataset và đẩy dữ liệu thời gian thực.
-Sử dụng Power BI REST API Push Dataset.
+﻿"""
+Push real-time data from Azure SQL to Power BI Streaming Dataset.
+Queries dbo.SalesTransactions (aligned with Stream Analytics output).
 """
 
 import json
+import os
 import sys
 import time
 import urllib.request
@@ -16,17 +17,12 @@ from config.settings import (
     SQL_SERVER, SQL_DATABASE, SQL_USERNAME, SQL_PASSWORD, SQL_DRIVER,
 )
 
-# ========================
-# CẤU HÌNH POWER BI
-# ========================
-# Lấy Push URL từ Power BI Service khi tạo Streaming Dataset
-POWERBI_PUSH_URL = "<Your-Power-BI-Push-URL>"
+POWERBI_PUSH_URL = os.getenv("POWERBI_PUSH_URL", "<Your-Power-BI-Push-URL>")
 
 
 def push_to_powerbi(data: list[dict]):
-    """Đẩy dữ liệu đến Power BI Streaming Dataset."""
     if POWERBI_PUSH_URL.startswith("<"):
-        print("[WARN] Chưa cấu hình Power BI Push URL. Bỏ qua.")
+        print("[WARN] POWERBI_PUSH_URL not configured. Skipping push.")
         return
 
     body = json.dumps(data).encode("utf-8")
@@ -36,13 +32,12 @@ def push_to_powerbi(data: list[dict]):
     try:
         response = urllib.request.urlopen(req)
         if response.status == 200:
-            print(f"[INFO] Đã đẩy {len(data)} dòng đến Power BI.")
+            print(f"[INFO] Pushed {len(data)} rows to Power BI.")
     except urllib.error.HTTPError as e:
         print(f"[ERROR] Power BI push failed: {e.code}")
 
 
 def get_realtime_summary_from_sql() -> list[dict]:
-    """Lấy dữ liệu tổng hợp mới nhất từ SQL Database."""
     conn_string = (
         f"Driver={SQL_DRIVER};"
         f"Server=tcp:{SQL_SERVER},1433;"
@@ -58,16 +53,16 @@ def get_realtime_summary_from_sql() -> list[dict]:
 
         query = """
         SELECT TOP 50
-            region,
+            store_id,
             category,
-            COUNT(*) AS transaction_count,
-            SUM(quantity) AS total_quantity,
-            SUM(final_amount) AS total_revenue,
-            AVG(final_amount) AS avg_order_value,
-            AVG(CAST(rating AS FLOAT)) AS avg_rating
-        FROM SalesTransactions
-        WHERE event_timestamp >= DATEADD(minute, -5, GETUTCDATE())
-        GROUP BY region, category
+            COUNT(*)         AS transaction_count,
+            SUM(units_sold)  AS total_quantity,
+            SUM(revenue)     AS total_revenue,
+            AVG(unit_price)  AS avg_unit_price,
+            AVG(temperature) AS avg_temperature
+        FROM dbo.SalesTransactions
+        WHERE event_time >= DATEADD(minute, -5, SYSUTCDATETIME())
+        GROUP BY store_id, category
         ORDER BY total_revenue DESC
         """
 
@@ -79,13 +74,13 @@ def get_realtime_summary_from_sql() -> list[dict]:
         for row in rows:
             results.append({
                 "timestamp": now,
-                "region": row[0],
+                "store_id": row[0],
                 "category": row[1],
                 "transaction_count": row[2],
-                "total_quantity": row[3],
-                "total_revenue": float(row[4]),
-                "avg_order_value": float(row[5]),
-                "avg_rating": float(row[6]) if row[6] else 0,
+                "total_quantity": int(row[3]),
+                "total_revenue": round(float(row[4]), 2),
+                "avg_unit_price": round(float(row[5]), 2),
+                "avg_temperature": round(float(row[6]), 1) if row[6] else None,
             })
 
         cursor.close()
@@ -98,10 +93,9 @@ def get_realtime_summary_from_sql() -> list[dict]:
 
 
 def main():
-    """Đẩy dữ liệu tổng hợp đến Power BI mỗi phút."""
     print("=" * 60)
     print("  POWER BI REAL-TIME DATA PUSH")
-    print("  Nhấn Ctrl+C để dừng")
+    print("  Press Ctrl+C to stop")
     print("=" * 60)
 
     while True:
@@ -109,13 +103,13 @@ def main():
             data = get_realtime_summary_from_sql()
             if data:
                 push_to_powerbi(data)
-                timestamp = datetime.now().strftime("%H:%M:%S")
-                print(f"[{timestamp}] Pushed {len(data)} rows to Power BI")
+                ts = datetime.now().strftime("%H:%M:%S")
+                print(f"[{ts}] Pushed {len(data)} rows")
             else:
-                print("[INFO] Không có dữ liệu mới.")
+                print("[INFO] No new data.")
             time.sleep(60)
         except KeyboardInterrupt:
-            print("\n[INFO] Đã dừng.")
+            print("\n[INFO] Stopped.")
             break
         except Exception as e:
             print(f"[ERROR] {e}")

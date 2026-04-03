@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 import os
 import sys
 import requests
-from azure.eventhub import EventData, EventHubProducerClient
+from azure.eventhub import EventData, EventHubProducerClient, TransportType
 
 # Thêm thư mục gốc vào path để import config
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -49,7 +49,16 @@ def random_quantity() -> int:
 def random_price(product: dict) -> float:
     min_price = product["min_price"]
     max_price = product["max_price"]
-    return round(random.uniform(min_price, max_price), 2)
+    price = random.uniform(min_price, max_price)
+
+    # Optional drift injection for demo: amplify price for selected products.
+    if settings.PRICE_SHOCK_ENABLED and settings.PRICE_SHOCK_MULTIPLIER > 0:
+        product_id = str(product.get("product_id", "")).upper()
+        selected = not settings.PRICE_SHOCK_PRODUCTS or product_id in settings.PRICE_SHOCK_PRODUCTS
+        if selected:
+            price = price * settings.PRICE_SHOCK_MULTIPLIER
+
+    return round(price, 2)
 
 
 def normalize_weather_condition(raw_weather: str) -> str:
@@ -388,8 +397,16 @@ def load_replay_events(file_path: str) -> list[dict]:
 
 def create_eventhub_producer() -> EventHubProducerClient:
     settings.validate_required_settings(mode="eventhub")
+    transport_name = (settings.EVENT_HUB_TRANSPORT or "AmqpOverWebsocket").strip().lower()
+    transport_type = (
+        TransportType.Amqp
+        if transport_name in {"amqp", "tcp", "amqptcp"}
+        else TransportType.AmqpOverWebsocket
+    )
     producer = EventHubProducerClient.from_connection_string(
-        conn_str=settings.EVENT_HUB_CONNECTION_STRING
+        conn_str=settings.EVENT_HUB_CONNECTION_STRING,
+        eventhub_name=settings.EVENT_HUB_NAME,
+        transport_type=transport_type,
     )
     return producer
 

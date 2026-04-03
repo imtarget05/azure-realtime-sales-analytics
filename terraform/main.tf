@@ -17,18 +17,21 @@ terraform {
     }
   }
 
-  backend "azurerm" {
-    resource_group_name  = "rg-terraform-state"
-    storage_account_name = "sttfsalesanalytics"
-    container_name       = "tfstate"
-    key                  = "sales-analytics.tfstate"
-  }
+  # Local backend cho môi trường dev/student
+  # Để dùng remote backend, tạo Storage Account rồi uncomment block dưới:
+  # backend "azurerm" {
+  #   resource_group_name  = "rg-terraform-state"
+  #   storage_account_name = "sttfsalesanalytics"
+  #   container_name       = "tfstate"
+  #   key                  = "sales-analytics.tfstate"
+  # }
 }
 
 provider "azurerm" {
   features {
     key_vault {
-      purge_soft_delete_on_destroy = false
+      purge_soft_delete_on_destroy    = true
+      recover_soft_deleted_key_vaults = true
     }
   }
 }
@@ -113,7 +116,7 @@ resource "azurerm_key_vault" "main" {
   resource_group_name        = azurerm_resource_group.main.name
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
-  purge_protection_enabled   = true
+  purge_protection_enabled   = false
   soft_delete_retention_days = 7
 
   access_policy {
@@ -212,7 +215,7 @@ resource "azurerm_stream_analytics_job" "main" {
   events_out_of_order_max_delay_in_seconds = 50
   events_out_of_order_policy               = "Adjust"
   output_error_policy                      = "Drop"
-  transformation_query                     = file("${path.module}/stream_query.sql")
+  transformation_query                     = file("${path.module}/../stream_analytics/stream_query.sql")
   tags                                     = local.tags
 }
 

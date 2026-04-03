@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Comparison Report</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #333; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #1a73e8; margin: 30px 0 10px; font-size: 1.8em; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 30px; margin-bottom: 20px; }
+        .card h2 { color: #1a73e8; margin-bottom: 20px; font-size: 1.2em; border-bottom: 2px solid #e8eaed; padding-bottom: 10px; }
+        .decision-banner { text-align: center; padding: 20px; border-radius: 12px; margin-bottom: 20px; font-size: 1.5em; font-weight: bold; }
+        .decision-promote { background: #e8f5e9; color: #2e7d32; border: 2px solid #4caf50; }
+        .decision-reject { background: #fce4ec; color: #c62828; border: 2px solid #f44336; }
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .metric-card { background: #f8f9fa; border-radius: 8px; padding: 20px; }
+        .metric-card h3 { font-size: 1em; color: #555; margin-bottom: 15px; }
+        .metric-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .metric-row:last-child { border-bottom: none; }
+        .metric-label { color: #666; }
+        .metric-value { font-weight: 600; }
+        .delta-positive { color: #2e7d32; }
+        .delta-negative { color: #c62828; }
+        .config-table { width: 100%; border-collapse: collapse; }
+        .config-table th, .config-table td { padding: 10px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        .config-table th { background: #f8f9fa; color: #555; font-weight: 600; }
+        .config-table .highlight { background: #e3f2fd; }
+        .chart-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .chart-item { text-align: center; }
+        .chart-item img { max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .chart-item .chart-title { font-weight: 600; color: #555; margin-bottom: 10px; }
+        .btn { display: inline-block; padding: 12px 30px; background: #1a73e8; color: #fff; border: none; border-radius: 8px; font-size: 1em; cursor: pointer; text-decoration: none; margin: 5px; }
+        .btn:hover { background: #1557b0; }
+        .btn-back { background: #5f6368; }
+        .btn-back:hover { background: #3c4043; }
+        .actions { text-align: center; margin: 30px 0; }
+        .no-report { text-align: center; padding: 60px 20px; color: #666; }
+        .no-report code { background: #f0f0f0; padding: 3px 8px; border-radius: 4px; font-size: 0.95em; }
+        .info-box { background: #e3f2fd; border-left: 4px solid #1a73e8; padding: 15px; border-radius: 0 8px 8px 0; margin: 15px 0; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Model Retrain Comparison Report</h1>
+        <p class="subtitle">Chứng minh mô hình mới cải thiện so với mô hình cũ</p>
+
+        {% if not report %}
+        <div class="card no-report">
+            <h2>Chưa có báo cáo so sánh</h2>
+            <p>Chạy lệnh sau để retrain và tạo báo cáo:</p>
+            <br>
+            <code>python ml/retrain_and_compare.py --new-samples 80000 --new-estimators 300</code>
+            <br><br>
+            <p>Hoặc với tự động promote:</p>
+            <code>python ml/retrain_and_compare.py --new-samples 80000 --new-estimators 300 --promote</code>
+        </div>
+        {% else %}
+
+        <!-- Decision Banner -->
+        <div class="decision-banner {{ 'decision-promote' if report.decision == 'PROMOTE' else 'decision-reject' }}">
+            {% if report.decision == 'PROMOTE' %}
+            ✅ PROMOTE — Mô hình mới ĐÃ CẢI THIỆN, đủ điều kiện thay thế
+            {% else %}
+            ❌ REJECT — Mô hình mới KHÔNG cải thiện, giữ nguyên mô hình cũ
+            {% endif %}
+        </div>
+
+        <!-- Config Comparison -->
+        <div class="card">
+            <h2>Cấu hình Huấn luyện</h2>
+            <table class="config-table">
+                <tr>
+                    <th>Tham số</th>
+                    <th>Old Model</th>
+                    <th>New Model</th>
+                </tr>
+                <tr>
+                    <td>Algorithm</td>
+                    <td>{{ report.old_config.get('algorithm', 'GradientBoosting') }}</td>
+                    <td class="highlight">{{ report.new_config.get('algorithm', 'GradientBoosting') }}</td>
+                </tr>
+                <tr>
+                    <td>Training Samples</td>
+                    <td>{{ "{:,}".format(report.old_config.n_samples) }}</td>
+                    <td class="highlight">{{ "{:,}".format(report.new_config.n_samples) }}</td>
+                </tr>
+                {% if report.new_config.get('n_estimators') %}
+                <tr>
+                    <td>N Estimators</td>
+                    <td>{{ report.old_config.get('n_estimators', '—') }}</td>
+                    <td class="highlight">{{ report.new_config.n_estimators }}</td>
+                </tr>
+                {% endif %}
+                {% if report.new_config.get('max_depth') %}
+                <tr>
+                    <td>Max Depth</td>
+                    <td>{{ report.old_config.get('max_depth', '—') }}</td>
+                    <td class="highlight">{{ report.new_config.max_depth }}</td>
+                </tr>
+                {% endif %}
+                {% if report.new_config.get('learning_rate') %}
+                <tr>
+                    <td>Learning Rate</td>
+                    <td>{{ report.old_config.get('learning_rate', '—') }}</td>
+                    <td class="highlight">{{ report.new_config.learning_rate }}</td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+
+        <!-- Metrics Comparison -->
+        <div class="card">
+            <h2>So sánh Metrics</h2>
+            <div class="metrics-grid">
+                <!-- Revenue -->
+                <div class="metric-card">
+                    <h3>Revenue Model</h3>
+                    {% set rev_imp = report.improvements %}
+                    <div class="metric-row">
+                        <span class="metric-label">R² Score</span>
+                        <span class="metric-value">
+                            {{ report.old_revenue_metrics.r2_score }} → {{ report.new_revenue_metrics.r2_score }}
+                            <span class="{{ 'delta-positive' if rev_imp.revenue_r2_delta >= 0 else 'delta-negative' }}">
+                                ({{ "%+.4f"|format(rev_imp.revenue_r2_delta) }})
+                            </span>
+                        </span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">MAE</span>
+                        <span class="metric-value">
+                            {{ report.old_revenue_metrics.mae }} → {{ report.new_revenue_metrics.mae }}
+                            <span class="{{ 'delta-positive' if rev_imp.revenue_mae_delta >= 0 else 'delta-negative' }}">
+                                ({{ "%+.4f"|format(rev_imp.revenue_mae_delta) }})
+                            </span>
+                        </span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">RMSE</span>
+                        <span class="metric-value">
+                            {{ report.old_revenue_metrics.rmse }} → {{ report.new_revenue_metrics.rmse }}
+                        </span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">CV R² Mean</span>
+                        <span class="metric-value">
+                            {{ report.old_revenue_metrics.cv_r2_mean }} → {{ report.new_revenue_metrics.cv_r2_mean }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Quantity -->
+                <div class="metric-card">
+                    <h3>Quantity Model</h3>
+                    <div class="metric-row">
+                        <span class="metric-label">R² Score</span>
+                        <span class="metric-value">
+                            {{ report.old_quantity_metrics.r2_score }} → {{ report.new_quantity_metrics.r2_score }}
+                            <span class="{{ 'delta-positive' if rev_imp.quantity_r2_delta >= 0 else 'delta-negative' }}">
+                                ({{ "%+.4f"|format(rev_imp.quantity_r2_delta) }})
+                            </span>
+                        </span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">MAE</span>
+                        <span class="metric-value">
+                            {{ report.old_quantity_metrics.mae }} → {{ report.new_quantity_metrics.mae }}
+                            <span class="{{ 'delta-positive' if rev_imp.quantity_mae_delta >= 0 else 'delta-negative' }}">
+                                ({{ "%+.4f"|format(rev_imp.quantity_mae_delta) }})
+                            </span>
+                        </span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">RMSE</span>
+                        <span class="metric-value">
+                            {{ report.old_quantity_metrics.rmse }} → {{ report.new_quantity_metrics.rmse }}
+                        </span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">CV R² Mean</span>
+                        <span class="metric-value">
+                            {{ report.old_quantity_metrics.cv_r2_mean }} → {{ report.new_quantity_metrics.cv_r2_mean }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info box about local vs cloud -->
+        <div class="card">
+            <h2>Local vs Cloud Training</h2>
+            <div class="info-box">
+                <strong>Retrain được thực hiện LOCAL</strong> vì:
+                <ul style="margin-top:8px; padding-left:20px;">
+                    <li>Dataset nhỏ (~50-80K rows) → train chỉ mất 5-10 giây</li>
+                    <li>GradientBoosting không cần GPU</li>
+                    <li>Tiết kiệm chi phí Azure ML Compute (~$0.11/phút cho Standard_DS2_v2)</li>
+                    <li>Iteration nhanh hơn: thử nhiều hyperparameters trong vài phút</li>
+                </ul>
+                <p style="margin-top:10px;">
+                    <strong>Khi nào nên chuyển lên Cloud?</strong>
+                    Dataset > 1M rows, cần GPU (Deep Learning), hoặc cần tự động retrain theo schedule (Azure ML Pipeline).
+                </p>
+            </div>
+            <p style="margin-top:10px; color:#666; font-size:0.85em;">
+                Timestamp: {{ report.timestamp }}
+            </p>
+        </div>
+
+        <!-- Charts -->
+        {% if charts %}
+        <div class="card">
+            <h2>Biểu đồ So sánh</h2>
+            <div class="chart-grid">
+                {% for name, b64 in charts.items() %}
+                <div class="chart-item">
+                    <div class="chart-title">{{ name.replace('_', ' ').replace('.png', '').title() }}</div>
+                    <img src="data:image/png;base64,{{ b64 }}" alt="{{ name }}">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% endif %}
+
+        <div class="actions">
+            <a href="/" class="btn btn-back">← Trang chủ</a>
+            {% if report %}
+            <a href="/model-report" class="btn">🔄 Refresh</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

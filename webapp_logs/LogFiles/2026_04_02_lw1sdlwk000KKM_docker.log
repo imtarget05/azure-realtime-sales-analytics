@@ -1,0 +1,790 @@
+2026-04-02T09:56:05.9355944Z State: Starting, Action: EstablishingSiteNetworks, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-04-02T09:56:07.8595600Z State: Starting, Action: StartingSiteContainers, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-04-02T09:56:07.8601778Z Container start method called.
+2026-04-02T09:56:07.8670506Z State: Starting, Action: PullingImage, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pulling image 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T09:56:07.8672427Z Establishing network.
+2026-04-02T09:56:07.8673745Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-04-02T09:56:08.6844927Z Image appsvc/python:3.11_20260203.2.tuxprod is pulled from registry 10.1.0.5:13209
+2026-04-02T09:56:08.6848081Z Container is starting.
+2026-04-02T09:56:08.6850307Z State: Starting, Action: MountingVolumes, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Mounting volumes for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T09:56:08.6852071Z Establishing user namespace if not established already.
+2026-04-02T09:56:08.6856446Z Establishing network if not established already.
+2026-04-02T09:56:08.6860759Z Mounting volumes.
+2026-04-02T09:56:08.6935951Z Nested mountpoint 
+2026-04-02T09:56:08.8056535Z Nested mountpoint volatile/logs
+2026-04-02T09:56:08.8251607Z Nested mountpoint 
+2026-04-02T09:56:09.0078261Z Nested mountpoint 
+2026-04-02T09:56:09.0374599Z Nested mountpoint 
+2026-04-02T09:56:09.4579877Z State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Finished pulling container image and mounting volumes for webapp-sales-d9bt2m. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-04-02T09:56:09.4585998Z Creating container.
+2026-04-02T09:56:09.4589498Z Creating pipes for streaming container io.
+2026-04-02T09:56:09.4790215Z Creating stdout named pipe at /podr/container/pipe/683132103bf7_webapp-sales-d9bt2m/stdout_a61aa31422cd4c3898415cb1bc8cec98.
+2026-04-02T09:56:09.5071271Z Successfully created stdout named pipe at: /podr/container/pipe/683132103bf7_webapp-sales-d9bt2m/stdout_a61aa31422cd4c3898415cb1bc8cec98.
+2026-04-02T09:56:09.5072374Z Opening named pipe /podr/container/pipe/683132103bf7_webapp-sales-d9bt2m/stdout_a61aa31422cd4c3898415cb1bc8cec98 for reading in non-blocking mode.
+2026-04-02T09:56:09.5073418Z Successfully opened named pipe: /podr/container/pipe/683132103bf7_webapp-sales-d9bt2m/stdout_a61aa31422cd4c3898415cb1bc8cec98.
+2026-04-02T09:56:09.5074189Z Successfully removed non-blocking flag from /podr/container/pipe/683132103bf7_webapp-sales-d9bt2m/stdout_a61aa31422cd4c3898415cb1bc8cec98.
+2026-04-02T09:56:09.5087623Z Creating stderr named pipe at /podr/container/pipe/683132103bf7_webapp-sales-d9bt2m/stderr_f15cd4af210c47d9a82d29729b4fedda.
+2026-04-02T09:56:09.5089300Z Successfully created stderr named pipe at: /podr/container/pipe/683132103bf7_webapp-sales-d9bt2m/stderr_f15cd4af210c47d9a82d29729b4fedda.
+2026-04-02T09:56:09.5090128Z Opening named pipe /podr/container/pipe/683132103bf7_webapp-sales-d9bt2m/stderr_f15cd4af210c47d9a82d29729b4fedda for reading in non-blocking mode.
+2026-04-02T09:56:09.5091146Z Successfully opened named pipe: /podr/container/pipe/683132103bf7_webapp-sales-d9bt2m/stderr_f15cd4af210c47d9a82d29729b4fedda.
+2026-04-02T09:56:09.5091855Z Successfully removed non-blocking flag from /podr/container/pipe/683132103bf7_webapp-sales-d9bt2m/stderr_f15cd4af210c47d9a82d29729b4fedda.
+2026-04-02T09:56:09.5256054Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-04-02T09:56:10.3131943Z Starting container: 683132103bf7_webapp-sales-d9bt2m.
+2026-04-02T09:56:10.3888288Z Starting watchers and probes.
+2026-04-02T09:56:10.3912511Z Starting metrics collection.
+2026-04-02T09:56:10.3918516Z Container is running.
+2026-04-02T09:56:10.3986085Z State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T09:56:10.7854701Z Container start method finished after 2867 ms.
+2026-04-02T09:56:10.7859145Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T09:56:10.7859446Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-04-02T09:56:53.0917526Z Container has finished running with exit code: 3.
+2026-04-02T09:56:53.0921038Z Container is terminating. Grace period: 5 seconds.
+2026-04-02T09:56:53.0930006Z Stop and delete container. Retry count = 0
+2026-04-02T09:56:53.0932315Z Stopping container: 683132103bf7_webapp-sales-d9bt2m.
+2026-04-02T09:56:53.1819590Z Deleting container: 683132103bf7_webapp-sales-d9bt2m. Retry count = 0
+2026-04-02T09:56:53.7650505Z Container spec TerminationMessagePolicy  path 
+2026-04-02T09:56:53.7658718Z Container is terminated. Total time elapsed: 673 ms.
+2026-04-02T09:56:53.7667574Z Site container: webapp-sales-d9bt2m terminated during site startup.
+2026-04-02T09:56:53.7850804Z State: Stopping, Action: CancellingStartup, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:56:53.8459538Z Site startup probe failed after 42.9988536 seconds.
+2026-04-02T09:56:54.0434039Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:56:54.1014619Z Failed to start site. Revert by stopping site.
+2026-04-02T09:56:54.1018038Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:56:54.1417244Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:56:54.1419257Z Site: webapp-sales-d9bt2m stopped.
+2026-04-02T09:56:54.1514212Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:56:54.6872347Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:56:54.8844218Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 09:56:54 (UTC), DetailsLevel: ERR
+2026-04-02T09:56:55.0931287Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 09:56:54 (UTC), DetailsLevel: ERR
+2026-04-02T09:57:00.6380093Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 09:56:54 (UTC), DetailsLevel: ERR
+2026-04-02T09:57:03.0204397Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 09:56:54 (UTC), DetailsLevel: ERR
+2026-04-02T09:57:03.0205415Z Container start method called.
+2026-04-02T09:57:03.0205868Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T09:57:03.0206673Z Establishing network.
+2026-04-02T09:57:03.0207695Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-04-02T09:57:03.5605287Z Container is starting.
+2026-04-02T09:57:03.5778277Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T09:57:03.5781063Z Establishing user namespace if not established already.
+2026-04-02T09:57:03.5790578Z Establishing network if not established already.
+2026-04-02T09:57:03.5799538Z Mounting volumes.
+2026-04-02T09:57:03.5873595Z Nested mountpoint 
+2026-04-02T09:57:03.6563302Z Nested mountpoint volatile/logs
+2026-04-02T09:57:03.6671868Z Nested mountpoint 
+2026-04-02T09:57:03.6858633Z Nested mountpoint 
+2026-04-02T09:57:03.8163628Z Nested mountpoint 
+2026-04-02T09:57:04.3990411Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for webapp-sales-d9bt2m. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-04-02T09:57:04.4162556Z Creating container.
+2026-04-02T09:57:04.4165494Z Creating pipes for streaming container io.
+2026-04-02T09:57:04.4172992Z Creating stdout named pipe at /podr/container/pipe/058ee43b3fdc_webapp-sales-d9bt2m/stdout_97bae330f12e4c82b9cad2166d336ab5.
+2026-04-02T09:57:04.4186768Z Successfully created stdout named pipe at: /podr/container/pipe/058ee43b3fdc_webapp-sales-d9bt2m/stdout_97bae330f12e4c82b9cad2166d336ab5.
+2026-04-02T09:57:04.4187776Z Opening named pipe /podr/container/pipe/058ee43b3fdc_webapp-sales-d9bt2m/stdout_97bae330f12e4c82b9cad2166d336ab5 for reading in non-blocking mode.
+2026-04-02T09:57:04.4188825Z Successfully opened named pipe: /podr/container/pipe/058ee43b3fdc_webapp-sales-d9bt2m/stdout_97bae330f12e4c82b9cad2166d336ab5.
+2026-04-02T09:57:04.4189547Z Successfully removed non-blocking flag from /podr/container/pipe/058ee43b3fdc_webapp-sales-d9bt2m/stdout_97bae330f12e4c82b9cad2166d336ab5.
+2026-04-02T09:57:04.4277314Z Creating stderr named pipe at /podr/container/pipe/058ee43b3fdc_webapp-sales-d9bt2m/stderr_e3a4c221474843ca84dcac8908db1004.
+2026-04-02T09:57:04.4278875Z Successfully created stderr named pipe at: /podr/container/pipe/058ee43b3fdc_webapp-sales-d9bt2m/stderr_e3a4c221474843ca84dcac8908db1004.
+2026-04-02T09:57:04.4279607Z Opening named pipe /podr/container/pipe/058ee43b3fdc_webapp-sales-d9bt2m/stderr_e3a4c221474843ca84dcac8908db1004 for reading in non-blocking mode.
+2026-04-02T09:57:04.4280586Z Successfully opened named pipe: /podr/container/pipe/058ee43b3fdc_webapp-sales-d9bt2m/stderr_e3a4c221474843ca84dcac8908db1004.
+2026-04-02T09:57:04.4281327Z Successfully removed non-blocking flag from /podr/container/pipe/058ee43b3fdc_webapp-sales-d9bt2m/stderr_e3a4c221474843ca84dcac8908db1004.
+2026-04-02T09:57:04.4291665Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-04-02T09:57:04.9814158Z Starting container: 058ee43b3fdc_webapp-sales-d9bt2m.
+2026-04-02T09:57:05.1410616Z Starting watchers and probes.
+2026-04-02T09:57:05.1514272Z Starting metrics collection.
+2026-04-02T09:57:05.1516126Z Container is running.
+2026-04-02T09:57:05.1516931Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T09:57:05.3514252Z Container start method finished after 2330 ms.
+2026-04-02T09:57:05.3794290Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T09:57:05.3794756Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-04-02T09:57:47.5534078Z Container has finished running with exit code: 3.
+2026-04-02T09:57:47.5546099Z Container is terminating. Grace period: 5 seconds.
+2026-04-02T09:57:47.5640933Z Stop and delete container. Retry count = 0
+2026-04-02T09:57:47.5642049Z Stopping container: 058ee43b3fdc_webapp-sales-d9bt2m.
+2026-04-02T09:57:47.6651875Z Deleting container: 058ee43b3fdc_webapp-sales-d9bt2m. Retry count = 0
+2026-04-02T09:57:48.1279335Z Container spec TerminationMessagePolicy  path 
+2026-04-02T09:57:48.1283958Z Container is terminated. Total time elapsed: 573 ms.
+2026-04-02T09:57:48.1285222Z Site container: webapp-sales-d9bt2m terminated during site startup.
+2026-04-02T09:57:48.1286416Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:56:54, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:57:48.1581240Z Site startup probe failed after 42.7704243 seconds.
+2026-04-02T09:57:48.2853441Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:57:48.3044743Z Failed to start site. Revert by stopping site.
+2026-04-02T09:57:48.3054673Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:57:48.3143995Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:57:48.3144457Z Site: webapp-sales-d9bt2m stopped.
+2026-04-02T09:57:48.3157282Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:57:48.7226082Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:57:48.8798765Z Site: webapp-sales-d9bt2m will be blocked for 1 minutes till 04/02/2026 09:58:48
+2026-04-02T09:57:48.8801022Z State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site: webapp-sales-d9bt2m will be blocked for 1 minutes till 04/02/2026 09:58:48, DetailsLevel: WARN
+2026-04-02T09:57:48.9657190Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 09:57:48 (UTC), DetailsLevel: WARN
+2026-04-02T09:57:49.1424668Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 09:57:48 (UTC), DetailsLevel: WARN
+2026-04-02T09:57:54.4274838Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 09:58:48, DetailsLevel: WARN
+2026-04-02T09:57:54.4275988Z Start site prohibitted because the site is being blocked.
+2026-04-02T09:57:59.6208378Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 09:58:48, DetailsLevel: WARN
+2026-04-02T09:57:59.6210043Z Start site prohibitted because the site is being blocked.
+2026-04-02T09:58:04.9106336Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 09:58:48, DetailsLevel: WARN
+2026-04-02T09:58:04.9106702Z Start site prohibitted because the site is being blocked.
+2026-04-02T09:58:10.1306307Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 09:58:48, DetailsLevel: WARN
+2026-04-02T09:58:10.1307580Z Start site prohibitted because the site is being blocked.
+2026-04-02T09:58:15.3603391Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 09:58:48, DetailsLevel: WARN
+2026-04-02T09:58:15.3603701Z Start site prohibitted because the site is being blocked.
+2026-04-02T09:58:20.6379314Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 09:58:48, DetailsLevel: WARN
+2026-04-02T09:58:20.6379981Z Start site prohibitted because the site is being blocked.
+2026-04-02T09:58:25.7988554Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 09:58:48, DetailsLevel: WARN
+2026-04-02T09:58:25.7989985Z Start site prohibitted because the site is being blocked.
+2026-04-02T09:58:31.0167488Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 09:58:48, DetailsLevel: WARN
+2026-04-02T09:58:31.0168143Z Start site prohibitted because the site is being blocked.
+2026-04-02T09:58:36.2465242Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 09:58:48, DetailsLevel: WARN
+2026-04-02T09:58:36.2466071Z Start site prohibitted because the site is being blocked.
+2026-04-02T09:58:41.3920974Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 09:58:48, DetailsLevel: WARN
+2026-04-02T09:58:41.3921545Z Start site prohibitted because the site is being blocked.
+2026-04-02T09:58:46.5349727Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 09:58:48, DetailsLevel: WARN
+2026-04-02T09:58:46.5350036Z Start site prohibitted because the site is being blocked.
+2026-04-02T09:58:48.8806914Z Site: webapp-sales-d9bt2m is unblocked.
+2026-04-02T09:58:51.7059203Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 09:58:48, DetailsLevel: WARN
+2026-04-02T09:58:53.4297045Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 09:58:48, DetailsLevel: WARN
+2026-04-02T09:58:53.4298810Z Container start method called.
+2026-04-02T09:58:53.4299445Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T09:58:53.4550167Z Establishing network.
+2026-04-02T09:58:53.4558887Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-04-02T09:58:53.7656405Z Container is starting.
+2026-04-02T09:58:53.7728256Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T09:58:53.7732865Z Establishing user namespace if not established already.
+2026-04-02T09:58:53.7736373Z Establishing network if not established already.
+2026-04-02T09:58:53.7738835Z Mounting volumes.
+2026-04-02T09:58:53.7744809Z Nested mountpoint 
+2026-04-02T09:58:53.7928423Z Nested mountpoint volatile/logs
+2026-04-02T09:58:53.8150008Z Nested mountpoint 
+2026-04-02T09:58:53.8527509Z Nested mountpoint 
+2026-04-02T09:58:53.8717110Z Nested mountpoint 
+2026-04-02T09:58:54.3448601Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for webapp-sales-d9bt2m. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-04-02T09:58:54.3454187Z Creating container.
+2026-04-02T09:58:54.3459170Z Creating pipes for streaming container io.
+2026-04-02T09:58:54.3460240Z Creating stdout named pipe at /podr/container/pipe/23217b9d21af_webapp-sales-d9bt2m/stdout_947b0d2f57c147daa8aa087635187122.
+2026-04-02T09:58:54.3540712Z Successfully created stdout named pipe at: /podr/container/pipe/23217b9d21af_webapp-sales-d9bt2m/stdout_947b0d2f57c147daa8aa087635187122.
+2026-04-02T09:58:54.3541930Z Opening named pipe /podr/container/pipe/23217b9d21af_webapp-sales-d9bt2m/stdout_947b0d2f57c147daa8aa087635187122 for reading in non-blocking mode.
+2026-04-02T09:58:54.3549991Z Successfully opened named pipe: /podr/container/pipe/23217b9d21af_webapp-sales-d9bt2m/stdout_947b0d2f57c147daa8aa087635187122.
+2026-04-02T09:58:54.3551542Z Successfully removed non-blocking flag from /podr/container/pipe/23217b9d21af_webapp-sales-d9bt2m/stdout_947b0d2f57c147daa8aa087635187122.
+2026-04-02T09:58:54.3552963Z Creating stderr named pipe at /podr/container/pipe/23217b9d21af_webapp-sales-d9bt2m/stderr_c7e31dfae6844fe786db9184b5cb17b5.
+2026-04-02T09:58:54.3554360Z Successfully created stderr named pipe at: /podr/container/pipe/23217b9d21af_webapp-sales-d9bt2m/stderr_c7e31dfae6844fe786db9184b5cb17b5.
+2026-04-02T09:58:54.3555069Z Opening named pipe /podr/container/pipe/23217b9d21af_webapp-sales-d9bt2m/stderr_c7e31dfae6844fe786db9184b5cb17b5 for reading in non-blocking mode.
+2026-04-02T09:58:54.3555949Z Successfully opened named pipe: /podr/container/pipe/23217b9d21af_webapp-sales-d9bt2m/stderr_c7e31dfae6844fe786db9184b5cb17b5.
+2026-04-02T09:58:54.3556655Z Successfully removed non-blocking flag from /podr/container/pipe/23217b9d21af_webapp-sales-d9bt2m/stderr_c7e31dfae6844fe786db9184b5cb17b5.
+2026-04-02T09:58:54.3557760Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-04-02T09:58:55.5888076Z Starting container: 23217b9d21af_webapp-sales-d9bt2m.
+2026-04-02T09:58:56.3623233Z Starting watchers and probes.
+2026-04-02T09:58:56.3911686Z Starting metrics collection.
+2026-04-02T09:58:56.3913600Z Container is running.
+2026-04-02T09:58:56.3914499Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T09:58:57.1406187Z Container start method finished after 3710 ms.
+2026-04-02T09:58:57.1407935Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T09:58:57.1408135Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-04-02T09:59:41.8459657Z Container has finished running with exit code: 3.
+2026-04-02T09:59:41.8464904Z Container is terminating. Grace period: 5 seconds.
+2026-04-02T09:59:41.9184826Z Stop and delete container. Retry count = 0
+2026-04-02T09:59:41.9270969Z Stopping container: 23217b9d21af_webapp-sales-d9bt2m.
+2026-04-02T09:59:42.0878932Z Deleting container: 23217b9d21af_webapp-sales-d9bt2m. Retry count = 0
+2026-04-02T09:59:43.4524351Z Container spec TerminationMessagePolicy  path 
+2026-04-02T09:59:43.4825881Z Container is terminated. Total time elapsed: 1635 ms.
+2026-04-02T09:59:43.4835758Z Site container: webapp-sales-d9bt2m terminated during site startup.
+2026-04-02T09:59:43.6462021Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:57:48, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:59:43.6753787Z Site startup probe failed after 46.5339672 seconds.
+2026-04-02T09:59:43.9017087Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:59:44.0156774Z Failed to start site. Revert by stopping site.
+2026-04-02T09:59:44.0166063Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:59:44.0251221Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:59:44.0251647Z Site: webapp-sales-d9bt2m stopped.
+2026-04-02T09:59:44.0269398Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:59:44.7177314Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T09:59:44.9225061Z Site: webapp-sales-d9bt2m will be blocked for 1 minutes till 04/02/2026 10:00:44
+2026-04-02T09:59:44.9241173Z State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site: webapp-sales-d9bt2m will be blocked for 1 minutes till 04/02/2026 10:00:44, DetailsLevel: WARN
+2026-04-02T09:59:44.9328547Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 09:59:44 (UTC), DetailsLevel: WARN
+2026-04-02T09:59:45.3428249Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 09:59:44 (UTC), DetailsLevel: WARN
+2026-04-02T09:59:50.2990218Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:00:44, DetailsLevel: WARN
+2026-04-02T09:59:50.2992008Z Start site prohibitted because the site is being blocked.
+2026-04-02T09:59:55.5568026Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:00:44, DetailsLevel: WARN
+2026-04-02T09:59:55.5568331Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:00:00.8695564Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:00:44, DetailsLevel: WARN
+2026-04-02T10:00:00.8695922Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:00:06.1031495Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:00:44, DetailsLevel: WARN
+2026-04-02T10:00:06.1032820Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:00:11.5432233Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:00:44, DetailsLevel: WARN
+2026-04-02T10:00:11.5432867Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:00:17.1168722Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:00:44, DetailsLevel: WARN
+2026-04-02T10:00:17.1191315Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:00:22.3789291Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:00:44, DetailsLevel: WARN
+2026-04-02T10:00:22.3789580Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:00:27.6661342Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:00:44, DetailsLevel: WARN
+2026-04-02T10:00:27.6662529Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:00:32.8149031Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:00:44, DetailsLevel: WARN
+2026-04-02T10:00:32.8149662Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:00:37.9771464Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:00:44, DetailsLevel: WARN
+2026-04-02T10:00:37.9772000Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:00:43.1244897Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:00:44, DetailsLevel: WARN
+2026-04-02T10:00:43.1246348Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:00:44.9251700Z Site: webapp-sales-d9bt2m is unblocked.
+2026-04-02T10:00:48.2667124Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:00:44, DetailsLevel: WARN
+2026-04-02T10:00:49.9674135Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:00:44, DetailsLevel: WARN
+2026-04-02T10:00:49.9677169Z Container start method called.
+2026-04-02T10:00:49.9677907Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:00:49.9688833Z Establishing network.
+2026-04-02T10:00:49.9695992Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-04-02T10:00:50.2924577Z Container is starting.
+2026-04-02T10:00:50.2925946Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:00:50.2927306Z Establishing user namespace if not established already.
+2026-04-02T10:00:50.2928534Z Establishing network if not established already.
+2026-04-02T10:00:50.2932702Z Mounting volumes.
+2026-04-02T10:00:50.2938994Z Nested mountpoint 
+2026-04-02T10:00:50.3147246Z Nested mountpoint volatile/logs
+2026-04-02T10:00:50.3323802Z Nested mountpoint 
+2026-04-02T10:00:50.3425549Z Nested mountpoint 
+2026-04-02T10:00:50.3522868Z Nested mountpoint 
+2026-04-02T10:00:50.8748552Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for webapp-sales-d9bt2m. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-04-02T10:00:50.8754345Z Creating container.
+2026-04-02T10:00:50.8762447Z Creating pipes for streaming container io.
+2026-04-02T10:00:50.8763994Z Creating stdout named pipe at /podr/container/pipe/ce056dfb52fc_webapp-sales-d9bt2m/stdout_680ad00dba8a447ab7fb34ca16c7a8fc.
+2026-04-02T10:00:50.8849437Z Successfully created stdout named pipe at: /podr/container/pipe/ce056dfb52fc_webapp-sales-d9bt2m/stdout_680ad00dba8a447ab7fb34ca16c7a8fc.
+2026-04-02T10:00:50.8853111Z Opening named pipe /podr/container/pipe/ce056dfb52fc_webapp-sales-d9bt2m/stdout_680ad00dba8a447ab7fb34ca16c7a8fc for reading in non-blocking mode.
+2026-04-02T10:00:50.8854734Z Successfully opened named pipe: /podr/container/pipe/ce056dfb52fc_webapp-sales-d9bt2m/stdout_680ad00dba8a447ab7fb34ca16c7a8fc.
+2026-04-02T10:00:50.8855965Z Successfully removed non-blocking flag from /podr/container/pipe/ce056dfb52fc_webapp-sales-d9bt2m/stdout_680ad00dba8a447ab7fb34ca16c7a8fc.
+2026-04-02T10:00:50.9146544Z Creating stderr named pipe at /podr/container/pipe/ce056dfb52fc_webapp-sales-d9bt2m/stderr_9dd73f1ad57a421d89fcd78ae127b04e.
+2026-04-02T10:00:50.9148605Z Successfully created stderr named pipe at: /podr/container/pipe/ce056dfb52fc_webapp-sales-d9bt2m/stderr_9dd73f1ad57a421d89fcd78ae127b04e.
+2026-04-02T10:00:50.9149474Z Opening named pipe /podr/container/pipe/ce056dfb52fc_webapp-sales-d9bt2m/stderr_9dd73f1ad57a421d89fcd78ae127b04e for reading in non-blocking mode.
+2026-04-02T10:00:50.9150405Z Successfully opened named pipe: /podr/container/pipe/ce056dfb52fc_webapp-sales-d9bt2m/stderr_9dd73f1ad57a421d89fcd78ae127b04e.
+2026-04-02T10:00:50.9151113Z Successfully removed non-blocking flag from /podr/container/pipe/ce056dfb52fc_webapp-sales-d9bt2m/stderr_9dd73f1ad57a421d89fcd78ae127b04e.
+2026-04-02T10:00:50.9157938Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-04-02T10:00:51.8678461Z Starting container: ce056dfb52fc_webapp-sales-d9bt2m.
+2026-04-02T10:00:51.9938895Z Starting watchers and probes.
+2026-04-02T10:00:51.9947303Z Starting metrics collection.
+2026-04-02T10:00:51.9949114Z Container is running.
+2026-04-02T10:00:51.9951753Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:00:52.3719249Z Container start method finished after 2402 ms.
+2026-04-02T10:00:52.3808748Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:00:52.3809067Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-04-02T10:01:23.9511299Z Container has finished running with exit code: 3.
+2026-04-02T10:01:23.9518701Z Container is terminating. Grace period: 5 seconds.
+2026-04-02T10:01:23.9620770Z Stop and delete container. Retry count = 0
+2026-04-02T10:01:23.9693655Z Stopping container: ce056dfb52fc_webapp-sales-d9bt2m.
+2026-04-02T10:01:24.0685011Z Deleting container: ce056dfb52fc_webapp-sales-d9bt2m. Retry count = 0
+2026-04-02T10:01:24.6476848Z Container spec TerminationMessagePolicy  path 
+2026-04-02T10:01:24.6492818Z Container is terminated. Total time elapsed: 696 ms.
+2026-04-02T10:01:24.6498480Z Site container: webapp-sales-d9bt2m terminated during site startup.
+2026-04-02T10:01:24.6571042Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 09:59:43, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:01:24.6684411Z Site startup probe failed after 32.2858716 seconds.
+2026-04-02T10:01:24.8762637Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:01:24.8779646Z Failed to start site. Revert by stopping site.
+2026-04-02T10:01:24.9043634Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:01:24.9060554Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:01:24.9060863Z Site: webapp-sales-d9bt2m stopped.
+2026-04-02T10:01:24.9145992Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:01:25.2607800Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:01:25.5460127Z Site: webapp-sales-d9bt2m will be blocked for 2 minutes till 04/02/2026 10:03:25
+2026-04-02T10:01:25.5544840Z State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site: webapp-sales-d9bt2m will be blocked for 2 minutes till 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:01:25.5568045Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:01:25 (UTC), DetailsLevel: WARN
+2026-04-02T10:01:25.7550318Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:01:25 (UTC), DetailsLevel: WARN
+2026-04-02T10:01:30.7747745Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:01:30.7749225Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:01:35.9815564Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:01:35.9816152Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:01:41.2073985Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:01:41.2074348Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:01:46.5031765Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:01:46.5033208Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:01:51.7424085Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:01:51.7424738Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:01:57.5954265Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:01:57.5954560Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:02:02.7975416Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:02:02.7975807Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:02:08.1525232Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:02:08.1525988Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:02:13.3279811Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:02:13.3548747Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:02:18.7146410Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:02:18.7147056Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:02:23.9323140Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:02:23.9324144Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:02:29.1275517Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:02:29.1276152Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:02:34.3168538Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:02:34.3168963Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:02:39.4664069Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:02:39.4664900Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:02:44.6006476Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:02:44.6008158Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:02:49.8284816Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:02:49.8285460Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:02:55.0414316Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:02:55.0414984Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:03:00.1963607Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:03:00.1967632Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:03:05.3912798Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:03:05.3913367Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:03:10.7005898Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:03:10.7006403Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:03:16.0335077Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:03:16.0336443Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:03:21.2316956Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:03:21.2317705Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:03:25.5504904Z Site: webapp-sales-d9bt2m is unblocked.
+2026-04-02T10:03:26.4271557Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:03:29.0802438Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:03:25, DetailsLevel: WARN
+2026-04-02T10:03:29.0805392Z Container start method called.
+2026-04-02T10:03:29.0907620Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:03:29.0912625Z Establishing network.
+2026-04-02T10:03:29.0914196Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-04-02T10:03:29.7153388Z Container is starting.
+2026-04-02T10:03:29.7156394Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:03:29.7157965Z Establishing user namespace if not established already.
+2026-04-02T10:03:29.7231272Z Establishing network if not established already.
+2026-04-02T10:03:29.7236412Z Mounting volumes.
+2026-04-02T10:03:29.7438208Z Nested mountpoint 
+2026-04-02T10:03:29.8042217Z Nested mountpoint volatile/logs
+2026-04-02T10:03:29.8434582Z Nested mountpoint 
+2026-04-02T10:03:29.9108197Z Nested mountpoint 
+2026-04-02T10:03:29.9572192Z Nested mountpoint 
+2026-04-02T10:03:30.6558501Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for webapp-sales-d9bt2m. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-04-02T10:03:30.6559529Z Creating container.
+2026-04-02T10:03:30.6560323Z Creating pipes for streaming container io.
+2026-04-02T10:03:30.6963445Z Creating stdout named pipe at /podr/container/pipe/fee8b2b14b14_webapp-sales-d9bt2m/stdout_afe7546054c0499682112a90184a4e33.
+2026-04-02T10:03:30.7067945Z Successfully created stdout named pipe at: /podr/container/pipe/fee8b2b14b14_webapp-sales-d9bt2m/stdout_afe7546054c0499682112a90184a4e33.
+2026-04-02T10:03:30.7069286Z Opening named pipe /podr/container/pipe/fee8b2b14b14_webapp-sales-d9bt2m/stdout_afe7546054c0499682112a90184a4e33 for reading in non-blocking mode.
+2026-04-02T10:03:30.7349960Z Successfully opened named pipe: /podr/container/pipe/fee8b2b14b14_webapp-sales-d9bt2m/stdout_afe7546054c0499682112a90184a4e33.
+2026-04-02T10:03:30.7352754Z Successfully removed non-blocking flag from /podr/container/pipe/fee8b2b14b14_webapp-sales-d9bt2m/stdout_afe7546054c0499682112a90184a4e33.
+2026-04-02T10:03:30.7359507Z Creating stderr named pipe at /podr/container/pipe/fee8b2b14b14_webapp-sales-d9bt2m/stderr_a6e1c549bcfa42b89265639fd67260fd.
+2026-04-02T10:03:30.7362440Z Successfully created stderr named pipe at: /podr/container/pipe/fee8b2b14b14_webapp-sales-d9bt2m/stderr_a6e1c549bcfa42b89265639fd67260fd.
+2026-04-02T10:03:30.7368970Z Opening named pipe /podr/container/pipe/fee8b2b14b14_webapp-sales-d9bt2m/stderr_a6e1c549bcfa42b89265639fd67260fd for reading in non-blocking mode.
+2026-04-02T10:03:30.7670710Z Successfully opened named pipe: /podr/container/pipe/fee8b2b14b14_webapp-sales-d9bt2m/stderr_a6e1c549bcfa42b89265639fd67260fd.
+2026-04-02T10:03:30.8364433Z Successfully removed non-blocking flag from /podr/container/pipe/fee8b2b14b14_webapp-sales-d9bt2m/stderr_a6e1c549bcfa42b89265639fd67260fd.
+2026-04-02T10:03:30.8775286Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-04-02T10:03:32.2313115Z Starting container: fee8b2b14b14_webapp-sales-d9bt2m.
+2026-04-02T10:03:32.3620499Z Starting watchers and probes.
+2026-04-02T10:03:32.3723865Z Starting metrics collection.
+2026-04-02T10:03:32.3912361Z Container is running.
+2026-04-02T10:03:32.3915222Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:03:32.4515637Z Container start method finished after 3370 ms.
+2026-04-02T10:03:32.4803425Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:03:32.4804165Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-04-02T10:04:17.3049499Z Container has finished running with exit code: 3.
+2026-04-02T10:04:17.3055600Z Container is terminating. Grace period: 5 seconds.
+2026-04-02T10:04:17.3171589Z Stop and delete container. Retry count = 0
+2026-04-02T10:04:17.3335754Z Stopping container: fee8b2b14b14_webapp-sales-d9bt2m.
+2026-04-02T10:04:17.4530424Z Deleting container: fee8b2b14b14_webapp-sales-d9bt2m. Retry count = 0
+2026-04-02T10:04:17.8934520Z Container spec TerminationMessagePolicy  path 
+2026-04-02T10:04:17.8956205Z Container is terminated. Total time elapsed: 588 ms.
+2026-04-02T10:04:17.8960584Z Site container: webapp-sales-d9bt2m terminated during site startup.
+2026-04-02T10:04:17.9040641Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:01:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:04:18.0409898Z Site startup probe failed after 45.5594137 seconds.
+2026-04-02T10:04:18.2706109Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:04:18.2726620Z Failed to start site. Revert by stopping site.
+2026-04-02T10:04:18.2800313Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:04:18.2803784Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:04:18.2803995Z Site: webapp-sales-d9bt2m stopped.
+2026-04-02T10:04:18.3599688Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:04:18.9131947Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:04:19.2127622Z Site: webapp-sales-d9bt2m will be blocked for 2 minutes till 04/02/2026 10:06:19
+2026-04-02T10:04:19.2129819Z State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site: webapp-sales-d9bt2m will be blocked for 2 minutes till 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:04:19.2132471Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:04:19 (UTC), DetailsLevel: WARN
+2026-04-02T10:04:19.5449237Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:04:19 (UTC), DetailsLevel: WARN
+2026-04-02T10:04:24.5402976Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:04:24.5403534Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:04:26.0574552Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:04:26.0577147Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:04:29.6434156Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:04:29.6434476Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:04:34.7787040Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:04:34.7787635Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:04:39.9045531Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:04:39.9045936Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:04:45.0789283Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:04:45.0789894Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:04:50.2763353Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:04:50.2764853Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:04:55.3947053Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:04:55.3947388Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:05:00.6243958Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:05:00.6244789Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:05:05.7928001Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:05:05.7928334Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:05:11.2265858Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:05:11.2266657Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:05:16.3727110Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:05:16.3728751Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:05:21.6319468Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:05:21.6320293Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:05:26.7468216Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:05:26.7468892Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:05:31.8402597Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:05:31.8402975Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:05:36.9398853Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:05:36.9399673Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:05:42.1182420Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:05:42.1184518Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:05:47.2258025Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:05:47.2258616Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:05:52.3510303Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:05:52.3511201Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:05:57.5186194Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:05:57.5186850Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:06:02.7640234Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:06:02.7642540Z Start site prohibitted because the site is being blocked.
+2026-04-02T10:06:19.2123590Z Site: webapp-sales-d9bt2m is unblocked.
+2026-04-02T10:07:55.4049444Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:07:57.1448377Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 04/02/2026 10:06:19, DetailsLevel: WARN
+2026-04-02T10:07:57.1449657Z Container start method called.
+2026-04-02T10:07:57.1450111Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:07:57.1450838Z Establishing network.
+2026-04-02T10:07:57.1746621Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-04-02T10:07:57.5421757Z Container is starting.
+2026-04-02T10:07:57.5429431Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:07:57.5431531Z Establishing user namespace if not established already.
+2026-04-02T10:07:57.5504521Z Establishing network if not established already.
+2026-04-02T10:07:57.5506434Z Mounting volumes.
+2026-04-02T10:07:57.5519550Z Nested mountpoint 
+2026-04-02T10:07:57.5730769Z Nested mountpoint volatile/logs
+2026-04-02T10:07:57.6007176Z Nested mountpoint 
+2026-04-02T10:07:57.6014727Z Nested mountpoint 
+2026-04-02T10:07:57.6111983Z Nested mountpoint 
+2026-04-02T10:07:58.0718428Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for webapp-sales-d9bt2m. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-04-02T10:07:58.0723946Z Creating container.
+2026-04-02T10:07:58.0727865Z Creating pipes for streaming container io.
+2026-04-02T10:07:58.0731811Z Creating stdout named pipe at /podr/container/pipe/22b218fe3027_webapp-sales-d9bt2m/stdout_ca4813403faa441f9d12d9bf0aa2927f.
+2026-04-02T10:07:58.0909426Z Successfully created stdout named pipe at: /podr/container/pipe/22b218fe3027_webapp-sales-d9bt2m/stdout_ca4813403faa441f9d12d9bf0aa2927f.
+2026-04-02T10:07:58.0912728Z Opening named pipe /podr/container/pipe/22b218fe3027_webapp-sales-d9bt2m/stdout_ca4813403faa441f9d12d9bf0aa2927f for reading in non-blocking mode.
+2026-04-02T10:07:58.0988355Z Successfully opened named pipe: /podr/container/pipe/22b218fe3027_webapp-sales-d9bt2m/stdout_ca4813403faa441f9d12d9bf0aa2927f.
+2026-04-02T10:07:58.0994149Z Successfully removed non-blocking flag from /podr/container/pipe/22b218fe3027_webapp-sales-d9bt2m/stdout_ca4813403faa441f9d12d9bf0aa2927f.
+2026-04-02T10:07:58.1066815Z Creating stderr named pipe at /podr/container/pipe/22b218fe3027_webapp-sales-d9bt2m/stderr_fb02891458094a8795842d0eb12aaf39.
+2026-04-02T10:07:58.1068857Z Successfully created stderr named pipe at: /podr/container/pipe/22b218fe3027_webapp-sales-d9bt2m/stderr_fb02891458094a8795842d0eb12aaf39.
+2026-04-02T10:07:58.1069658Z Opening named pipe /podr/container/pipe/22b218fe3027_webapp-sales-d9bt2m/stderr_fb02891458094a8795842d0eb12aaf39 for reading in non-blocking mode.
+2026-04-02T10:07:58.1084397Z Successfully opened named pipe: /podr/container/pipe/22b218fe3027_webapp-sales-d9bt2m/stderr_fb02891458094a8795842d0eb12aaf39.
+2026-04-02T10:07:58.1086058Z Successfully removed non-blocking flag from /podr/container/pipe/22b218fe3027_webapp-sales-d9bt2m/stderr_fb02891458094a8795842d0eb12aaf39.
+2026-04-02T10:07:58.1164611Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-04-02T10:07:58.7895622Z Starting container: 22b218fe3027_webapp-sales-d9bt2m.
+2026-04-02T10:07:58.8851388Z Starting watchers and probes.
+2026-04-02T10:07:58.8952947Z Starting metrics collection.
+2026-04-02T10:07:58.8961943Z Container is running.
+2026-04-02T10:07:58.8963321Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:07:59.2259008Z Container start method finished after 2063 ms.
+2026-04-02T10:07:59.2445664Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:07:59.2450584Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-04-02T10:08:35.1979737Z Container has finished running with exit code: 3.
+2026-04-02T10:08:35.1992937Z Container is terminating. Grace period: 5 seconds.
+2026-04-02T10:08:35.2083476Z Stop and delete container. Retry count = 0
+2026-04-02T10:08:35.2164313Z Stopping container: 22b218fe3027_webapp-sales-d9bt2m.
+2026-04-02T10:08:35.4404109Z Deleting container: 22b218fe3027_webapp-sales-d9bt2m. Retry count = 0
+2026-04-02T10:08:35.9788598Z Container spec TerminationMessagePolicy  path 
+2026-04-02T10:08:35.9790583Z Container is terminated. Total time elapsed: 779 ms.
+2026-04-02T10:08:35.9795957Z Site container: webapp-sales-d9bt2m terminated during site startup.
+2026-04-02T10:08:36.0097452Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:04:18, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:08:36.0908520Z Site startup probe failed after 36.8436514 seconds.
+2026-04-02T10:08:36.8639413Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:08:36, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:08:36.9126432Z Failed to start site. Revert by stopping site.
+2026-04-02T10:08:36.9206863Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:08:36, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:08:36.9404569Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:08:36, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:08:36.9405026Z Site: webapp-sales-d9bt2m stopped.
+2026-04-02T10:16:04.1647871Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:08:36, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:08:37 (UTC), DetailsLevel: WARN
+2026-04-02T10:16:05.7778746Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:08:36, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:08:37 (UTC), DetailsLevel: WARN
+2026-04-02T10:16:05.7779867Z Container start method called.
+2026-04-02T10:16:05.7780306Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:08:36, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:16:05.7781020Z Establishing network.
+2026-04-02T10:16:05.7781840Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-04-02T10:16:05.9558869Z Container is starting.
+2026-04-02T10:16:05.9562316Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:08:36, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:16:05.9563904Z Establishing user namespace if not established already.
+2026-04-02T10:16:05.9565414Z Establishing network if not established already.
+2026-04-02T10:16:05.9569513Z Mounting volumes.
+2026-04-02T10:16:05.9573837Z Nested mountpoint 
+2026-04-02T10:16:05.9844168Z Nested mountpoint volatile/logs
+2026-04-02T10:16:06.0059683Z Nested mountpoint 
+2026-04-02T10:16:06.0429072Z Nested mountpoint 
+2026-04-02T10:16:06.0638321Z Nested mountpoint 
+2026-04-02T10:16:06.5369852Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:08:36, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for webapp-sales-d9bt2m. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-04-02T10:16:06.5376094Z Creating container.
+2026-04-02T10:16:06.5382360Z Creating pipes for streaming container io.
+2026-04-02T10:16:06.5387227Z Creating stdout named pipe at /podr/container/pipe/31b2518aeaeb_webapp-sales-d9bt2m/stdout_034095fcd2624b939427ab5084009775.
+2026-04-02T10:16:06.5396723Z Successfully created stdout named pipe at: /podr/container/pipe/31b2518aeaeb_webapp-sales-d9bt2m/stdout_034095fcd2624b939427ab5084009775.
+2026-04-02T10:16:06.5595612Z Opening named pipe /podr/container/pipe/31b2518aeaeb_webapp-sales-d9bt2m/stdout_034095fcd2624b939427ab5084009775 for reading in non-blocking mode.
+2026-04-02T10:16:06.5694291Z Successfully opened named pipe: /podr/container/pipe/31b2518aeaeb_webapp-sales-d9bt2m/stdout_034095fcd2624b939427ab5084009775.
+2026-04-02T10:16:06.5791774Z Successfully removed non-blocking flag from /podr/container/pipe/31b2518aeaeb_webapp-sales-d9bt2m/stdout_034095fcd2624b939427ab5084009775.
+2026-04-02T10:16:06.5794271Z Creating stderr named pipe at /podr/container/pipe/31b2518aeaeb_webapp-sales-d9bt2m/stderr_19e24d22325e4bd5913adc7a43f653b0.
+2026-04-02T10:16:06.5797488Z Successfully created stderr named pipe at: /podr/container/pipe/31b2518aeaeb_webapp-sales-d9bt2m/stderr_19e24d22325e4bd5913adc7a43f653b0.
+2026-04-02T10:16:06.6083286Z Opening named pipe /podr/container/pipe/31b2518aeaeb_webapp-sales-d9bt2m/stderr_19e24d22325e4bd5913adc7a43f653b0 for reading in non-blocking mode.
+2026-04-02T10:16:06.6085783Z Successfully opened named pipe: /podr/container/pipe/31b2518aeaeb_webapp-sales-d9bt2m/stderr_19e24d22325e4bd5913adc7a43f653b0.
+2026-04-02T10:16:06.6086679Z Successfully removed non-blocking flag from /podr/container/pipe/31b2518aeaeb_webapp-sales-d9bt2m/stderr_19e24d22325e4bd5913adc7a43f653b0.
+2026-04-02T10:16:06.6087986Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-04-02T10:16:07.1612158Z Starting container: 31b2518aeaeb_webapp-sales-d9bt2m.
+2026-04-02T10:16:07.2341978Z Starting watchers and probes.
+2026-04-02T10:16:07.2433394Z Starting metrics collection.
+2026-04-02T10:16:07.2435875Z Container is running.
+2026-04-02T10:16:07.2437618Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:08:36, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:16:07.3759089Z Container start method finished after 1597 ms.
+2026-04-02T10:16:07.3760815Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:08:36, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:16:07.3761009Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:08:36, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-04-02T10:16:36.6913180Z Container has finished running with exit code: 3.
+2026-04-02T10:16:36.7002125Z Container is terminating. Grace period: 5 seconds.
+2026-04-02T10:16:36.7019467Z Stop and delete container. Retry count = 0
+2026-04-02T10:16:36.7096844Z Stopping container: 31b2518aeaeb_webapp-sales-d9bt2m.
+2026-04-02T10:16:36.7698802Z Deleting container: 31b2518aeaeb_webapp-sales-d9bt2m. Retry count = 0
+2026-04-02T10:16:37.2218331Z Container spec TerminationMessagePolicy  path 
+2026-04-02T10:16:37.2226216Z Container is terminated. Total time elapsed: 521 ms.
+2026-04-02T10:16:37.2232157Z Site container: webapp-sales-d9bt2m terminated during site startup.
+2026-04-02T10:16:37.2236789Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:08:36, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:16:37.2327612Z Site startup probe failed after 29.7466814 seconds.
+2026-04-02T10:16:37.3829001Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:16:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:16:37.4041379Z Failed to start site. Revert by stopping site.
+2026-04-02T10:16:37.4043377Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:16:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:16:37.4046101Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:16:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:16:37.4046249Z Site: webapp-sales-d9bt2m stopped.
+2026-04-02T10:19:23.7432074Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:16:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:16:38 (UTC), DetailsLevel: ERR
+2026-04-02T10:19:25.6317194Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:16:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:16:38 (UTC), DetailsLevel: ERR
+2026-04-02T10:19:25.6318226Z Container start method called.
+2026-04-02T10:19:25.6318639Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:16:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:19:25.6319393Z Establishing network.
+2026-04-02T10:19:25.6320262Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-04-02T10:19:25.9884804Z Container is starting.
+2026-04-02T10:19:25.9885772Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:16:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:19:25.9886596Z Establishing user namespace if not established already.
+2026-04-02T10:19:25.9887367Z Establishing network if not established already.
+2026-04-02T10:19:25.9888318Z Mounting volumes.
+2026-04-02T10:19:25.9896930Z Nested mountpoint 
+2026-04-02T10:19:26.0793043Z Nested mountpoint volatile/logs
+2026-04-02T10:19:26.1012145Z Nested mountpoint 
+2026-04-02T10:19:26.1090312Z Nested mountpoint 
+2026-04-02T10:19:26.1105948Z Nested mountpoint 
+2026-04-02T10:19:26.7243308Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:16:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for webapp-sales-d9bt2m. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-04-02T10:19:26.7253929Z Creating container.
+2026-04-02T10:19:26.7258410Z Creating pipes for streaming container io.
+2026-04-02T10:19:26.7261337Z Creating stdout named pipe at /podr/container/pipe/482163aa372e_webapp-sales-d9bt2m/stdout_1106de27494848b99f7e5ff5c9821616.
+2026-04-02T10:19:26.7270372Z Successfully created stdout named pipe at: /podr/container/pipe/482163aa372e_webapp-sales-d9bt2m/stdout_1106de27494848b99f7e5ff5c9821616.
+2026-04-02T10:19:26.7273123Z Opening named pipe /podr/container/pipe/482163aa372e_webapp-sales-d9bt2m/stdout_1106de27494848b99f7e5ff5c9821616 for reading in non-blocking mode.
+2026-04-02T10:19:26.7346928Z Successfully opened named pipe: /podr/container/pipe/482163aa372e_webapp-sales-d9bt2m/stdout_1106de27494848b99f7e5ff5c9821616.
+2026-04-02T10:19:26.7348773Z Successfully removed non-blocking flag from /podr/container/pipe/482163aa372e_webapp-sales-d9bt2m/stdout_1106de27494848b99f7e5ff5c9821616.
+2026-04-02T10:19:26.7544958Z Creating stderr named pipe at /podr/container/pipe/482163aa372e_webapp-sales-d9bt2m/stderr_4aff2358e4024813bc32eab7adb20453.
+2026-04-02T10:19:26.7547076Z Successfully created stderr named pipe at: /podr/container/pipe/482163aa372e_webapp-sales-d9bt2m/stderr_4aff2358e4024813bc32eab7adb20453.
+2026-04-02T10:19:26.7547866Z Opening named pipe /podr/container/pipe/482163aa372e_webapp-sales-d9bt2m/stderr_4aff2358e4024813bc32eab7adb20453 for reading in non-blocking mode.
+2026-04-02T10:19:26.7548844Z Successfully opened named pipe: /podr/container/pipe/482163aa372e_webapp-sales-d9bt2m/stderr_4aff2358e4024813bc32eab7adb20453.
+2026-04-02T10:19:26.7549571Z Successfully removed non-blocking flag from /podr/container/pipe/482163aa372e_webapp-sales-d9bt2m/stderr_4aff2358e4024813bc32eab7adb20453.
+2026-04-02T10:19:26.7550880Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-04-02T10:19:27.4453410Z Starting container: 482163aa372e_webapp-sales-d9bt2m.
+2026-04-02T10:19:27.5829464Z Starting watchers and probes.
+2026-04-02T10:19:27.6132608Z Starting metrics collection.
+2026-04-02T10:19:27.6710088Z Container is running.
+2026-04-02T10:19:27.6714910Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:16:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:19:27.8627041Z Container start method finished after 2230 ms.
+2026-04-02T10:19:27.8632551Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:16:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:19:27.8632846Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:16:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-04-02T10:20:12.4788824Z Container has finished running with exit code: 3.
+2026-04-02T10:20:12.4795073Z Container is terminating. Grace period: 5 seconds.
+2026-04-02T10:20:12.4970760Z Stop and delete container. Retry count = 0
+2026-04-02T10:20:12.4979039Z Stopping container: 482163aa372e_webapp-sales-d9bt2m.
+2026-04-02T10:20:12.5752336Z Deleting container: 482163aa372e_webapp-sales-d9bt2m. Retry count = 0
+2026-04-02T10:20:13.2729268Z Container spec TerminationMessagePolicy  path 
+2026-04-02T10:20:13.2739338Z Container is terminated. Total time elapsed: 784 ms.
+2026-04-02T10:20:13.2742138Z Site container: webapp-sales-d9bt2m terminated during site startup.
+2026-04-02T10:20:13.2813680Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:16:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:20:13.2933673Z Site startup probe failed after 45.391182 seconds.
+2026-04-02T10:20:13.5534010Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:20:13, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:20:13.5554767Z Failed to start site. Revert by stopping site.
+2026-04-02T10:20:13.5612479Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:20:13, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:20:13.5700645Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:20:13, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:20:13.5700995Z Site: webapp-sales-d9bt2m stopped.
+2026-04-02T10:20:49.2864987Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:20:13, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:20:14 (UTC), DetailsLevel: ERR
+2026-04-02T10:20:51.1723293Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:20:13, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:20:14 (UTC), DetailsLevel: ERR
+2026-04-02T10:20:51.1912661Z Container start method called.
+2026-04-02T10:20:51.1917647Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:20:13, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.6:13209/appsvc/python:3.11_20260203.2.tuxprod for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:20:51.1921281Z Establishing network.
+2026-04-02T10:20:51.2329261Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-04-02T10:20:51.6054518Z Container is starting.
+2026-04-02T10:20:51.6057902Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:20:13, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:20:51.6059506Z Establishing user namespace if not established already.
+2026-04-02T10:20:51.6064110Z Establishing network if not established already.
+2026-04-02T10:20:51.6146458Z Mounting volumes.
+2026-04-02T10:20:51.6246527Z Nested mountpoint 
+2026-04-02T10:20:51.7130421Z Nested mountpoint volatile/logs
+2026-04-02T10:20:51.7151174Z Nested mountpoint 
+2026-04-02T10:20:51.7521296Z Nested mountpoint 
+2026-04-02T10:20:51.7533360Z Nested mountpoint 
+2026-04-02T10:20:52.5859741Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:20:13, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for webapp-sales-d9bt2m. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-04-02T10:20:52.6031715Z Creating container.
+2026-04-02T10:20:52.6036939Z Creating pipes for streaming container io.
+2026-04-02T10:20:52.6039583Z Creating stdout named pipe at /podr/container/pipe/91c8f2a8486c_webapp-sales-d9bt2m/stdout_7b202ec1880d41178fe1f1a212f5b095.
+2026-04-02T10:20:52.6317834Z Successfully created stdout named pipe at: /podr/container/pipe/91c8f2a8486c_webapp-sales-d9bt2m/stdout_7b202ec1880d41178fe1f1a212f5b095.
+2026-04-02T10:20:52.6328282Z Opening named pipe /podr/container/pipe/91c8f2a8486c_webapp-sales-d9bt2m/stdout_7b202ec1880d41178fe1f1a212f5b095 for reading in non-blocking mode.
+2026-04-02T10:20:52.6332656Z Successfully opened named pipe: /podr/container/pipe/91c8f2a8486c_webapp-sales-d9bt2m/stdout_7b202ec1880d41178fe1f1a212f5b095.
+2026-04-02T10:20:52.6333938Z Successfully removed non-blocking flag from /podr/container/pipe/91c8f2a8486c_webapp-sales-d9bt2m/stdout_7b202ec1880d41178fe1f1a212f5b095.
+2026-04-02T10:20:52.6628159Z Creating stderr named pipe at /podr/container/pipe/91c8f2a8486c_webapp-sales-d9bt2m/stderr_33330d298cc048c6b0096fa2db7203d5.
+2026-04-02T10:20:52.6630269Z Successfully created stderr named pipe at: /podr/container/pipe/91c8f2a8486c_webapp-sales-d9bt2m/stderr_33330d298cc048c6b0096fa2db7203d5.
+2026-04-02T10:20:52.6811050Z Opening named pipe /podr/container/pipe/91c8f2a8486c_webapp-sales-d9bt2m/stderr_33330d298cc048c6b0096fa2db7203d5 for reading in non-blocking mode.
+2026-04-02T10:20:52.6813279Z Successfully opened named pipe: /podr/container/pipe/91c8f2a8486c_webapp-sales-d9bt2m/stderr_33330d298cc048c6b0096fa2db7203d5.
+2026-04-02T10:20:52.6814158Z Successfully removed non-blocking flag from /podr/container/pipe/91c8f2a8486c_webapp-sales-d9bt2m/stderr_33330d298cc048c6b0096fa2db7203d5.
+2026-04-02T10:20:52.6815630Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.6:13209 and fully qualified image name: 10.1.0.6:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-04-02T10:20:53.9937456Z Starting container: 91c8f2a8486c_webapp-sales-d9bt2m.
+2026-04-02T10:20:54.1541528Z Starting watchers and probes.
+2026-04-02T10:20:54.1640194Z Starting metrics collection.
+2026-04-02T10:20:54.1642462Z Container is running.
+2026-04-02T10:20:54.1643461Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:20:13, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:20:54.3746750Z Container start method finished after 3182 ms.
+2026-04-02T10:20:54.3755790Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:20:13, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:20:54.3756349Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:20:13, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-04-02T10:21:36.2950985Z Container has finished running with exit code: 3.
+2026-04-02T10:21:36.3038722Z Container is terminating. Grace period: 5 seconds.
+2026-04-02T10:21:36.3049631Z Stop and delete container. Retry count = 0
+2026-04-02T10:21:36.3239129Z Stopping container: 91c8f2a8486c_webapp-sales-d9bt2m.
+2026-04-02T10:21:36.4063319Z Deleting container: 91c8f2a8486c_webapp-sales-d9bt2m. Retry count = 0
+2026-04-02T10:21:36.7673988Z Container spec TerminationMessagePolicy  path 
+2026-04-02T10:21:36.7675856Z Container is terminated. Total time elapsed: 463 ms.
+2026-04-02T10:21:36.7677050Z Site container: webapp-sales-d9bt2m terminated during site startup.
+2026-04-02T10:21:36.7684404Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:20:13, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:21:36.8486436Z Site startup probe failed after 42.472173 seconds.
+2026-04-02T10:21:37.2515076Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:21:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:21:37.2764419Z Failed to start site. Revert by stopping site.
+2026-04-02T10:21:37.2769096Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:21:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:21:37.2776670Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:21:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:21:37.2776881Z Site: webapp-sales-d9bt2m stopped.
+2026-04-02T10:37:26.6590988Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:21:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:21:38 (UTC), DetailsLevel: ERR
+2026-04-02T10:37:28.8335055Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:21:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:21:38 (UTC), DetailsLevel: ERR
+2026-04-02T10:37:28.8354873Z Container start method called.
+2026-04-02T10:37:28.8529134Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:21:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.6:13209/appsvc/python:3.11_20260203.2.tuxprod for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:37:28.8537911Z Establishing network.
+2026-04-02T10:37:28.8550559Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-04-02T10:37:29.3297854Z Container is starting.
+2026-04-02T10:37:29.3355881Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:21:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:37:29.3362013Z Establishing user namespace if not established already.
+2026-04-02T10:37:29.3368014Z Establishing network if not established already.
+2026-04-02T10:37:29.3371778Z Mounting volumes.
+2026-04-02T10:37:29.3448408Z Nested mountpoint 
+2026-04-02T10:37:29.4123086Z Nested mountpoint volatile/logs
+2026-04-02T10:37:29.4535629Z Nested mountpoint 
+2026-04-02T10:37:29.5026975Z Nested mountpoint 
+2026-04-02T10:37:29.5036302Z Nested mountpoint 
+2026-04-02T10:37:29.9661340Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:21:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for webapp-sales-d9bt2m. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-04-02T10:37:29.9732174Z Creating container.
+2026-04-02T10:37:29.9738239Z Creating pipes for streaming container io.
+2026-04-02T10:37:29.9746066Z Creating stdout named pipe at /podr/container/pipe/3a13c703c998_webapp-sales-d9bt2m/stdout_3373d2d22a0a4528b87dc59fa2a87205.
+2026-04-02T10:37:29.9837324Z Successfully created stdout named pipe at: /podr/container/pipe/3a13c703c998_webapp-sales-d9bt2m/stdout_3373d2d22a0a4528b87dc59fa2a87205.
+2026-04-02T10:37:29.9845990Z Opening named pipe /podr/container/pipe/3a13c703c998_webapp-sales-d9bt2m/stdout_3373d2d22a0a4528b87dc59fa2a87205 for reading in non-blocking mode.
+2026-04-02T10:37:29.9855505Z Successfully opened named pipe: /podr/container/pipe/3a13c703c998_webapp-sales-d9bt2m/stdout_3373d2d22a0a4528b87dc59fa2a87205.
+2026-04-02T10:37:29.9859550Z Successfully removed non-blocking flag from /podr/container/pipe/3a13c703c998_webapp-sales-d9bt2m/stdout_3373d2d22a0a4528b87dc59fa2a87205.
+2026-04-02T10:37:29.9941239Z Creating stderr named pipe at /podr/container/pipe/3a13c703c998_webapp-sales-d9bt2m/stderr_dca766d05ccb43f9931a56caecde3eff.
+2026-04-02T10:37:29.9949384Z Successfully created stderr named pipe at: /podr/container/pipe/3a13c703c998_webapp-sales-d9bt2m/stderr_dca766d05ccb43f9931a56caecde3eff.
+2026-04-02T10:37:29.9953660Z Opening named pipe /podr/container/pipe/3a13c703c998_webapp-sales-d9bt2m/stderr_dca766d05ccb43f9931a56caecde3eff for reading in non-blocking mode.
+2026-04-02T10:37:30.0021759Z Successfully opened named pipe: /podr/container/pipe/3a13c703c998_webapp-sales-d9bt2m/stderr_dca766d05ccb43f9931a56caecde3eff.
+2026-04-02T10:37:30.0028135Z Successfully removed non-blocking flag from /podr/container/pipe/3a13c703c998_webapp-sales-d9bt2m/stderr_dca766d05ccb43f9931a56caecde3eff.
+2026-04-02T10:37:30.0043049Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.6:13209 and fully qualified image name: 10.1.0.6:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-04-02T10:37:30.7149655Z Starting container: 3a13c703c998_webapp-sales-d9bt2m.
+2026-04-02T10:37:30.8234989Z Starting watchers and probes.
+2026-04-02T10:37:30.8424208Z Starting metrics collection.
+2026-04-02T10:37:30.8722641Z Container is running.
+2026-04-02T10:37:30.8724490Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:21:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:37:31.1550249Z Container start method finished after 2319 ms.
+2026-04-02T10:37:31.1558126Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:21:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:37:31.2036243Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:21:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-04-02T10:38:06.7281723Z Container has finished running with exit code: 3.
+2026-04-02T10:38:06.7289188Z Container is terminating. Grace period: 5 seconds.
+2026-04-02T10:38:06.7404389Z Stop and delete container. Retry count = 0
+2026-04-02T10:38:06.7464459Z Stopping container: 3a13c703c998_webapp-sales-d9bt2m.
+2026-04-02T10:38:06.8164764Z Deleting container: 3a13c703c998_webapp-sales-d9bt2m. Retry count = 0
+2026-04-02T10:38:07.2482796Z Container spec TerminationMessagePolicy  path 
+2026-04-02T10:38:07.2644657Z Container is terminated. Total time elapsed: 524 ms.
+2026-04-02T10:38:07.2653658Z Site container: webapp-sales-d9bt2m terminated during site startup.
+2026-04-02T10:38:07.2780913Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:21:37, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:38:07.3735371Z Site startup probe failed after 36.033491 seconds.
+2026-04-02T10:38:07.5990763Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:38:07, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:38:07.6401237Z Failed to start site. Revert by stopping site.
+2026-04-02T10:38:07.6502379Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:38:07, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:38:07.6677979Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:38:07, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:38:07.6681198Z Site: webapp-sales-d9bt2m stopped.
+2026-04-02T10:43:09.8534993Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:38:07, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:38:08 (UTC), DetailsLevel: ERR
+2026-04-02T10:43:11.1710965Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:38:07, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:38:08 (UTC), DetailsLevel: ERR
+2026-04-02T10:43:11.1717558Z Container start method called.
+2026-04-02T10:43:11.1725474Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:38:07, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:43:11.1809838Z Establishing network.
+2026-04-02T10:43:11.1816463Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-04-02T10:43:11.3894858Z Container is starting.
+2026-04-02T10:43:11.3895680Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:38:07, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:43:11.3897553Z Establishing user namespace if not established already.
+2026-04-02T10:43:11.3898426Z Establishing network if not established already.
+2026-04-02T10:43:11.3899333Z Mounting volumes.
+2026-04-02T10:43:11.3900596Z Nested mountpoint 
+2026-04-02T10:43:11.4394407Z Nested mountpoint volatile/logs
+2026-04-02T10:43:11.4575602Z Nested mountpoint 
+2026-04-02T10:43:11.4601585Z Nested mountpoint 
+2026-04-02T10:43:11.4773914Z Nested mountpoint 
+2026-04-02T10:43:11.8663901Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:38:07, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for webapp-sales-d9bt2m. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-04-02T10:43:11.8746258Z Creating container.
+2026-04-02T10:43:11.8762126Z Creating pipes for streaming container io.
+2026-04-02T10:43:11.8763847Z Creating stdout named pipe at /podr/container/pipe/a05795aa7879_webapp-sales-d9bt2m/stdout_7d0cdc68995e44f9b615a1ba207db9cd.
+2026-04-02T10:43:11.8766705Z Successfully created stdout named pipe at: /podr/container/pipe/a05795aa7879_webapp-sales-d9bt2m/stdout_7d0cdc68995e44f9b615a1ba207db9cd.
+2026-04-02T10:43:11.8767541Z Opening named pipe /podr/container/pipe/a05795aa7879_webapp-sales-d9bt2m/stdout_7d0cdc68995e44f9b615a1ba207db9cd for reading in non-blocking mode.
+2026-04-02T10:43:11.8948103Z Successfully opened named pipe: /podr/container/pipe/a05795aa7879_webapp-sales-d9bt2m/stdout_7d0cdc68995e44f9b615a1ba207db9cd.
+2026-04-02T10:43:11.8959441Z Successfully removed non-blocking flag from /podr/container/pipe/a05795aa7879_webapp-sales-d9bt2m/stdout_7d0cdc68995e44f9b615a1ba207db9cd.
+2026-04-02T10:43:11.9042721Z Creating stderr named pipe at /podr/container/pipe/a05795aa7879_webapp-sales-d9bt2m/stderr_c2105f4ae0784369bb54b56efa02fb05.
+2026-04-02T10:43:11.9044547Z Successfully created stderr named pipe at: /podr/container/pipe/a05795aa7879_webapp-sales-d9bt2m/stderr_c2105f4ae0784369bb54b56efa02fb05.
+2026-04-02T10:43:11.9045320Z Opening named pipe /podr/container/pipe/a05795aa7879_webapp-sales-d9bt2m/stderr_c2105f4ae0784369bb54b56efa02fb05 for reading in non-blocking mode.
+2026-04-02T10:43:11.9046242Z Successfully opened named pipe: /podr/container/pipe/a05795aa7879_webapp-sales-d9bt2m/stderr_c2105f4ae0784369bb54b56efa02fb05.
+2026-04-02T10:43:11.9047009Z Successfully removed non-blocking flag from /podr/container/pipe/a05795aa7879_webapp-sales-d9bt2m/stderr_c2105f4ae0784369bb54b56efa02fb05.
+2026-04-02T10:43:11.9131052Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-04-02T10:43:12.5706955Z Starting container: a05795aa7879_webapp-sales-d9bt2m.
+2026-04-02T10:43:12.6364194Z Starting watchers and probes.
+2026-04-02T10:43:12.6374541Z Starting metrics collection.
+2026-04-02T10:43:12.6568238Z Container is running.
+2026-04-02T10:43:12.6646448Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:38:07, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:43:12.8422776Z Container start method finished after 1670 ms.
+2026-04-02T10:43:12.9040692Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:38:07, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:43:12.9048003Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:38:07, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-04-02T10:43:41.7072533Z Container has finished running with exit code: 1.
+2026-04-02T10:43:41.7148440Z Container is terminating. Grace period: 5 seconds.
+2026-04-02T10:43:41.7152052Z Stop and delete container. Retry count = 0
+2026-04-02T10:43:41.7152925Z Stopping container: a05795aa7879_webapp-sales-d9bt2m.
+2026-04-02T10:43:41.7753399Z Deleting container: a05795aa7879_webapp-sales-d9bt2m. Retry count = 0
+2026-04-02T10:43:42.2027414Z Container spec TerminationMessagePolicy  path 
+2026-04-02T10:43:42.2029543Z Container is terminated. Total time elapsed: 487 ms.
+2026-04-02T10:43:42.2034609Z Site container: webapp-sales-d9bt2m terminated during site startup.
+2026-04-02T10:43:42.2041517Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:38:07, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:43:42.2228909Z Site startup probe failed after 29.3079823 seconds.
+2026-04-02T10:43:42.3702053Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:43:42, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:43:42.3713254Z Failed to start site. Revert by stopping site.
+2026-04-02T10:43:42.3715846Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:43:42, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:43:42.4098679Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:43:42, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: webapp-sales-d9bt2m terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-04-02T10:43:42.4099117Z Site: webapp-sales-d9bt2m stopped.
+2026-04-02T10:48:51.7846062Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:43:42, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:43:42 (UTC), DetailsLevel: ERR
+2026-04-02T10:48:53.2892156Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:43:42, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 04/02/2026 10:43:42 (UTC), DetailsLevel: ERR
+2026-04-02T10:48:53.2894054Z Container start method called.
+2026-04-02T10:48:53.2898612Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:43:42, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.6:13209/appsvc/python:3.11_20260203.2.tuxprod for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:48:53.2900057Z Establishing network.
+2026-04-02T10:48:53.2905091Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-04-02T10:48:53.5737488Z Container is starting.
+2026-04-02T10:48:53.5812320Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:43:42, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for webapp-sales-d9bt2m., DetailsLevel: INFO
+2026-04-02T10:48:53.5818514Z Establishing user namespace if not established already.
+2026-04-02T10:48:53.5819968Z Establishing network if not established already.
+2026-04-02T10:48:53.5824313Z Mounting volumes.
+2026-04-02T10:48:53.5852856Z Nested mountpoint 
+2026-04-02T10:48:53.6046158Z Nested mountpoint volatile/logs
+2026-04-02T10:48:53.6522064Z Nested mountpoint 
+2026-04-02T10:48:53.6694661Z Nested mountpoint 
+2026-04-02T10:48:53.6719628Z Nested mountpoint 
+2026-04-02T10:48:54.0024932Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:43:42, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for webapp-sales-d9bt2m. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-04-02T10:48:54.0029109Z Creating container.
+2026-04-02T10:48:54.0033489Z Creating pipes for streaming container io.
+2026-04-02T10:48:54.0036553Z Creating stdout named pipe at /podr/container/pipe/64117b8c8e18_webapp-sales-d9bt2m/stdout_f6900902ff7e4533a2a31f4022f98f58.
+2026-04-02T10:48:54.0310223Z Successfully created stdout named pipe at: /podr/container/pipe/64117b8c8e18_webapp-sales-d9bt2m/stdout_f6900902ff7e4533a2a31f4022f98f58.
+2026-04-02T10:48:54.0311810Z Opening named pipe /podr/container/pipe/64117b8c8e18_webapp-sales-d9bt2m/stdout_f6900902ff7e4533a2a31f4022f98f58 for reading in non-blocking mode.
+2026-04-02T10:48:54.0669706Z Successfully opened named pipe: /podr/container/pipe/64117b8c8e18_webapp-sales-d9bt2m/stdout_f6900902ff7e4533a2a31f4022f98f58.
+2026-04-02T10:48:54.0709005Z Successfully removed non-blocking flag from /podr/container/pipe/64117b8c8e18_webapp-sales-d9bt2m/stdout_f6900902ff7e4533a2a31f4022f98f58.
+2026-04-02T10:48:54.0728130Z Creating stderr named pipe at /podr/container/pipe/64117b8c8e18_webapp-sales-d9bt2m/stderr_34340486619f4cf28f6ea03f0bbb5ea7.
+2026-04-02T10:48:54.0733108Z Successfully created stderr named pipe at: /podr/container/pipe/64117b8c8e18_webapp-sales-d9bt2m/stderr_34340486619f4cf28f6ea03f0bbb5ea7.
+2026-04-02T10:48:54.0815573Z Opening named pipe /podr/container/pipe/64117b8c8e18_webapp-sales-d9bt2m/stderr_34340486619f4cf28f6ea03f0bbb5ea7 for reading in non-blocking mode.
+2026-04-02T10:48:54.0824704Z Successfully opened named pipe: /podr/container/pipe/64117b8c8e18_webapp-sales-d9bt2m/stderr_34340486619f4cf28f6ea03f0bbb5ea7.
+2026-04-02T10:48:54.0827316Z Successfully removed non-blocking flag from /podr/container/pipe/64117b8c8e18_webapp-sales-d9bt2m/stderr_34340486619f4cf28f6ea03f0bbb5ea7.
+2026-04-02T10:48:54.0903863Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.6:13209 and fully qualified image name: 10.1.0.6:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-04-02T10:48:54.6826881Z Starting container: 64117b8c8e18_webapp-sales-d9bt2m.
+2026-04-02T10:48:54.7527207Z Starting watchers and probes.
+2026-04-02T10:48:54.7625246Z Starting metrics collection.
+2026-04-02T10:48:54.7641450Z Container is running.
+2026-04-02T10:48:54.7716624Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:43:42, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:48:55.0745316Z Container start method finished after 1784 ms.
+2026-04-02T10:48:55.0846320Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:43:42, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container webapp-sales-d9bt2m successfully created and is running., DetailsLevel: INFO
+2026-04-02T10:48:55.0848914Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:43:42, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-04-02T10:49:29.8116797Z Site startup probe succeeded after 34.6851428 seconds.
+2026-04-02T10:49:30.0630759Z State: Starting, Action: WarmUpProbeSucceeded, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:43:42, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site startup probe succeeded after 34.6851428 seconds., DetailsLevel: INFO
+2026-04-02T10:49:30.2221086Z Site is running with deployment version: 095c1d7d-9b8d-486c-aa99-ec6b60dc1e8f
+2026-04-02T10:49:30.2226324Z Site started.
+2026-04-02T10:49:30.2227121Z State: Started, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 04/02/2026 10:43:42, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site started at 04/02/2026 10:49:30 (UTC), DetailsLevel: INFO
+2026-04-02T10:49:30.3018422Z Site is running with patch version PYTHON 3.11.14

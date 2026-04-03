@@ -116,12 +116,17 @@ def wait_for_job(ml_client: MLClient, job_name: str, timeout_minutes: int = 60) 
     if status == "Completed":
         print(f"[TRAIN] Job completed successfully in {elapsed:.0f}s")
         # Download outputs
+        download_root = os.path.join(os.path.dirname(__file__), "..", "ml", "artifacts")
         ml_client.jobs.download(
             job_name,
             output_name="default",
-            download_path=os.path.join(os.path.dirname(__file__), "..", "ml"),
+            download_path=download_root,
         )
-        return {"status": "Completed", "job_name": job_name}
+        return {
+            "status": "Completed",
+            "job_name": job_name,
+            "model_output_dir": os.path.join(download_root, "outputs", "model_output"),
+        }
     else:
         print(f"[TRAIN] Job ended with status: {status}")
         return {"status": status, "job_name": job_name}
@@ -195,7 +200,7 @@ def run_pipeline(n_samples: int = 50000, timeout_minutes: int = 60) -> dict:
         return result
 
     # Step 3: Register and evaluate
-    model_output = os.path.join(
+    model_output = result.get("model_output_dir") or os.path.join(
         os.path.dirname(__file__), "..", "ml", "outputs", "model_output"
     )
     promoted = register_and_evaluate(model_output)

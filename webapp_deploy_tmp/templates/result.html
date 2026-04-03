@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả Dự đoán</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: #333; }
+        .container { max-width: 860px; margin: 0 auto; padding: 30px 20px 40px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #fff; font-size: 2em; font-weight: 700; text-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.10); padding: 28px 32px; margin-bottom: 20px; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+        .card-title { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; padding-bottom: 12px; border-bottom: 2px solid #f0f0f5; }
+        .card-title .icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1em; flex-shrink: 0; }
+        .icon-revenue { background: #eef2ff; color: #667eea; }
+        .icon-quantity { background: #fef3e2; color: #f59e0b; }
+        .icon-input { background: #f0fdf4; color: #22c55e; }
+        .card-title h2 { font-size: 1.1em; font-weight: 600; color: #1e293b; }
+        .prediction-hero { text-align: center; margin: 24px 0; }
+        .prediction-value { font-size: 3em; font-weight: 700; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .prediction-label { font-size: 0.9em; color: #94a3b8; margin-top: 4px; }
+        .confidence { display: flex; justify-content: center; gap: 40px; margin: 20px 0; }
+        .confidence-item { text-align: center; }
+        .confidence-item .label { font-size: 0.8em; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+        .confidence-item .value { font-size: 1.25em; font-weight: 600; }
+        .confidence-item.lower .value { color: #ef4444; }
+        .confidence-item.center .value { color: #667eea; }
+        .confidence-item.upper .value { color: #22c55e; }
+        .bar-track { background: #f1f5f9; border-radius: 10px; height: 12px; position: relative; overflow: hidden; margin: 8px 0; }
+        .bar-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, #ef4444, #f59e0b, #22c55e); }
+        .bar-labels { display: flex; justify-content: space-between; font-size: 0.78em; color: #94a3b8; }
+        .input-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .input-item { display: flex; justify-content: space-between; padding: 10px 14px; background: #f8fafc; border-radius: 10px; }
+        .input-item .key { color: #94a3b8; font-size: 0.9em; }
+        .input-item .val { font-weight: 600; color: #1e293b; }
+        .source-badge { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 0.8em; font-weight: 500; }
+        .source-azure { background: #eef2ff; color: #667eea; }
+        .source-mock { background: #fff7ed; color: #ea580c; }
+        .source-center { text-align: center; margin-top: 18px; }
+        .status-success { border-left: 4px solid #22c55e; }
+        .status-error { border-left: 4px solid #ef4444; }
+        .error-msg { background: #fef2f2; color: #dc2626; padding: 16px; border-radius: 10px; font-size: 0.95em; }
+        .actions { text-align: center; margin: 32px 0 10px; }
+        .btn { display: inline-block; padding: 13px 36px; border: none; border-radius: 12px; font-size: 1em; font-weight: 600; cursor: pointer; text-decoration: none; font-family: inherit; transition: all 0.3s; }
+        .btn-back { background: rgba(255,255,255,0.2); color: #fff; backdrop-filter: blur(4px); border: 1.5px solid rgba(255,255,255,0.3); }
+        .btn-back:hover { background: rgba(255,255,255,0.35); }
+        .quantity-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px; }
+        .quantity-badge { background: #fef3e2; color: #d97706; padding: 8px 20px; border-radius: 10px; font-weight: 600; font-size: 1.1em; }
+        @media (max-width: 600px) {
+            .input-summary { grid-template-columns: 1fr; }
+            .confidence { flex-direction: column; gap: 12px; }
+            .container { padding: 20px 12px; }
+            .card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Kết quả Dự đoán</h1>
+        </div>
+
+        {% if result.status == 'success' %}
+        <div class="card status-success">
+            <div class="card-title">
+                <div class="icon icon-revenue">&#128176;</div>
+                <h2>Doanh thu Dự đoán</h2>
+            </div>
+            <div class="prediction-hero">
+                <div class="prediction-value">${{ "%.2f"|format(result.prediction.predicted_revenue) }}</div>
+                <div class="prediction-label">Predicted Revenue</div>
+            </div>
+
+            {% if result.prediction.confidence_interval %}
+            <div class="confidence">
+                <div class="confidence-item lower">
+                    <div class="label">Cận dưới</div>
+                    <div class="value">${{ "%.2f"|format(result.prediction.confidence_interval.lower) }}</div>
+                </div>
+                <div class="confidence-item center">
+                    <div class="label">Dự đoán</div>
+                    <div class="value">${{ "%.2f"|format(result.prediction.predicted_revenue) }}</div>
+                </div>
+                <div class="confidence-item upper">
+                    <div class="label">Cận trên</div>
+                    <div class="value">${{ "%.2f"|format(result.prediction.confidence_interval.upper) }}</div>
+                </div>
+            </div>
+            <div style="max-width:400px;margin:0 auto;">
+                <div class="bar-track"><div class="bar-fill" style="width:70%"></div></div>
+                <div class="bar-labels">
+                    <span>${{ "%.2f"|format(result.prediction.confidence_interval.lower) }}</span>
+                    <span>${{ "%.2f"|format(result.prediction.confidence_interval.upper) }}</span>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if result.prediction.predicted_quantity %}
+            <div class="quantity-row">
+                <span style="color:#94a3b8;font-size:0.9em;">Số lượng dự đoán:</span>
+                <span class="quantity-badge">{{ result.prediction.predicted_quantity }} sản phẩm</span>
+            </div>
+            {% endif %}
+
+            <div class="source-center">
+                {% if 'Mock' in result.source %}
+                <span class="source-badge source-mock">{{ result.source }}</span>
+                {% else %}
+                <span class="source-badge source-azure">{{ result.source }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% else %}
+        <div class="card status-error">
+            <div class="card-title">
+                <div class="icon" style="background:#fef2f2;color:#ef4444;">&#10060;</div>
+                <h2>Lỗi</h2>
+            </div>
+            <div class="error-msg">{{ result.message }}</div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-title">
+                <div class="icon icon-input">&#128203;</div>
+                <h2>Tham số đầu vào</h2>
+            </div>
+            <div class="input-summary">
+                <div class="input-item"><span class="key">Giờ</span><span class="val">{{ input_data.get('hour', 'N/A') }}h</span></div>
+                <div class="input-item"><span class="key">Tháng</span><span class="val">{{ input_data.get('month', 'N/A') }}</span></div>
+                <div class="input-item"><span class="key">Cửa hàng</span><span class="val">{{ input_data.get('store_id', 'N/A') }}</span></div>
+                <div class="input-item"><span class="key">Sản phẩm</span><span class="val">{{ input_data.get('product_id', 'N/A') }}</span></div>
+                <div class="input-item"><span class="key">Danh mục</span><span class="val">{{ input_data.get('category', 'N/A') }}</span></div>
+                <div class="input-item"><span class="key">Nhiệt độ</span><span class="val">{{ input_data.get('temperature', 'N/A') }}°C</span></div>
+                <div class="input-item"><span class="key">Mưa</span><span class="val">{{ 'Có' if input_data.get('is_rainy') == 1 else 'Không' }}</span></div>
+                <div class="input-item"><span class="key">Ngày lễ</span><span class="val">{{ 'Có' if input_data.get('holiday') == 1 else 'Không' }}</span></div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/" class="btn btn-back">&larr; Dự đoán lại</a>
+        </div>
+    </div>
+</body>
+</html>

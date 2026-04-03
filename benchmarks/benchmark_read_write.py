@@ -9,7 +9,6 @@ Mục 3.1 Rubric: Đo benchmark đọc/ghi dữ liệu trên Azure SQL Database.
 import os
 import sys
 import time
-import uuid
 import json
 import random
 from datetime import datetime, timedelta
@@ -17,7 +16,7 @@ from datetime import datetime, timedelta
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from config.settings import (
     SQL_SERVER, SQL_DATABASE, SQL_USERNAME, SQL_PASSWORD, SQL_DRIVER,
-    PRODUCTS, REGIONS, PAYMENT_METHODS, CUSTOMER_SEGMENTS,
+    PRODUCTS, STORE_IDS,
 )
 
 try:
@@ -41,30 +40,30 @@ def generate_row():
     product = random.choice(PRODUCTS)
     quantity = random.randint(1, 10)
     unit_price = round(product["base_price"] * random.uniform(0.85, 1.15), 2)
-    total = round(unit_price * quantity, 2)
-    discount_pct = random.choice([0, 5, 10, 15, 20])
-    discount_amt = round(total * discount_pct / 100, 2)
-    final = round(total - discount_amt, 2)
+    revenue = round(unit_price * quantity, 2)
     dt = datetime(2024, 1, 1) + timedelta(seconds=random.randint(0, 30_000_000))
+    weather = random.choice(["sunny", "rainy", "cloudy", "stormy"])
+    holiday = random.choice([0, 0, 0, 1])
 
     return (
-        str(uuid.uuid4()), dt.isoformat(), dt.strftime("%Y-%m-%d"),
-        dt.hour, ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][dt.weekday()],
-        product["id"], product["name"], product["category"],
-        quantity, unit_price, total, discount_pct, discount_amt, final,
-        f"C{random.randint(1,5000):05d}", random.choice(CUSTOMER_SEGMENTS),
-        random.choice(REGIONS), random.choice(PAYMENT_METHODS),
-        random.choice([0, 1]), random.randint(1, 5),
+        dt.isoformat(),
+        random.choice(STORE_IDS),
+        product["id"],
+        quantity,
+        unit_price,
+        revenue,
+        round(random.uniform(15, 40), 1),
+        weather,
+        holiday,
+        product["category"],
     )
 
 
 INSERT_SQL = """
     INSERT INTO SalesTransactions
-        (transaction_id, event_timestamp, sale_date, sale_hour, day_of_week,
-         product_id, product_name, category, quantity, unit_price,
-         total_amount, discount_percent, discount_amount, final_amount,
-         customer_id, customer_segment, region, payment_method, is_online, rating)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        (event_time, store_id, product_id, units_sold, unit_price,
+         revenue, temperature, weather, holiday, category)
+    VALUES (?,?,?,?,?,?,?,?,?,?)
 """
 
 
@@ -121,40 +120,40 @@ def benchmark_queries(conn) -> list:
     cursor = conn.cursor()
     queries = [
         ("COUNT(*)", "SELECT COUNT(*) FROM SalesTransactions"),
-        ("SUM + GROUP BY region", """
-            SELECT region, SUM(final_amount) AS revenue, COUNT(*) AS cnt
+        ("SUM + GROUP BY store_id", """
+            SELECT store_id, SUM(revenue) AS total_revenue, COUNT(*) AS cnt
             FROM SalesTransactions
-            GROUP BY region
-            ORDER BY revenue DESC
+            GROUP BY store_id
+            ORDER BY total_revenue DESC
         """),
         ("AVG + GROUP BY category", """
-            SELECT category, AVG(final_amount) AS avg_amount, COUNT(*) AS cnt
+            SELECT category, AVG(revenue) AS avg_revenue, COUNT(*) AS cnt
             FROM SalesTransactions
             GROUP BY category
         """),
         ("TOP 10 products", """
-            SELECT TOP 10 product_name, SUM(final_amount) AS total_revenue
+            SELECT TOP 10 product_id, SUM(revenue) AS total_revenue
             FROM SalesTransactions
-            GROUP BY product_name
+            GROUP BY product_id
             ORDER BY total_revenue DESC
         """),
         ("WHERE + ORDER BY", """
-            SELECT TOP 100 transaction_id, final_amount, region, category
+            SELECT TOP 100 id, revenue, store_id, category
             FROM SalesTransactions
-            WHERE final_amount > 100
-            ORDER BY final_amount DESC
+            WHERE revenue > 10
+            ORDER BY revenue DESC
         """),
         ("DATE range filter", """
-            SELECT COUNT(*) AS cnt, SUM(final_amount) AS revenue
+            SELECT COUNT(*) AS cnt, SUM(revenue) AS total_revenue
             FROM SalesTransactions
-            WHERE sale_date BETWEEN '2024-03-01' AND '2024-06-30'
+            WHERE event_time BETWEEN '2024-03-01' AND '2024-06-30'
         """),
         ("Multi-condition filter", """
-            SELECT region, category, SUM(final_amount) AS revenue
+            SELECT store_id, category, SUM(revenue) AS total_revenue
             FROM SalesTransactions
-            WHERE is_online = 1 AND discount_percent > 0
-            GROUP BY region, category
-            ORDER BY revenue DESC
+            WHERE holiday = 1 AND temperature > 30
+            GROUP BY store_id, category
+            ORDER BY total_revenue DESC
         """),
     ]
 
@@ -199,7 +198,7 @@ def run_full_benchmark():
         print(f"\n  --- {n:,} dòng ---")
         # Xóa dữ liệu cũ
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM SalesTransactions WHERE transaction_id LIKE '%-%'")
+        cursor.execute("DELETE FROM SalesTransactions WHERE store_id IN ('S01','S02','S03')")
         conn.commit()
         cursor.close()
 
@@ -208,7 +207,7 @@ def run_full_benchmark():
         print(f"  Single: {r1['time_sec']}s ({r1['rows_per_sec']} rows/s)")
 
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM SalesTransactions WHERE transaction_id LIKE '%-%'")
+        cursor.execute("DELETE FROM SalesTransactions WHERE store_id IN ('S01','S02','S03')")
         conn.commit()
         cursor.close()
 

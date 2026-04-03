@@ -1,0 +1,43 @@
+{
+  "pipeline": "local-first-mlops",
+  "started_at": "2026-04-02T17:30:57.136820Z",
+  "params": {
+    "bootstrap_samples": 5000,
+    "retrain_samples": 8000,
+    "n_estimators": 120,
+    "max_depth": 6,
+    "learning_rate": 0.1,
+    "promote": true
+  },
+  "steps": [
+    {
+      "step": "bootstrap_train",
+      "skipped": true,
+      "reason": "model artifacts already exist",
+      "finished_at": "2026-04-02T17:30:57.136820Z"
+    },
+    {
+      "command": "C:\\Users\\Admin\\azure-realtime-sales-analytics\\.venv\\Scripts\\python.exe ml\\retrain_and_compare.py --new-samples 8000 --new-estimators 120 --new-depth 6 --new-lr 0.1 --promote",
+      "returncode": 0,
+      "started_at": "2026-04-02T17:30:57.136820Z",
+      "finished_at": "2026-04-02T17:31:08.937856Z",
+      "stdout_tail": "[WARN] Azure ML SDK not available. Running locally.\n============================================================\n  RETRAIN & COMPARE â€” Chá»©ng minh mÃ´ hÃ¬nh má»›i tá»‘t hÆ¡n\n============================================================\n\n[OLD MODEL] Trained on 80000 samples\n  Revenue RÂ²: 0.8791\n  Quantity RÂ²: 0.8002\n\n[DATA] Generating 8000 samples (same for both models)...\n\n[OLD] Training OLD model: Ridge Regression (linear baseline)...\n[EVAL] Evaluating old model...\n  Old Revenue â†’ RÂ²: 0.5774 | MAE: 14.9957\n  Old Quantity â†’ RÂ²: 0.5373 | MAE: 11.9031\n\n[NEW] Training NEW model: GradientBoosting (120 est, depth=6, lr=0.1)...\n[EVAL] Evaluating new model on common test set...\n  New Revenue â†’ RÂ²: 0.8734 | MAE: 8.2396\n  New Quantity â†’ RÂ²: 0.7838 | MAE: 7.9523\n\n============================================================\n  DECISION: PROMOTE\n  Revenue RÂ²: 0.5774 â†’ 0.8734  (âœ“)\n  Quantity RÂ²: 0.5373 â†’ 0.7838  (âœ“)\n============================================================\n\n[CHARTS] Generating comparison charts...\n  âœ“ Dashboard saved\n  âœ“ Waterfall chart saved\n\n[INFO] Report saved: C:\\Users\\Admin\\azure-realtime-sales-analytics\\ml\\model_output\\retrain_comparison\\comparison_report.json\n[INFO] Run archived: C:\\Users\\Admin\\azure-realtime-sales-analytics\\ml\\model_output\\retrain_history\\20260402_173108\n\n[PROMOTE] Saving new models as current production models...\n  âœ“ Models promoted!\n\nâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€\nMetric                           Old        New      Delta\nâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€\n  Revenue r2_score               0.5774     0.8734    +0.2960\n  Revenue mae                   14.9957     8.2396    -6.7561\n  Revenue rmse                  18.6481    10.2060    -8.4421\n  Revenue cv_r2_mean             0.5877     0.8684    +0.2807\n  Quantity r2_score               0.5373     0.7838    +0.2465\n  Quantity mae                   11.9031     7.9523    -3.9508\n  Quantity rmse                  15.2340    10.4125    -4.8215\n  Quantity cv_r2_mean             0.5501     0.7771    +0.2270\nâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€\n\n[INFO] Charts saved to: C:\\Users\\Admin\\azure-realtime-sales-analytics\\ml\\model_output\\retrain_comparison\n[INFO] View report at: http://localhost:5000/model-report\n",
+      "stderr_tail": "",
+      "step": "retrain_compare",
+      "ok": true
+    },
+    {
+      "command": "C:\\Users\\Admin\\azure-realtime-sales-analytics\\.venv\\Scripts\\python.exe -c import json;from webapp.app import call_ml_endpoint;sample={'hour':14,'day_of_month':15,'month':6,'is_weekend':0,'store_id':'S01','product_id':'COKE','category':'Beverage','temperature':28,'is_rainy':0,'holiday':0};res=call_ml_endpoint(sample);print(json.dumps({'status':res.get('status'),'source':res.get('source')}, ensure_ascii=False))",
+      "returncode": 0,
+      "started_at": "2026-04-02T17:31:08.937856Z",
+      "finished_at": "2026-04-02T17:31:32.797066Z",
+      "stdout_tail": "[INFO] Local models loaded: v10.0\n{\"status\": \"success\", \"source\": \"Local Model (v10.0)\"}\n",
+      "stderr_tail": "",
+      "step": "smoke_predict",
+      "ok": true,
+      "prediction_source": "Local Model (v10.0)"
+    }
+  ],
+  "status": "success",
+  "finished_at": "2026-04-02T17:31:32.797066Z"
+}

@@ -9,11 +9,12 @@ import time
 import signal
 import sys
 from datetime import datetime, timezone
-from azure.eventhub import EventHubProducerClient, EventData
+from azure.eventhub import EventHubProducerClient, EventData, TransportType
 
 sys.path.insert(0, ".")
 from config.settings import (
     EVENT_HUB_CONNECTION_STRING,
+    EVENT_HUB_TRANSPORT,
     REGIONS,
 )
 
@@ -36,9 +37,16 @@ class WeatherDataGenerator:
     }
 
     def __init__(self):
+        transport_name = (EVENT_HUB_TRANSPORT or "AmqpOverWebsocket").strip().lower()
+        transport_type = (
+            TransportType.Amqp
+            if transport_name in {"amqp", "tcp", "amqptcp"}
+            else TransportType.AmqpOverWebsocket
+        )
         self.producer = EventHubProducerClient.from_connection_string(
             conn_str=EVENT_HUB_CONNECTION_STRING,
             eventhub_name=WEATHER_EVENT_HUB_NAME,
+            transport_type=transport_type,
         )
         self.running = True
         self.total_sent = 0

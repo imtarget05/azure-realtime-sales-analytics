@@ -1,0 +1,58 @@
+{
+  "feature_columns": [
+    "hour",
+    "day_of_month",
+    "month",
+    "is_weekend",
+    "hour_sin",
+    "hour_cos",
+    "month_sin",
+    "month_cos",
+    "store_id_enc",
+    "product_id_enc",
+    "category_enc",
+    "temperature",
+    "is_rainy",
+    "holiday"
+  ],
+  "categorical_columns": [
+    "store_id",
+    "product_id",
+    "category"
+  ],
+  "revenue_metrics": {
+    "mae": 7.9706,
+    "rmse": 9.8853,
+    "r2_score": 0.8794,
+    "cv_r2_mean": 0.8624,
+    "cv_r2_std": 0.0018
+  },
+  "quantity_metrics": {
+    "mae": 7.759,
+    "rmse": 10.0312,
+    "r2_score": 0.8003,
+    "cv_r2_mean": 0.7687,
+    "cv_r2_std": 0.0052
+  },
+  "training_samples": 80000,
+  "trained_at": "2026-04-02T12:28:00.461928",
+  "model_version": "v3.0",
+  "retrain_history": [
+    {
+      "timestamp": "2026-04-02T12:28:00.461928",
+      "old_config": {
+        "n_samples": 50000,
+        "algorithm": "Ridge Regression",
+        "alpha": 1.0
+      },
+      "new_config": {
+        "n_samples": 80000,
+        "algorithm": "GradientBoosting",
+        "n_estimators": 300,
+        "max_depth": 6,
+        "learning_rate": 0.1
+      },
+      "decision": "PROMOTE"
+    }
+  ]
+}

@@ -1,0 +1,155 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dự đoán Doanh thu Bán hàng</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: #333; }
+        .container { max-width: 860px; margin: 0 auto; padding: 30px 20px 40px; }
+        .header { text-align: center; margin-bottom: 35px; }
+        .header h1 { color: #fff; font-size: 2em; font-weight: 700; text-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-bottom: 8px; }
+        .header .subtitle { color: rgba(255,255,255,0.85); font-size: 0.95em; }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.10); padding: 28px 32px; margin-bottom: 20px; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+        .card-title { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; padding-bottom: 12px; border-bottom: 2px solid #f0f0f5; }
+        .card-title .icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1em; flex-shrink: 0; }
+        .icon-time { background: #eef2ff; color: #667eea; }
+        .icon-store { background: #fef3e2; color: #f59e0b; }
+        .icon-weather { background: #e6fbf4; color: #10b981; }
+        .card-title h2 { font-size: 1.1em; font-weight: 600; color: #1e293b; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .form-group { margin-bottom: 2px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #64748b; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.03em; }
+        .form-group select, .form-group input {
+            width: 100%; padding: 11px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+            font-size: 0.95em; font-family: inherit; background: #f8fafc; transition: all 0.25s;
+        }
+        .form-group select:focus, .form-group input:focus {
+            border-color: #667eea; outline: none; box-shadow: 0 0 0 3px rgba(102,126,234,0.15); background: #fff;
+        }
+        .btn-submit {
+            display: block; width: 100%; padding: 15px; border: none; border-radius: 12px;
+            font-size: 1.1em; font-weight: 600; cursor: pointer; margin-top: 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.4); transition: all 0.3s;
+            font-family: inherit;
+        }
+        .btn-submit:hover { box-shadow: 0 6px 20px rgba(102,126,234,0.55); transform: translateY(-1px); }
+        .btn-submit:active { transform: translateY(0); }
+        .footer { text-align: center; margin-top: 32px; color: rgba(255,255,255,0.7); font-size: 0.82em; }
+        .footer a { color: rgba(255,255,255,0.9); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .container { padding: 20px 12px; }
+            .card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Dự đoán Doanh thu Bán hàng</h1>
+            <p class="subtitle">Azure ML Endpoint &mdash; Real-time Sales Analytics</p>
+        </div>
+
+        <form action="/predict" method="POST">
+            <div class="card">
+                <div class="card-title">
+                    <div class="icon icon-time">&#128339;</div>
+                    <h2>Thời gian</h2>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Giờ (0-23)</label>
+                        <input type="number" name="hour" min="0" max="23" value="14" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ngày trong tuần</label>
+                        <select name="day_of_week">
+                            <option value="0">Thứ Hai</option>
+                            <option value="1">Thứ Ba</option>
+                            <option value="2" selected>Thứ Tư</option>
+                            <option value="3">Thứ Năm</option>
+                            <option value="4">Thứ Sáu</option>
+                            <option value="5">Thứ Bảy</option>
+                            <option value="6">Chủ Nhật</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tháng</label>
+                        <select name="month">
+                            {% for m in range(1, 13) %}
+                            <option value="{{ m }}" {% if m == 6 %}selected{% endif %}>Tháng {{ m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ngày lễ</label>
+                        <select name="holiday">
+                            <option value="0" selected>Không</option>
+                            <option value="1">Có</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <div class="icon icon-store">&#127978;</div>
+                    <h2>Cửa hàng &amp; Sản phẩm</h2>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Cửa hàng</label>
+                        <select name="store_id">
+                            {% for s in stores %}
+                            <option value="{{ s.id }}">{{ s.id }} &ndash; {{ s.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Sản phẩm</label>
+                        <select name="product_id">
+                            {% for p in products %}
+                            <option value="{{ p.id }}">{{ p.name }} ({{ p.category }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <div class="icon icon-weather">&#9729;&#65039;</div>
+                    <h2>Thời tiết</h2>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nhiệt độ (°C)</label>
+                        <input type="number" name="temperature" step="0.1" value="28" min="-10" max="50">
+                    </div>
+                    <div class="form-group">
+                        <label>Trời mưa?</label>
+                        <select name="is_rainy">
+                            <option value="0" selected>Không</option>
+                            <option value="1">Có</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Dự đoán Doanh thu</button>
+        </form>
+
+        <div class="footer">
+            <p>Đồ án Cloud Computing &mdash; Hệ thống phân tích dữ liệu bán hàng thời gian thực trên Azure</p>
+            <p style="margin-top: 6px;"><a href="/model-report">Xem báo cáo mô hình ML</a></p>
+        </div>
+    </div>
+</body>
+</html>

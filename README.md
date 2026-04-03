@@ -267,6 +267,126 @@ AZURE_RESOURCE_GROUP=rg-sales-analytics
 ```
 </details>
 
+## 🧪 Local-First MLOps (Khuyến nghị trước khi đẩy Azure)
+
+Mục tiêu: giữ nguyên toàn bộ nội dung dự án nhưng chạy ổn định ở local để demo,
+chứng minh luồng MLOps tự học trước khi deploy cloud.
+
+### Luồng local-first
+
+1. Bootstrap model local nếu chưa có artifact.
+2. Retrain và gate check old vs new.
+3. Promote local model nếu cải thiện.
+4. Smoke test đường dự đoán local (không phụ thuộc endpoint Azure).
+5. Lưu report chạy pipeline vào `ml/model_output/local_pipeline_report.json`.
+
+### Chạy 1 lệnh
+
+```bash
+python mlops/local_first_pipeline.py
+```
+
+Tuỳ chỉnh nhanh:
+
+```bash
+python mlops/local_first_pipeline.py --bootstrap-samples 20000 --retrain-samples 30000 --n-estimators 180
+python mlops/local_first_pipeline.py --no-promote
+```
+
+### Kết quả mong đợi
+
+- In ra `Status: success` trong terminal.
+- Có file `ml/model_output/local_pipeline_report.json`.
+- Web app `/predict` trả kết quả với `source` là `Local Model (vX.Y)` khi Azure endpoint không khả dụng.
+
+### Sau khi local pass mới đẩy Azure
+
+1. Chạy local-first pipeline để khóa model/metrics.
+2. Kiểm tra UI retrain: `/retrain` và report: `/model-report`.
+3. Chỉ khi local ổn định mới chạy CI/CD Azure (`.github/workflows/ci-cd-mlops.yml`).
+
+## 🔁 Drift Monitor & Continuous Training
+
+Script `ml/drift_monitor.py` đóng vòng lặp CT theo MAE từ SQL view `dbo.vw_ForecastVsActual`:
+
+```bash
+python ml/drift_monitor.py --threshold-mae 25 --window-hours 24 --min-samples 24
+```
+
+Nếu `MAE > threshold`, script sẽ tự động gọi:
+
+```bash
+python ml/retrain_and_compare.py --promote
+```
+
+Chạy đầy đủ local + Azure ML pipeline trigger:
+
+```bash
+python ml/drift_monitor.py --threshold-mae 25 --window-hours 24 --min-samples 24 --trigger-mode both
+```
+
+Verify Continuous Training (kịch bản chấm điểm):
+
+1. Chạy web app và mở trang dự báo.
+2. Tăng mạnh doanh thu từ simulator (hoặc replay file có outlier).
+3. Kiểm tra cảnh báo realtime trong SQL bảng `dbo.SalesAlerts`.
+4. Chạy `drift_monitor.py`, xác nhận `triggered=true` trong báo cáo.
+5. Sau khi retrain hoàn tất, F5 `http://localhost:5000/model-report` để thấy biểu đồ/metrics mới.
+
+Inject drift nhanh bằng .env (ví dụ đẩy giá Coca/Pepsi lên cao):
+
+```env
+PRICE_SHOCK_ENABLED=true
+PRICE_SHOCK_MULTIPLIER=6.5
+PRICE_SHOCK_PRODUCTS=COKE,PEPSI
+```
+
+Sau đó chạy lại simulator:
+
+```bash
+python data_generator/sales_generator.py
+```
+
+Nếu muốn drift monitor tự bắn GitHub Actions workflow khi vượt ngưỡng MAE:
+
+```env
+DRIFT_TRIGGER_GITHUB_ACTIONS=true
+GITHUB_REPO=<owner/repo>
+GITHUB_WORKFLOW_FILE=ci-cd-mlops.yml
+GITHUB_REF=main
+GITHUB_TOKEN=<token>
+```
+
+```bash
+python ml/drift_monitor.py --trigger-mode local --trigger-github-actions
+```
+
+Query kiểm tra nhanh cảnh báo realtime:
+
+```sql
+SELECT TOP 20 alert_time, store_id, type, value
+FROM dbo.SalesAlerts
+ORDER BY alert_time DESC;
+```
+
+Artifacts để demo:
+- `ml/model_output/drift_monitor_report.json`
+- `ml/model_output/retrain_comparison/comparison_report.json`
+- Trang web report: `http://localhost:5000/model-report`
+
+## ✅ Success Criteria khi demo
+
+1. Web App dự báo ban đầu còn thấp.
+2. Simulator tạo spike doanh thu, SQL xuất hiện alert realtime trong `SalesAlerts`.
+3. `drift_monitor.py` phát hiện MAE vượt ngưỡng và tự gọi retrain/promote.
+4. Sau retrain, `model-report` và kết quả dự báo cập nhật theo xu hướng mới.
+
+Chạy thử không trigger retrain:
+
+```bash
+python ml/drift_monitor.py --dry-run
+```
+
 ### Bước 4 — Upload dữ liệu tham chiếu lên Blob Storage
 
 ```bash

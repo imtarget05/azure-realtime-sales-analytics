@@ -1,16 +1,84 @@
 """
 Cấu hình trung tâm cho hệ thống trực quan dữ liệu bán hàng thời gian thực.
 
-Tất cả giá trị được đọc từ biến môi trường (.env). Nếu chưa có file .env,
-hãy copy file .env.example và điền thông tin Azure / API thực tế của bạn.
+Tất cả giá trị được đọc từ biến môi trường (.env). Nếu biến để trống và
+có KEY_VAULT_URI, sẽ tự động lấy secret từ Azure Key Vault.
 
     cp .env.example .env
 """
 
 import os
+import logging
 from dotenv import load_dotenv
 
 load_dotenv()
+
+_logger = logging.getLogger(__name__)
+
+# ─────────────────────────────────────────────
+# Key Vault integration
+# ─────────────────────────────────────────────
+KEY_VAULT_URI = os.getenv("KEY_VAULT_URI", "")
+KEY_VAULT_NAME = os.getenv("KEY_VAULT_NAME", "")
+
+_kv_client = None
+
+
+def _get_kv_client():
+    """Lazy-init Key Vault client (chỉ tạo khi cần)."""
+    global _kv_client
+    if _kv_client is not None:
+        return _kv_client
+    if not KEY_VAULT_URI:
+        return None
+    try:
+        from azure.identity import DefaultAzureCredential
+        from azure.keyvault.secrets import SecretClient
+        credential = DefaultAzureCredential()
+        _kv_client = SecretClient(vault_url=KEY_VAULT_URI, credential=credential)
+        _logger.info("Key Vault client initialized: %s", KEY_VAULT_URI)
+        return _kv_client
+    except Exception as e:
+        _logger.warning("Không thể kết nối Key Vault: %s", e)
+        return None
+
+
+def _get_secret(
+    env_var: str,
+    kv_secret_name: str,
+    default: str = "",
+    prefer_key_vault: bool = False,
+) -> str:
+    """
+    Ưu tiên: env var → Key Vault → default.
+    Nếu env var có giá trị (không rỗng, không placeholder) thì dùng luôn.
+    Nếu không, thử lấy từ Key Vault.
+    """
+    value = os.getenv(env_var, "")
+
+    if prefer_key_vault:
+        client = _get_kv_client()
+        if client:
+            try:
+                secret = client.get_secret(kv_secret_name)
+                if secret.value:
+                    return secret.value
+            except Exception as e:
+                _logger.debug("Key Vault secret '%s' not found: %s", kv_secret_name, e)
+        if value and not value.startswith("<"):
+            return value
+        return default
+
+    if value and not value.startswith("<"):
+        return value
+    client = _get_kv_client()
+    if client:
+        try:
+            secret = client.get_secret(kv_secret_name)
+            return secret.value
+        except Exception as e:
+            _logger.debug("Key Vault secret '%s' not found: %s", kv_secret_name, e)
+    return default
 
 
 def _get_bool(name: str, default: bool = False) -> bool:
@@ -37,9 +105,10 @@ def _get_float(name: str, default: float) -> float:
 # ─────────────────────────────────────────────
 # Azure Event Hubs
 # ─────────────────────────────────────────────
-EVENT_HUB_CONNECTION_STRING = os.getenv(
+EVENT_HUB_CONNECTION_STRING = _get_secret(
     "EVENT_HUB_CONNECTION_STRING",
-    "<Your-Event-Hub-Connection-String>",
+    "event-hub-connection-string",
+    prefer_key_vault=True,
 )
 EVENT_HUB_NAME = os.getenv("EVENT_HUB_NAME", "sales-events")
 
@@ -47,14 +116,15 @@ EVENT_HUB_MAX_RETRIES = _get_int("EVENT_HUB_MAX_RETRIES", 5)
 EVENT_HUB_RETRY_BACKOFF_FACTOR = _get_float("EVENT_HUB_RETRY_BACKOFF_FACTOR", 0.8)
 EVENT_HUB_RETRY_BACKOFF_MAX = _get_int("EVENT_HUB_RETRY_BACKOFF_MAX", 30)
 EVENT_HUB_SEND_TIMEOUT = _get_int("EVENT_HUB_SEND_TIMEOUT", 30)
+EVENT_HUB_TRANSPORT = os.getenv("EVENT_HUB_TRANSPORT", "AmqpOverWebsocket")
 
 # ─────────────────────────────────────────────
 # Azure SQL Database
 # ─────────────────────────────────────────────
-SQL_SERVER = os.getenv("SQL_SERVER", "<your-server>.database.windows.net")
+SQL_SERVER = os.getenv("SQL_SERVER", "sql-sales-analytics-d9bt2m.database.windows.net")
 SQL_DATABASE = os.getenv("SQL_DATABASE", "SalesAnalyticsDB")
-SQL_USERNAME = os.getenv("SQL_USERNAME", "<your-username>")
-SQL_PASSWORD = os.getenv("SQL_PASSWORD", "<your-password>")
+SQL_USERNAME = _get_secret("SQL_USERNAME", "sql-admin-username")
+SQL_PASSWORD = _get_secret("SQL_PASSWORD", "sql-admin-password", prefer_key_vault=True)
 SQL_DRIVER = os.getenv("SQL_DRIVER", "{ODBC Driver 18 for SQL Server}")
 
 # ─────────────────────────────────────────────
@@ -64,7 +134,7 @@ AML_WORKSPACE_NAME = os.getenv("AML_WORKSPACE_NAME", "<your-aml-workspace>")
 AML_SUBSCRIPTION_ID = os.getenv("AML_SUBSCRIPTION_ID", "<your-subscription-id>")
 AML_RESOURCE_GROUP = os.getenv("AML_RESOURCE_GROUP", "<your-resource-group>")
 AML_ENDPOINT_URL = os.getenv("AML_ENDPOINT_URL", "<your-ml-endpoint-url>")
-AML_API_KEY = os.getenv("AML_API_KEY", "<your-ml-api-key>")
+AML_API_KEY = _get_secret("AML_API_KEY", "ml-api-key") or "<your-ml-api-key>"
 
 ML_ENDPOINT_URL = AML_ENDPOINT_URL
 ML_API_KEY = AML_API_KEY
@@ -72,9 +142,8 @@ ML_API_KEY = AML_API_KEY
 # ─────────────────────────────────────────────
 # Azure Blob Storage
 # ─────────────────────────────────────────────
-BLOB_CONNECTION_STRING = os.getenv(
-    "BLOB_CONNECTION_STRING",
-    "<Your-Blob-Storage-Connection-String>",
+BLOB_CONNECTION_STRING = _get_secret(
+    "BLOB_CONNECTION_STRING", "blob-connection-string"
 )
 BLOB_CONTAINER_REFERENCE = os.getenv("BLOB_CONTAINER_REFERENCE", "reference-data")
 BLOB_CONTAINER_ARCHIVE = os.getenv("BLOB_CONTAINER_ARCHIVE", "sales-archive")
@@ -95,8 +164,8 @@ AZURE_LOCATION = os.getenv("AZURE_LOCATION", "eastus")
 # ─────────────────────────────────────────────
 # External APIs
 # ─────────────────────────────────────────────
-OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY", "")
-CALENDARIFIC_API_KEY = os.getenv("CALENDARIFIC_API_KEY", "")
+OPENWEATHER_API_KEY = _get_secret("OPENWEATHER_API_KEY", "openweather-api-key")
+CALENDARIFIC_API_KEY = _get_secret("CALENDARIFIC_API_KEY", "calendarific-api-key")
 DEFAULT_COUNTRY_CODE = os.getenv("DEFAULT_COUNTRY_CODE", "VN")
 
 WEATHER_CACHE_TTL = _get_int("WEATHER_CACHE_TTL", 600)
@@ -114,15 +183,41 @@ BURST_ENABLED = _get_bool("BURST_ENABLED", True)
 BURST_MULTIPLIER = _get_int("BURST_MULTIPLIER", 3)
 BURST_DURATION_SECONDS = _get_int("BURST_DURATION_SECONDS", 15)
 
+# Price shock mode (for drift demo)
+PRICE_SHOCK_ENABLED = _get_bool("PRICE_SHOCK_ENABLED", False)
+PRICE_SHOCK_MULTIPLIER = _get_float("PRICE_SHOCK_MULTIPLIER", 1.0)
+PRICE_SHOCK_PRODUCTS = {
+    p.strip().upper()
+    for p in os.getenv("PRICE_SHOCK_PRODUCTS", "").split(",")
+    if p.strip()
+}
+
 REPLAY_MODE = _get_bool("REPLAY_MODE", False)
 REPLAY_FILE = os.getenv("REPLAY_FILE", "sample_events.jsonl")
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
 # ─────────────────────────────────────────────
+# Databricks
+# ─────────────────────────────────────────────
+DATABRICKS_HOST = _get_secret(
+    "DATABRICKS_HOST", "databricks-host",
+    default="https://adb-7405619740283965.5.azuredatabricks.net",
+)
+DATABRICKS_TOKEN = _get_secret("DATABRICKS_TOKEN", "databricks-token")
+
+# ─────────────────────────────────────────────
 # Danh mục dữ liệu giả lập
+# Nguồn duy nhất (single source of truth) cho tất cả product definitions.
+# SALES_PRODUCTS được derive từ PRODUCTS — không hardcode riêng.
 # ─────────────────────────────────────────────
 PRODUCTS = [
+    # ── Sản phẩm Event Hub (data generator → Stream Analytics) ──
+    {"id": "COKE",  "name": "Coca-Cola",      "category": "Beverage",     "base_price": 1.5,  "min_price": 1.2, "max_price": 1.8},
+    {"id": "PEPSI", "name": "Pepsi",          "category": "Beverage",     "base_price": 1.4,  "min_price": 1.1, "max_price": 1.7},
+    {"id": "BREAD", "name": "Bread",          "category": "Bakery",       "base_price": 1.15, "min_price": 0.8, "max_price": 1.5},
+    {"id": "MILK",  "name": "Milk",           "category": "Dairy",        "base_price": 1.6,  "min_price": 1.0, "max_price": 2.2},
+    # ── Sản phẩm mở rộng (web app, blob reference, Power BI) ──
     {"id": "P001", "name": "Laptop",         "category": "Electronics", "base_price": 999.99},
     {"id": "P002", "name": "Smartphone",     "category": "Electronics", "base_price": 699.99},
     {"id": "P003", "name": "Headphones",     "category": "Electronics", "base_price": 149.99},
@@ -138,14 +233,38 @@ PRODUCTS = [
     {"id": "P013", "name": "Sunglasses",     "category": "Accessories", "base_price": 129.99},
     {"id": "P014", "name": "Wireless Mouse", "category": "Electronics", "base_price": 39.99},
     {"id": "P015", "name": "Keyboard",       "category": "Electronics", "base_price": 69.99},
+    # ── Thực phẩm & Đồ uống mở rộng ──
+    {"id": "P016", "name": "Nước ép cam",    "category": "Beverage",    "base_price": 2.50},
+    {"id": "P017", "name": "Trà xanh",       "category": "Beverage",    "base_price": 1.80},
+    {"id": "P018", "name": "Bánh mì sandwich","category": "Bakery",     "base_price": 3.50},
+    {"id": "P019", "name": "Sữa chua",       "category": "Dairy",       "base_price": 1.20},
+    {"id": "P020", "name": "Phô mai",        "category": "Dairy",       "base_price": 4.99},
+    # ── Snacks ──
+    {"id": "P021", "name": "Khoai tây chiên", "category": "Snacks",     "base_price": 1.99},
+    {"id": "P022", "name": "Socola",          "category": "Snacks",     "base_price": 3.49},
+    {"id": "P023", "name": "Bánh quy",        "category": "Snacks",     "base_price": 2.29},
+    # ── Sức khỏe & Làm đẹp ──
+    {"id": "P024", "name": "Kem chống nắng",  "category": "Health & Beauty", "base_price": 12.99},
+    {"id": "P025", "name": "Dầu gội",         "category": "Health & Beauty", "base_price": 7.99},
+    {"id": "P026", "name": "Kem đánh răng",   "category": "Health & Beauty", "base_price": 3.49},
+    # ── Thể thao ──
+    {"id": "P027", "name": "Bóng đá",         "category": "Sports",     "base_price": 24.99},
+    {"id": "P028", "name": "Bình nước thể thao","category": "Sports",   "base_price": 14.99},
+    # ── Văn phòng phẩm ──
+    {"id": "P029", "name": "Sổ tay",          "category": "Stationery", "base_price": 5.99},
+    {"id": "P030", "name": "Bút bi",          "category": "Stationery", "base_price": 1.49},
+    # ── Đồ chơi ──
+    {"id": "P031", "name": "Rubik",           "category": "Toys",       "base_price": 8.99},
 ]
 
+# Derive SALES_PRODUCTS từ PRODUCTS (chỉ những sản phẩm có min_price/max_price)
 SALES_PRODUCTS = [
-    {"product_id": "COKE",  "min_price": 1.2, "max_price": 1.8},
-    {"product_id": "PEPSI", "min_price": 1.1, "max_price": 1.7},
-    {"product_id": "BREAD", "min_price": 0.8, "max_price": 1.5},
-    {"product_id": "MILK",  "min_price": 1.0, "max_price": 2.2},
+    {"product_id": p["id"], "min_price": p["min_price"], "max_price": p["max_price"]}
+    for p in PRODUCTS if "min_price" in p and "max_price" in p
 ]
+
+# Tập hợp tất cả product IDs hợp lệ (dùng cho validation)
+VALID_PRODUCT_IDS = {p["id"] for p in PRODUCTS}
 
 STORE_IDS = ["S01", "S02", "S03"]
 
@@ -173,6 +292,7 @@ DRIFT_PSI_MAX = _get_float("DRIFT_PSI_MAX", 0.2)
 DRIFT_R2_DEGRADATION_MAX = _get_float("DRIFT_R2_DEGRADATION_MAX", 0.15)
 DRIFT_MAE_INCREASE_MAX = _get_float("DRIFT_MAE_INCREASE_MAX", 0.20)
 DRIFT_CHECK_DAYS = _get_int("DRIFT_CHECK_DAYS", 7)
+DRIFT_MAE_ABS_THRESHOLD = _get_float("DRIFT_MAE_ABS_THRESHOLD", 25.0)
 
 # Auto-retrain
 AUTO_RETRAIN_ENABLED = _get_bool("AUTO_RETRAIN_ENABLED", True)
@@ -231,6 +351,9 @@ def get_runtime_config() -> dict:
         "BURST_ENABLED": BURST_ENABLED,
         "BURST_MULTIPLIER": BURST_MULTIPLIER,
         "BURST_DURATION_SECONDS": BURST_DURATION_SECONDS,
+        "PRICE_SHOCK_ENABLED": PRICE_SHOCK_ENABLED,
+        "PRICE_SHOCK_MULTIPLIER": PRICE_SHOCK_MULTIPLIER,
+        "PRICE_SHOCK_PRODUCTS": sorted(list(PRICE_SHOCK_PRODUCTS)),
         "REPLAY_MODE": REPLAY_MODE,
         "REPLAY_FILE": REPLAY_FILE,
         "LOG_LEVEL": LOG_LEVEL,
