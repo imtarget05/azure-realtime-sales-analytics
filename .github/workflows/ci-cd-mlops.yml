@@ -97,7 +97,7 @@ jobs:
     needs: preflight
     if: |
       needs.preflight.outputs.azure_ready == 'true' &&
-      github.event_name != 'workflow_call' &&
+      github.event_name == 'workflow_dispatch' &&
       inputs.skip_terraform != true &&
       inputs.deploy_only != true
     outputs:
