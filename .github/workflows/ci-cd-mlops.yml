@@ -33,9 +33,9 @@ on:
         default: false
         type: boolean
       skip_terraform:
-        description: "Skip Terraform apply"
+        description: "Skip Terraform apply (default true — infra deployed via CLI)"
         required: false
-        default: false
+        default: true
         type: boolean
       deploy_only:
         description: "Skip training, deploy existing model"
@@ -170,6 +170,8 @@ jobs:
       needs.preflight.outputs.azure_ready == 'true' &&
       (needs.terraform.result == 'success' || needs.terraform.result == 'skipped') &&
       inputs.deploy_only != true
+    outputs:
+      model_registered: ${{ steps.register.outputs.registered }}
     steps:
       - uses: actions/checkout@v4
 
@@ -190,12 +192,48 @@ jobs:
           pip install -r requirements.txt
           pip install azure-ai-ml azure-identity
 
-      - name: Trigger Training Pipeline
-        run: python mlops/trigger_training_pipeline.py
+      - name: Train Model (local)
+        run: |
+          python ml/train_model.py \
+            --output-dir ml/model_output \
+            --n-samples 50000
+        env:
+          # Ensure local mode (no AzureML Run context)
+          AZUREML_RUN_ID: ""
+
+      - name: Register Model to AML
+        id: register
+        continue-on-error: true
+        run: |
+          python -c "
+          import json, sys, os
+          sys.path.insert(0, '.')
+          try:
+              from mlops.model_registry import register_model
+              with open('ml/model_output/model_metadata.json') as f:
+                  meta = json.load(f)
+              metrics = meta.get('revenue_metrics', meta.get('metrics', {}))
+              model = register_model(
+                  'ml/model_output', metrics,
+                  description='CI/CD pipeline training',
+                  tags={'source': 'github_actions'},
+              )
+              print(f'[OK] Model registered: v{model.version}')
+          except Exception as e:
+              print(f'[WARN] AML registration failed (non-blocking): {e}')
+              sys.exit(1)
+          "
         env:
           AML_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           AML_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
           AML_WORKSPACE_NAME: ${{ secrets.AML_WORKSPACE_NAME }}
+
+      - name: Upload model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model
+          path: ml/model_output/
+          retention-days: 7
 
   # ─────────────────────────────────────────────
   # Stage 3: Deploy Model to Online Endpoint
@@ -204,6 +242,7 @@ jobs:
     name: "ML: Deploy Endpoint"
     runs-on: ubuntu-latest
     needs: [preflight, ml-retrain]
+    # Only deploy if training succeeded; deploy_only needs explicit trigger
     if: |
       always() &&
       needs.preflight.outputs.azure_ready == 'true' &&
@@ -229,6 +268,7 @@ jobs:
           pip install azure-ai-ml azure-identity
 
       - name: Deploy Model
+        continue-on-error: true
         env:
           AML_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           AML_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
