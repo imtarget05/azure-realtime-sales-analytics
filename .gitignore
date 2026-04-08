@@ -33,7 +33,24 @@ terraform/terraform.tfvars
 terraform.tfstate
 terraform.tfstate.backup
 
+# Temp deploy / log folders
+webapp_deploy_tmp/
+webapp_logs/
+.pytest_cache/
+
 # Drift reports (regenerated)
 ml/model_output/drift_report.json
 ml/model_output/drift_monitor_report.json
 ml/model_output/drift_monitor_state.json
+
+# ML retrain artifacts (generated)
+ml/model_output/retrain_comparison/
+ml/model_output/retrain_history/
+ml/model_output/rollback_backup/
+ml/model_output/local_pipeline_report.json
+ml/model_output/model_metadata.json
+ml/model_output/*.png
+
+# Local binaries / exports
+demo.pbix
+nul

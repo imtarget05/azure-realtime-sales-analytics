@@ -1,0 +1,346 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="300">
+    <title>Monitoring Dashboard — Sales Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg: #0f1117; --surface: #1a1d27; --surface2: #22262f;
+            --border: #2d3140; --text: #e1e4ea; --text2: #8b90a0;
+            --accent: #4f8cff; --accent2: #6c5ce7; --green: #00b894;
+            --red: #ff6b6b; --orange: #fdcb6e; --radius: 12px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+        a { color: var(--accent); text-decoration: none; }
+
+        .top-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 30px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .top-bar h1 { font-size: 1.15em; font-weight: 600; }
+        .nav { display: flex; gap: 8px; }
+        .container { max-width: 960px; margin: 0 auto; padding: 24px; }
+        .section { margin-bottom: 28px; }
+        .section-title { font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.78em; font-weight: 600; }
+        .badge-green { background: rgba(0,184,148,.15); color: var(--green); }
+        .badge-red { background: rgba(255,107,107,.15); color: var(--red); }
+        .badge-blue { background: rgba(79,140,255,.15); color: var(--accent); }
+
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+
+        .status-banner { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-radius: var(--radius); margin-bottom: 20px; }
+        .status-ok { background: rgba(0,184,148,.08); border: 1px solid rgba(0,184,148,.25); }
+        .status-alert { background: rgba(255,107,107,.08); border: 1px solid rgba(255,107,107,.25); }
+        .status-banner .icon { font-size: 2em; }
+        .status-banner .info h3 { font-size: 1em; margin-bottom: 2px; }
+        .status-banner .info p { font-size: 0.85em; color: var(--text2); }
+
+        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+        .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
+        .kpi .label { font-size: 0.72em; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+        .kpi .val { font-size: 1.6em; font-weight: 700; }
+        .kpi .sub { font-size: 0.78em; color: var(--text2); margin-top: 4px; }
+        .kpi-mae-ok { color: var(--green); }
+        .kpi-mae-alert { color: var(--red); }
+
+        .canvas-wrap { position: relative; height: 200px; }
+        .canvas-wrap canvas { width: 100% !important; height: 100% !important; }
+
+        .ev-table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+        .ev-table th, .ev-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        .ev-table th { color: var(--text2); font-size: 0.75em; text-transform: uppercase; }
+        .type-drift_check { color: var(--accent); }
+        .type-retrain { color: var(--orange); }
+
+        .timeline { padding-left: 20px; position: relative; }
+        .timeline::before { content:''; position: absolute; left: 6px; top: 4px; bottom: 4px; width: 2px; background: var(--border); }
+        .tl-item { position: relative; padding: 8px 0 8px 18px; }
+        .tl-item::before { content:''; position: absolute; left: -17px; top: 13px; width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--accent); background: var(--bg); }
+        .tl-item.promote::before { border-color: var(--green); background: var(--green); }
+        .tl-item.reject::before { border-color: var(--red); background: var(--red); }
+        .tl-item .time { font-size: 0.78em; color: var(--text2); }
+        .tl-item .detail { font-size: 0.88em; }
+        .tl-item .r2 { font-size: 0.78em; color: var(--text2); }
+
+        .sys-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .sys-card { background: var(--surface2); border-radius: 10px; padding: 14px; }
+        .sys-card h4 { font-size: 0.85em; margin-bottom: 8px; color: var(--text); }
+        .sys-row { display: flex; justify-content: space-between; font-size: 0.82em; padding: 3px 0; }
+        .sys-row .k { color: var(--text2); }
+        .sys-row .v { font-weight: 600; }
+        .v-ok { color: var(--green); }
+        .v-warn { color: var(--orange); }
+
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 8px; font-size: 0.85em; font-weight: 500; border: none; cursor: pointer; transition: all .15s; text-decoration: none; }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: #3d7ae6; }
+        .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+        .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+        .actions { display: flex; gap: 10px; justify-content: center; margin-top: 30px; }
+
+        .empty { text-align: center; padding: 40px; color: var(--text2); }
+        .empty .big { font-size: 2.5em; margin-bottom: 10px; }
+
+        @media (max-width: 768px) {
+            .kpi-row { grid-template-columns: 1fr 1fr; }
+            .sys-grid { grid-template-columns: 1fr; }
+        }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <h1>📊 Monitoring Dashboard</h1>
+        <div class="nav">
+            <a href="/" class="btn btn-ghost">🔮 Predict</a>
+            <a href="/dashboard" class="btn btn-primary">📊 Dashboard</a>
+            <a href="/model-report" class="btn btn-ghost">📋 Report</a>
+            <a href="/api/health" class="btn btn-ghost">🏥 Health</a>
+        </div>
+    </div>
+
+    <div
+        id="page-data"
+        class="container"
+        data-drift-report='{{ (drift_report or {}) | tojson | forceescape }}'
+        data-history='{{ (history or []) | tojson | forceescape }}'>
+
+        {% if drift_report %}
+        <div class="status-banner {{ 'status-alert' if drift_report.triggered else 'status-ok' }}">
+            <div class="icon">{{ '🚨' if drift_report.triggered else '🛡️' }}</div>
+            <div class="info">
+                <h3>{% if drift_report.triggered %}DRIFT DETECTED — Auto-retrain đã kích hoạt{% elif drift_report.status == 'error' %}⚠️ Monitor Error{% else %}No Drift — Model hoạt động tốt{% endif %}</h3>
+                <p>MAE: {{ drift_report.metrics.mae if drift_report.metrics else '—' }} · Threshold: {{ drift_report.threshold_mae }} · Last check: {{ drift_report.timestamp }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="kpi-row">
+            <div class="kpi">
+                <div class="label">Model Version</div>
+                <div class="val" style="color:var(--accent)">{{ model_meta.model_version if model_meta else '—' }}</div>
+                <div class="sub">{{ model_meta.trained_at[:10] if model_meta and model_meta.trained_at else '—' }}</div>
+            </div>
+            <div class="kpi">
+                <div class="label">Current MAE</div>
+                <div class="val {{ 'kpi-mae-alert' if drift_report and drift_report.metrics and drift_report.metrics.mae > drift_report.threshold_mae else 'kpi-mae-ok' }}">
+                    {{ drift_report.metrics.mae if drift_report and drift_report.metrics else '—' }}
+                </div>
+                <div class="sub">Threshold: {{ drift_report.threshold_mae if drift_report else '—' }}</div>
+            </div>
+            <div class="kpi">
+                <div class="label">Training Samples</div>
+                <div class="val" style="color:var(--accent2)">{{ "{:,}".format(model_meta.training_samples) if model_meta else '—' }}</div>
+                <div class="sub">{{ model_meta.get('data_source', 'synthetic') if model_meta else '—' }}</div>
+            </div>
+            <div class="kpi">
+                <div class="label">Total Retrains</div>
+                <div class="val" style="color:var(--orange)">{{ history|length }}</div>
+                <div class="sub">{% if history %}Last: {{ history[-1].timestamp[:16] }}{% else %}No retrains{% endif %}</div>
+            </div>
+        </div>
+
+        {% if drift_report %}
+        <div class="section">
+            <div class="section-title">MAE vs Threshold</div>
+            <div class="card">
+                <div class="canvas-wrap">
+                    <canvas id="maeGaugeChart"></canvas>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if history|length > 1 %}
+        <div class="section">
+            <div class="section-title">R² Score Trend</div>
+            <div class="card">
+                <div class="canvas-wrap" style="height:240px">
+                    <canvas id="r2TrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if history %}
+        <div class="section">
+            <div class="section-title">Recent Model Updates</div>
+            <div class="card">
+                <div class="timeline">
+                    {% for run in history[-5:]|reverse %}
+                    <div class="tl-item {{ run.decision|lower if run.decision else 'promote' }}">
+                        <div class="time">{{ run.timestamp }}</div>
+                        <div class="detail">
+                            <span class="badge {{ 'badge-green' if run.decision == 'PROMOTE' else 'badge-red' }}">{{ run.decision }}</span>
+                            {{ run.run_id }}
+                        </div>
+                        <div class="r2">Revenue R²: {{ run.revenue_r2 }} · Quantity R²: {{ run.quantity_r2 }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="section">
+            <div class="section-title">Monitoring Events</div>
+            {% if monitoring_events %}
+            <div class="card" style="padding:0; overflow:hidden;">
+                <div style="overflow-x:auto;">
+                <table class="ev-table">
+                    <thead>
+                        <tr><th>Time</th><th>Event</th><th>MAE</th><th>Threshold</th><th>Retrain</th><th>Model</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for evt in monitoring_events[:10] %}
+                        <tr>
+                            <td style="white-space:nowrap">{{ evt.event_time[:19] }}</td>
+                            <td><span class="type-{{ evt.event_type }}">{{ evt.event_type }}</span></td>
+                            <td>{{ "%.4f"|format(evt.mae_value) if evt.mae_value else '—' }}</td>
+                            <td>{{ evt.threshold if evt.threshold else '—' }}</td>
+                            <td>{{ '✅' if evt.retrain_triggered else '—' }}</td>
+                            <td>{{ evt.model_version or '—' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            </div>
+            {% else %}
+            <div class="card empty">
+                <div class="big">📋</div>
+                <p>Chưa có monitoring events.<br>
+                <code style="background:var(--surface2);padding:3px 10px;border-radius:6px;color:var(--accent);font-size:0.85em;">python ml/drift_monitor.py --dry-run</code></p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <div class="section-title">System Status</div>
+            <div class="sys-grid">
+                <div class="sys-card">
+                    <h4>🤖 Drift Monitor</h4>
+                    <div class="sys-row"><span class="k">Schedule</span><span class="v">Every 1 hour</span></div>
+                    <div class="sys-row"><span class="k">Last Run</span><span class="v">{{ drift_report.timestamp if drift_report else 'Never' }}</span></div>
+                    <div class="sys-row"><span class="k">Status</span>
+                        <span class="v {{ 'v-ok' if drift_report and drift_report.get('status') == 'ok' else 'v-warn' }}">
+                            {{ drift_report.get('status', 'unknown')|upper if drift_report else 'NOT RUN' }}
+                        </span>
+                    </div>
+                </div>
+                <div class="sys-card">
+                    <h4>🧠 ML Model</h4>
+                    <div class="sys-row"><span class="k">Version</span><span class="v">{{ model_meta.model_version if model_meta else '—' }}</span></div>
+                    <div class="sys-row"><span class="k">Trained</span><span class="v">{{ model_meta.trained_at[:19] if model_meta and model_meta.trained_at else '—' }}</span></div>
+                    <div class="sys-row"><span class="k">Source</span><span class="v">{{ model_meta.get('data_source', 'synthetic') if model_meta else '—' }}</span></div>
+                </div>
+                <div class="sys-card">
+                    <h4>🗄️ SQL Database</h4>
+                    <div class="sys-row"><span class="k">DB</span><span class="v">SalesAnalyticsDB</span></div>
+                    <div class="sys-row"><span class="k">Tier</span><span class="v">Basic</span></div>
+                </div>
+                <div class="sys-card">
+                    <h4>📡 Pipeline</h4>
+                    <div class="sys-row"><span class="k">Mode</span><span class="v">Local simulation</span></div>
+                    <div class="sys-row"><span class="k">Event Hub</span><span class="v v-warn">Stopped</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/" class="btn btn-ghost">🔮 Predict</a>
+            <a href="/model-report" class="btn btn-ghost">📋 Model Report</a>
+            <a href="/dashboard" class="btn btn-primary">↻ Refresh</a>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const pageDataEl = document.getElementById('page-data');
+        const driftReport = pageDataEl ? JSON.parse(pageDataEl.dataset.driftReport || '{}') : {};
+        const metrics = driftReport.metrics || {};
+        const historyData = pageDataEl ? JSON.parse(pageDataEl.dataset.history || '[]') : [];
+
+        if (document.getElementById('maeGaugeChart') && typeof driftReport.threshold_mae === 'number') {
+        const mae = typeof metrics.mae === 'number' ? metrics.mae : 0;
+        const threshold = driftReport.threshold_mae;
+        const maxVal = Math.max(threshold * 2, mae * 1.5, 1);
+        new Chart(document.getElementById('maeGaugeChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Current MAE', 'Threshold'],
+                datasets: [{ data: [mae, threshold],
+                    backgroundColor: [mae > threshold ? '#ff6b6b' : '#00b894', 'rgba(253,203,110,.4)'],
+                    borderColor: [mae > threshold ? '#ff6b6b' : '#00b894', '#fdcb6e'],
+                    borderWidth: 2, borderRadius: 6, barPercentage: 0.5 }]
+            },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { min: 0, max: maxVal, ticks: { color: '#8b90a0' }, grid: { color: 'rgba(45,49,64,.5)' } },
+                    y: { ticks: { color: '#e1e4ea', font: { size: 13, weight: 'bold' } }, grid: { display: false } }
+                }
+            }
+        });
+        }
+
+        if (document.getElementById('r2TrendChart') && historyData.length > 1) {
+        const labels = historyData.map(h => {
+            const d = new Date(h.timestamp);
+            return d.toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit'}) + ' ' + d.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+        });
+        new Chart(document.getElementById('r2TrendChart'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    { label: 'Revenue R²', data: historyData.map(h => h.revenue_r2), borderColor: '#4f8cff', backgroundColor: 'rgba(79,140,255,.1)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#4f8cff' },
+                    { label: 'Quantity R²', data: historyData.map(h => h.quantity_r2), borderColor: '#6c5ce7', backgroundColor: 'rgba(108,92,231,.1)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#6c5ce7' }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#8b90a0' } } },
+                scales: {
+                    x: { ticks: { color: '#8b90a0', maxRotation: 45, font: { size: 10 } }, grid: { color: 'rgba(45,49,64,.5)' } },
+                    y: { ticks: { color: '#8b90a0' }, grid: { color: 'rgba(45,49,64,.5)' }, min: 0, max: 1, title: { display: true, text: 'R² Score', color: '#8b90a0' } }
+                }
+            }
+        });
+        }
+
+        const evtSource = new EventSource('/api/sse/dashboard');
+        const indicator = document.createElement('div');
+        indicator.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:8px 16px;border-radius:8px;font-size:0.82em;z-index:999;background:var(--surface);border:1px solid var(--border);color:var(--text2);display:flex;align-items:center;gap:8px;';
+        indicator.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite"></span> Live';
+        document.body.appendChild(indicator);
+
+        evtSource.addEventListener('drift_updated', function(e) {
+            const data = JSON.parse(e.data);
+            showToast(data.triggered ? '🚨 Drift detected! MAE=' + data.mae.toFixed(4) : '🛡️ OK (MAE=' + data.mae.toFixed(4) + ')',
+                data.triggered ? 'var(--red)' : 'var(--green)');
+            setTimeout(() => location.reload(), 3000);
+        });
+        evtSource.addEventListener('report_updated', function(e) {
+            const data = JSON.parse(e.data);
+            showToast('📊 Model updated — ' + data.decision, 'var(--accent)');
+            setTimeout(() => location.reload(), 3000);
+        });
+        evtSource.onerror = function() {
+            indicator.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span> Disconnected';
+        };
+        function showToast(msg, color) {
+            const t = document.createElement('div');
+            t.style.cssText = 'position:fixed;top:70px;right:20px;padding:14px 24px;border-radius:10px;font-size:0.9em;z-index:1000;background:var(--surface);border:1px solid ' + color + ';color:' + color + ';box-shadow:0 4px 20px rgba(0,0,0,.3);transition:opacity .5s;';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 5000);
+        }
+    })();
+    </script>
+</body>
+</html>

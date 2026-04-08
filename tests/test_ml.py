@@ -39,3 +39,18 @@ def test_drift_logic_mae_exceeds_threshold():
 
     assert metrics["n_samples"] == 4
     assert metrics["mae"] > 25.0
+
+
+def test_drift_metrics_zero_actuals_mape_safe():
+    """MAPE should stay 0.0 when all actual values are zero to avoid division errors."""
+    df = pd.DataFrame(
+        {
+            "predicted_revenue": [10.0, 20.0, 0.0],
+            "actual_revenue": [0.0, 0.0, 0.0],
+        }
+    )
+
+    metrics = compute_metrics(df)
+
+    assert metrics["n_samples"] == 3
+    assert metrics["mape"] == 0.0

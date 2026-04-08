@@ -110,5 +110,93 @@
     "revenue_r2": 0.8791,
     "quantity_r2": 0.8002,
     "path": "C:\\Users\\Admin\\azure-realtime-sales-analytics\\webapp\\..\\ml\\model_output\\retrain_history\\20260403_165150"
+  },
+  {
+    "run_id": "20260404_122350",
+    "timestamp": "2026-04-04T12:23:50.247623",
+    "decision": "PROMOTE",
+    "revenue_r2": 0.8791,
+    "quantity_r2": 0.8002,
+    "path": "C:\\Users\\Admin\\azure-realtime-sales-analytics\\webapp\\..\\ml\\model_output\\retrain_history\\20260404_122350"
+  },
+  {
+    "run_id": "20260404_122622",
+    "timestamp": "2026-04-04T12:26:22.817504",
+    "decision": "PROMOTE",
+    "revenue_r2": 0.8791,
+    "quantity_r2": 0.8002,
+    "path": "C:\\Users\\Admin\\azure-realtime-sales-analytics\\webapp\\..\\ml\\model_output\\retrain_history\\20260404_122622"
+  },
+  {
+    "run_id": "20260404_122801",
+    "timestamp": "2026-04-04T12:28:01.410207",
+    "decision": "PROMOTE",
+    "revenue_r2": 0.8791,
+    "quantity_r2": 0.8002,
+    "path": "C:\\Users\\Admin\\azure-realtime-sales-analytics\\webapp\\..\\ml\\model_output\\retrain_history\\20260404_122801"
+  },
+  {
+    "run_id": "20260404_122944",
+    "timestamp": "2026-04-04T12:29:44.560073",
+    "decision": "PROMOTE",
+    "revenue_r2": 0.8791,
+    "quantity_r2": 0.8002,
+    "path": "C:\\Users\\Admin\\azure-realtime-sales-analytics\\webapp\\..\\ml\\model_output\\retrain_history\\20260404_122944"
+  },
+  {
+    "run_id": "20260404_123157",
+    "timestamp": "2026-04-04T12:31:57.406115",
+    "decision": "PROMOTE",
+    "revenue_r2": 0.8791,
+    "quantity_r2": 0.8002,
+    "path": "C:\\Users\\Admin\\azure-realtime-sales-analytics\\webapp\\..\\ml\\model_output\\retrain_history\\20260404_123157"
+  },
+  {
+    "run_id": "20260404_055942",
+    "timestamp": "2026-04-04T05:59:42.805879",
+    "decision": "PROMOTE",
+    "revenue_r2": 0.8791,
+    "quantity_r2": 0.8002,
+    "path": "C:\\Users\\Admin\\azure-realtime-sales-analytics\\webapp\\..\\ml\\model_output\\retrain_history\\20260404_055942"
+  },
+  {
+    "run_id": "20260404_060158",
+    "timestamp": "2026-04-04T06:01:58.807636",
+    "decision": "PROMOTE",
+    "revenue_r2": 0.8791,
+    "quantity_r2": 0.8002,
+    "path": "C:\\Users\\Admin\\azure-realtime-sales-analytics\\webapp\\..\\ml\\model_output\\retrain_history\\20260404_060158"
+  },
+  {
+    "run_id": "20260404_060446",
+    "timestamp": "2026-04-04T06:04:46.454869",
+    "decision": "PROMOTE",
+    "revenue_r2": 0.8791,
+    "quantity_r2": 0.8002,
+    "path": "C:\\Users\\Admin\\azure-realtime-sales-analytics\\webapp\\..\\ml\\model_output\\retrain_history\\20260404_060446"
+  },
+  {
+    "run_id": "20260406_215624",
+    "timestamp": "2026-04-06T21:56:24.802405",
+    "decision": "PROMOTE",
+    "revenue_r2": 0.8792,
+    "quantity_r2": 0.7965,
+    "path": "C:\\Users\\Admin\\azure-realtime-sales-analytics\\ml\\model_output\\retrain_history\\20260406_215624"
+  },
+  {
+    "run_id": "20260406_225652",
+    "timestamp": "2026-04-06T22:56:52.827096",
+    "decision": "PROMOTE",
+    "revenue_r2": 0.8794,
+    "quantity_r2": 0.8003,
+    "path": "C:\\Users\\Admin\\azure-realtime-sales-analytics\\ml\\model_output\\retrain_history\\20260406_225652"
+  },
+  {
+    "run_id": "20260408_165452",
+    "timestamp": "2026-04-08T16:54:52.375318",
+    "decision": "PROMOTE",
+    "revenue_r2": 0.8601,
+    "quantity_r2": 0.7788,
+    "path": "C:\\Users\\Admin\\azure-realtime-sales-analytics\\ml\\model_output\\retrain_history\\20260408_165452"
   }
 ]

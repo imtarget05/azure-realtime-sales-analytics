@@ -1,19 +1,17 @@
 ﻿"""
 Flask web app – Sales prediction via Azure ML endpoint.
-Routes: /, /predict (form), /api/predict (JSON), /api/health
+Routes: /, /predict, /api/predict, /api/health, /dashboard, /model-report
 """
 
 import os
 import sys
 import json
-import math
-import subprocess
-import threading
+import time as _time
 import requests
 import numpy as np
 from datetime import datetime
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 
 # Read ML config directly from env vars (works both locally and on Azure App Service)
 try:
@@ -189,8 +187,8 @@ def call_ml_endpoint(input_data: dict) -> dict:
                 },
                 "source": "Azure ML Endpoint",
             }
-        except Exception:
-            pass  # Fall through to local model
+        except Exception as e:
+            print(f"[WARN] Azure ML endpoint failed: {e}")  # Fall through to local model
 
     # 2) Try local pkl models
     try:
@@ -260,6 +258,56 @@ def predict():
                                result={"status": "error", "message": str(e)})
 
 
+def _validate_predict_input(data):
+    """Validate /api/predict JSON body. Returns (cleaned_data, error_msg)."""
+    if not isinstance(data, dict):
+        return None, "Request body must be a JSON object"
+
+    errors = []
+    required = ["hour", "month", "store_id", "product_id"]
+    for field in required:
+        if field not in data:
+            errors.append(f"Missing required field: {field}")
+    if errors:
+        return None, "; ".join(errors)
+
+    int_ranges = {
+        "hour": (0, 23),
+        "day_of_month": (1, 31),
+        "month": (1, 12),
+        "is_weekend": (0, 1),
+        "is_rainy": (0, 1),
+        "holiday": (0, 1),
+    }
+    for field, (lo, hi) in int_ranges.items():
+        if field in data:
+            try:
+                val = int(data[field])
+            except (TypeError, ValueError):
+                errors.append(f"{field} must be an integer")
+                continue
+            if val < lo or val > hi:
+                errors.append(f"{field} must be between {lo} and {hi}")
+            data[field] = val
+
+    for field in ("temperature",):
+        if field in data:
+            try:
+                data[field] = float(data[field])
+            except (TypeError, ValueError):
+                errors.append(f"{field} must be a number")
+
+    for field in ("store_id", "product_id"):
+        val = data.get(field)
+        if val is not None:
+            if not isinstance(val, str) or len(val) > 50:
+                errors.append(f"{field} must be a string (max 50 chars)")
+
+    if errors:
+        return None, "; ".join(errors)
+    return data, None
+
+
 @app.route("/api/predict", methods=["GET", "POST"])
 def api_predict():
     """REST API (JSON in/out)."""
@@ -275,7 +323,12 @@ def api_predict():
             "docs": "Send POST with Content-Type: application/json",
         })
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True)
+        if data is None:
+            return jsonify({"status": "error", "message": "Invalid or missing JSON body"}), 400
+        data, err = _validate_predict_input(data)
+        if err:
+            return jsonify({"status": "error", "message": err}), 400
         result = call_ml_endpoint(data)
         return jsonify(result)
     except Exception as e:
@@ -284,11 +337,41 @@ def api_predict():
 
 @app.route("/api/health")
 def health():
-    return jsonify({
+    health_data = {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
         "ml_endpoint_configured": bool(ML_ENDPOINT_URL and not ML_ENDPOINT_URL.startswith("<")),
-    })
+        "model_version": None,
+        "drift_monitor": {"status": "unknown", "last_check": None},
+        "rollback_available": False,
+    }
+
+    # Model metadata
+    meta_path = os.path.join(_MODEL_DIR, "model_metadata.json")
+    if os.path.exists(meta_path):
+        with open(meta_path, "r", encoding="utf-8") as f:
+            meta = json.load(f)
+        health_data["model_version"] = meta.get("model_version")
+
+    # Drift monitor report
+    drift_path = os.path.join(_base_dir, "..", "ml", "model_output", "drift_monitor_report.json")
+    if os.path.exists(drift_path):
+        with open(drift_path, "r", encoding="utf-8") as f:
+            drift = json.load(f)
+        health_data["drift_monitor"] = {
+            "status": drift.get("status", "unknown"),
+            "last_check": drift.get("timestamp"),
+            "triggered": drift.get("triggered", False),
+            "mae": drift.get("metrics", {}).get("mae"),
+        }
+
+    # Rollback backup available?
+    backup_dir = os.path.join(_MODEL_DIR, "rollback_backup")
+    health_data["rollback_available"] = os.path.isdir(backup_dir) and os.path.exists(
+        os.path.join(backup_dir, "model_metadata.json")
+    )
+
+    return jsonify(health_data)
 
 
 def _get_report_dir():
@@ -296,6 +379,18 @@ def _get_report_dir():
     candidates = [
         os.path.join(_base_dir, "..", "ml", "model_output", "retrain_comparison"),
         os.path.join(_base_dir, "ml", "model_output", "retrain_comparison"),
+    ]
+    for c in candidates:
+        if os.path.isdir(c):
+            return os.path.abspath(c)
+    return None
+
+
+def _get_chart_dir():
+    """Return the first existing charts directory (training charts)."""
+    candidates = [
+        os.path.join(_base_dir, "..", "ml", "model_output", "charts"),
+        os.path.join(_base_dir, "ml", "model_output", "charts"),
     ]
     for c in candidates:
         if os.path.isdir(c):
@@ -316,16 +411,32 @@ def model_report_image(filename):
     return send_from_directory(report_dir, filename)
 
 
+@app.route("/model-chart-image/<path:filename>")
+def model_chart_image(filename):
+    """Serve training chart images from charts directory."""
+    from flask import send_from_directory, abort
+    import re
+    if not re.match(r'^[\w\-]+\.png$', filename):
+        abort(404)
+    chart_dir = _get_chart_dir()
+    if not chart_dir:
+        abort(404)
+    return send_from_directory(chart_dir, filename)
+
+
 @app.route("/model-report")
 def model_report():
     """Show retrain report from latest run plus previous-run comparison."""
     report_dir = _get_report_dir()
+    chart_dir = _get_chart_dir()
 
     report = None
     chart_files = []
+    training_chart_files = []
     history = []
     latest_run = None
     previous_run = None
+    drift_report = None
 
     if report_dir:
         report_file = os.path.join(report_dir, "comparison_report.json")
@@ -349,135 +460,182 @@ def model_report():
         # Append any remaining PNGs not in preferred list
         chart_files += sorted(existing - set(chart_files))
 
-        history_index_file = os.path.join(_base_dir, "..", "ml", "model_output", "retrain_history", "history_index.json")
-        if os.path.exists(history_index_file):
-            with open(history_index_file, "r", encoding="utf-8") as f:
-                raw = json.load(f)
-                if isinstance(raw, list):
-                    history = raw
-                    if len(history) >= 1:
-                        latest_run = history[-1]
-                    if len(history) >= 2:
-                        previous_run = history[-2]
+    if chart_dir:
+        training_preferred = [
+            "model_summary_comparison.png",
+            "revenue_feature_importance.png",
+            "quantity_feature_importance.png",
+            "revenue_actual_vs_predicted.png",
+            "quantity_actual_vs_predicted.png",
+            "revenue_residuals.png",
+            "quantity_residuals.png",
+            "revenue_learning_curve.png",
+            "quantity_learning_curve.png",
+            "revenue_error_by_hour.png",
+            "quantity_error_by_hour.png",
+        ]
+        existing_tc = {f for f in os.listdir(chart_dir) if f.lower().endswith(".png")}
+        training_chart_files = [f for f in training_preferred if f in existing_tc]
+        training_chart_files += sorted(existing_tc - set(training_chart_files))
+
+    history_index_file = os.path.join(_base_dir, "..", "ml", "model_output", "retrain_history", "history_index.json")
+    if os.path.exists(history_index_file):
+        with open(history_index_file, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+            if isinstance(raw, list):
+                history = raw
+                if len(history) >= 1:
+                    latest_run = history[-1]
+                if len(history) >= 2:
+                    previous_run = history[-2]
+
+    # Load drift monitor report
+    drift_report_file = os.path.join(_base_dir, "..", "ml", "model_output", "drift_monitor_report.json")
+    if os.path.exists(drift_report_file):
+        with open(drift_report_file, "r", encoding="utf-8") as f:
+            drift_report = json.load(f)
 
     return render_template(
         "model_report.html",
         report=report,
         chart_files=chart_files,
+        training_chart_files=training_chart_files,
         latest_run=latest_run,
         previous_run=previous_run,
+        history=history,
         history_count=len(history),
+        drift_report=drift_report,
     )
 
 
-# ── Retrain routes ────────────────────────────────────────────────
-_retrain_lock = threading.Lock()
-_retrain_status = {"running": False, "last_result": None}
+# ── Dashboard route (main monitoring page) ───────────────────────
+@app.route("/dashboard")
+def dashboard():
+    """Main monitoring dashboard — auto-refreshes every 30s."""
+    # Model metadata
+    model_meta = None
+    meta_path = os.path.join(_MODEL_DIR, "model_metadata.json")
+    if os.path.exists(meta_path):
+        with open(meta_path, "r", encoding="utf-8") as f:
+            model_meta = json.load(f)
 
+    # Drift report
+    drift_report = None
+    drift_path = os.path.join(_base_dir, "..", "ml", "model_output", "drift_monitor_report.json")
+    if os.path.exists(drift_path):
+        with open(drift_path, "r", encoding="utf-8") as f:
+            drift_report = json.load(f)
 
-def _run_retrain(n_samples: int, n_estimators: int, max_depth: int, lr: float, promote: bool):
-    """Run retrain_and_compare.py in a subprocess."""
+    # Retrain history
+    history = []
+    history_index_file = os.path.join(_base_dir, "..", "ml", "model_output", "retrain_history", "history_index.json")
+    if os.path.exists(history_index_file):
+        with open(history_index_file, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+            if isinstance(raw, list):
+                history = raw
+
+    # Monitoring events from SQL (best effort)
+    monitoring_events = []
     try:
-        script = os.path.join(_base_dir, "..", "ml", "retrain_and_compare.py")
-        cmd = [
-            sys.executable, script,
-            "--new-samples", str(n_samples),
-            "--new-estimators", str(n_estimators),
-            "--new-depth", str(max_depth),
-            "--new-lr", str(lr),
-        ]
-        if promote:
-            cmd.append("--promote")
-
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=600,
-                                cwd=os.path.join(_base_dir, ".."),
-                                env={**os.environ, "PYTHONIOENCODING": "utf-8"})
-        _retrain_status["last_result"] = {
-            "success": result.returncode == 0,
-            "stdout": result.stdout[-5000:] if result.stdout else "",
-            "stderr": result.stderr[-2000:] if result.stderr else "",
-            "timestamp": datetime.now().isoformat(),
-        }
-        # Reload local models after retrain
-        if result.returncode == 0:
-            _local_models["metadata"] = None  # force reload on next predict
+        from config.settings import SQL_SERVER, SQL_DATABASE, SQL_USERNAME, SQL_PASSWORD, SQL_DRIVER
+        if SQL_SERVER and SQL_USERNAME and SQL_PASSWORD:
+            import pyodbc
+            conn_str = (
+                f"DRIVER={SQL_DRIVER};SERVER={SQL_SERVER};DATABASE={SQL_DATABASE};"
+                f"UID={SQL_USERNAME};PWD={SQL_PASSWORD};"
+                "Encrypt=yes;TrustServerCertificate=no;Connection Timeout=10"
+            )
+            conn = pyodbc.connect(conn_str)
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT TOP 50 event_time, event_type, mae_value, threshold,
+                       model_version, retrain_triggered, details
+                FROM dbo.MonitoringEvents
+                ORDER BY event_time DESC
+            """)
+            for row in cursor.fetchall():
+                monitoring_events.append({
+                    "event_time": row[0].isoformat() if row[0] else "",
+                    "event_type": row[1],
+                    "mae_value": row[2],
+                    "threshold": row[3],
+                    "model_version": row[4],
+                    "retrain_triggered": bool(row[5]),
+                    "details": row[6],
+                })
+            conn.close()
     except Exception as e:
-        _retrain_status["last_result"] = {
-            "success": False,
-            "stdout": "",
-            "stderr": str(e),
-            "timestamp": datetime.now().isoformat(),
-        }
-    finally:
-        _retrain_status["running"] = False
+        print(f"[INFO] Could not load monitoring events from SQL: {e}")
+
+    return render_template(
+        "dashboard.html",
+        model_meta=model_meta,
+        drift_report=drift_report,
+        history=history,
+        monitoring_events=monitoring_events,
+    )
 
 
-@app.route("/retrain", methods=["GET", "POST"])
-def retrain():
-    """UI page to trigger retrain locally."""
-    if request.method == "GET":
-        return render_template("retrain.html",
-                               status=_retrain_status,
-                               running=_retrain_status["running"])
+# ── SSE endpoint for live dashboard updates ──────────────────────
+@app.route("/api/sse/dashboard")
+def sse_dashboard():
+    """Server-Sent Events stream for dashboard auto-refresh."""
+    def _generate():
+        last_report_hash = None
+        last_drift_hash = None
+        is_first_check = True
 
-    # POST – kick off retrain
-    if _retrain_status["running"]:
-        return render_template("retrain.html",
-                               status=_retrain_status,
-                               running=True,
-                               message="Retrain đang chạy, vui lòng chờ...")
+        while True:
+            events = []
 
-    n_samples = int(request.form.get("n_samples", 80000))
-    n_estimators = int(request.form.get("n_estimators", 300))
-    max_depth = int(request.form.get("max_depth", 6))
-    lr = float(request.form.get("learning_rate", 0.1))
-    promote = request.form.get("promote") == "1"
+            # Check comparison report changes
+            report_dir = _get_report_dir()
+            if report_dir:
+                report_file = os.path.join(report_dir, "comparison_report.json")
+                if os.path.exists(report_file):
+                    mtime = os.path.getmtime(report_file)
+                    if mtime != last_report_hash:
+                        if not is_first_check:
+                            with open(report_file, encoding="utf-8") as f:
+                                events.append(("report_updated", json.dumps({
+                                    "timestamp": datetime.now().isoformat(),
+                                    "decision": json.load(f).get("decision", ""),
+                                })))
+                        last_report_hash = mtime
 
-    _retrain_status["running"] = True
-    _retrain_status["last_result"] = None
+            # Check drift report changes
+            drift_file = os.path.join(_base_dir, "..", "ml", "model_output", "drift_monitor_report.json")
+            if os.path.exists(drift_file):
+                mtime = os.path.getmtime(drift_file)
+                if mtime != last_drift_hash:
+                    if not is_first_check:
+                        with open(drift_file, encoding="utf-8") as f:
+                            drift = json.load(f)
+                        events.append(("drift_updated", json.dumps({
+                            "triggered": drift.get("triggered", False),
+                            "mae": drift.get("metrics", {}).get("mae", 0),
+                            "timestamp": drift.get("timestamp", ""),
+                        })))
+                    last_drift_hash = mtime
 
-    t = threading.Thread(target=_run_retrain,
-                         args=(n_samples, n_estimators, max_depth, lr, promote),
-                         daemon=True)
-    t.start()
+            is_first_check = False
 
-    return render_template("retrain.html",
-                           status=_retrain_status,
-                           running=True,
-                           message="Retrain đã bắt đầu! Trang sẽ tự cập nhật...")
+            for event_name, data in events:
+                yield f"event: {event_name}\ndata: {data}\n\n"
 
+            # Heartbeat every 30s
+            yield f": heartbeat {datetime.now().isoformat()}\n\n"
+            _time.sleep(30)
 
-@app.route("/api/retrain", methods=["POST"])
-def api_retrain():
-    """JSON API to trigger retrain."""
-    if _retrain_status["running"]:
-        return jsonify({"status": "busy", "message": "Retrain is already running"}), 409
-
-    data = request.get_json() or {}
-    n_samples = int(data.get("n_samples", 80000))
-    n_estimators = int(data.get("n_estimators", 300))
-    max_depth = int(data.get("max_depth", 6))
-    lr = float(data.get("learning_rate", 0.1))
-    promote = bool(data.get("promote", True))
-
-    _retrain_status["running"] = True
-    _retrain_status["last_result"] = None
-
-    t = threading.Thread(target=_run_retrain,
-                         args=(n_samples, n_estimators, max_depth, lr, promote),
-                         daemon=True)
-    t.start()
-
-    return jsonify({"status": "started", "message": "Retrain triggered"})
-
-
-@app.route("/api/retrain/status")
-def api_retrain_status():
-    """Poll retrain progress."""
-    return jsonify({
-        "running": _retrain_status["running"],
-        "last_result": _retrain_status["last_result"],
-    })
+    return Response(
+        _generate(),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 if __name__ == "__main__":

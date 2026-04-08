@@ -23,10 +23,71 @@ logger = logging.getLogger("sales_generator")
 
 WEATHER_CACHE: dict = {}
 HOLIDAY_CACHE: dict = {}
+PRODUCT_BY_ID: dict[str, dict] = {p["id"]: p for p in settings.PRODUCTS if "id" in p}
+
+# Store profiles to make demand distribution less uniform and more realistic.
+STORE_PROFILES: dict[str, dict] = {
+    "S01": {
+        "traffic_weight": 0.45,
+        "demand_multiplier": 1.20,
+        "price_index": 1.05,
+        "category_affinity": {
+            "Electronics": 1.30,
+            "Accessories": 1.15,
+            "Beverage": 1.05,
+            "Clothing": 1.00,
+            "Home": 1.00,
+        },
+    },
+    "S02": {
+        "traffic_weight": 0.35,
+        "demand_multiplier": 1.00,
+        "price_index": 1.00,
+        "category_affinity": {
+            "Beverage": 1.20,
+            "Bakery": 1.10,
+            "Dairy": 1.10,
+            "Stationery": 1.05,
+            "Snacks": 1.05,
+        },
+    },
+    "S03": {
+        "traffic_weight": 0.20,
+        "demand_multiplier": 0.88,
+        "price_index": 0.97,
+        "category_affinity": {
+            "Home": 1.20,
+            "Sports": 1.15,
+            "Toys": 1.15,
+            "Snacks": 1.10,
+            "Health & Beauty": 1.05,
+        },
+    },
+}
+
+CATEGORY_BASE_QUANTITY: dict[str, float] = {
+    "Beverage": 3.4,
+    "Bakery": 2.9,
+    "Dairy": 2.5,
+    "Snacks": 2.4,
+    "Stationery": 1.8,
+    "Accessories": 1.6,
+    "Home": 1.5,
+    "Clothing": 1.4,
+    "Health & Beauty": 1.3,
+    "Sports": 1.2,
+    "Toys": 1.2,
+    "Electronics": 1.1,
+    "Other": 1.4,
+}
 
 
 def utc_now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def utc_now_dt() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 def utc_today_parts() -> tuple[int, int, int]:
@@ -35,21 +96,239 @@ def utc_today_parts() -> tuple[int, int, int]:
 
 
 def choose_store_id() -> str:
-    return random.choice(list(settings.STORE_LOCATIONS.keys()))
+    store_ids = list(settings.STORE_LOCATIONS.keys())
+    if not settings.STORE_PROFILE_ENABLED:
+        return random.choice(store_ids)
+
+    weights = [
+        STORE_PROFILES.get(store_id, {}).get("traffic_weight", 1.0)
+        for store_id in store_ids
+    ]
+    return random.choices(store_ids, weights=weights, k=1)[0]
 
 
-def choose_product() -> dict:
-    return random.choice(settings.SALES_PRODUCTS)
+def get_product_meta(product_id: str) -> dict:
+    return PRODUCT_BY_ID.get(product_id, {"id": product_id, "category": "Other"})
 
 
-def random_quantity() -> int:
-    return random.randint(1, 5)
+def time_of_day_multiplier(category: str, now_utc: datetime) -> float:
+    if not settings.SEASONALITY_ENABLED:
+        return 1.0
+
+    hour = now_utc.hour
+
+    if 6 <= hour < 10:
+        return {
+            "Bakery": 1.45,
+            "Beverage": 1.20,
+            "Dairy": 1.12,
+            "Electronics": 0.78,
+            "Toys": 0.82,
+        }.get(category, 1.0)
+
+    if 10 <= hour < 14:
+        return {
+            "Beverage": 1.35,
+            "Bakery": 1.18,
+            "Snacks": 1.20,
+            "Stationery": 1.10,
+            "Home": 0.92,
+        }.get(category, 1.0)
+
+    if 17 <= hour < 21:
+        return {
+            "Snacks": 1.32,
+            "Beverage": 1.25,
+            "Accessories": 1.18,
+            "Home": 1.10,
+            "Electronics": 1.08,
+            "Bakery": 0.86,
+        }.get(category, 1.0)
+
+    if 21 <= hour or hour < 6:
+        return {
+            "Snacks": 1.20,
+            "Beverage": 1.10,
+            "Electronics": 0.82,
+            "Home": 0.88,
+            "Stationery": 0.80,
+        }.get(category, 0.95)
+
+    return 1.0
 
 
-def random_price(product: dict) -> float:
+def day_of_week_multiplier(category: str, now_utc: datetime) -> float:
+    if not settings.SEASONALITY_ENABLED:
+        return 1.0
+
+    is_weekend = now_utc.weekday() >= 5
+    if not is_weekend:
+        return 1.0
+
+    return {
+        "Sports": 1.28,
+        "Toys": 1.26,
+        "Accessories": 1.20,
+        "Electronics": 1.15,
+        "Beverage": 1.08,
+        "Stationery": 0.84,
+    }.get(category, 1.05)
+
+
+def weather_demand_multiplier(category: str, weather: str, temperature: float) -> float:
+    if not settings.SEASONALITY_ENABLED:
+        return 1.0
+
+    multiplier = 1.0
+    normalized_weather = (weather or "").lower()
+
+    if temperature >= 32 and category in {"Beverage", "Dairy"}:
+        multiplier *= 1.20
+    if temperature <= 22 and category in {"Bakery", "Beverage", "Home"}:
+        multiplier *= 1.10
+
+    if normalized_weather == "rainy":
+        if category in {"Home", "Snacks", "Beverage"}:
+            multiplier *= 1.15
+        if category in {"Sports", "Accessories"}:
+            multiplier *= 0.85
+
+    return multiplier
+
+
+def get_active_promotion(
+    now_utc: datetime,
+    store_id: str,
+    product_meta: dict,
+    weather_data: dict,
+    holiday_flag: int,
+) -> dict:
+    if not settings.PROMOTION_ENABLED:
+        return {"name": "none", "discount": 0.0, "qty_boost": 1.0}
+
+    category = product_meta.get("category", "Other")
+    hour = now_utc.hour
+    weekday = now_utc.weekday()
+    weather = (weather_data.get("weather") or "unknown").lower()
+
+    rules: list[dict] = []
+
+    if weekday < 5 and 11 <= hour <= 13 and category in {"Beverage", "Bakery", "Dairy"}:
+        rules.append({"name": "lunch_combo", "discount": 0.12, "qty_boost": 1.30})
+
+    if 18 <= hour <= 21 and category in {"Snacks", "Beverage", "Toys", "Accessories"}:
+        rules.append({"name": "evening_impulse", "discount": 0.08, "qty_boost": 1.20})
+
+    if weekday >= 5 and category in {"Electronics", "Sports", "Accessories", "Home"}:
+        rules.append({"name": "weekend_lifestyle", "discount": 0.10, "qty_boost": 1.16})
+
+    if now_utc.day >= 25 and category in {"Electronics", "Clothing", "Home"}:
+        rules.append({"name": "payday_campaign", "discount": 0.15, "qty_boost": 1.28})
+
+    if holiday_flag == 1:
+        rules.append({"name": "holiday_special", "discount": 0.18, "qty_boost": 1.35})
+
+    if weather == "rainy" and category in {"Beverage", "Snacks", "Home"}:
+        rules.append({"name": "rainy_day_offer", "discount": 0.07, "qty_boost": 1.14})
+
+    if store_id == "S01" and 17 <= hour <= 20 and category == "Electronics":
+        rules.append({"name": "store_s01_prime", "discount": 0.09, "qty_boost": 1.12})
+
+    if not rules:
+        return {"name": "none", "discount": 0.0, "qty_boost": 1.0}
+
+    best_discount = max(rule["discount"] for rule in rules)
+    best_qty_boost = max(rule["qty_boost"] for rule in rules)
+    promo_name = "+".join(sorted({rule["name"] for rule in rules}))
+
+    return {
+        "name": promo_name,
+        "discount": min(0.30, best_discount),
+        "qty_boost": min(1.50, best_qty_boost),
+    }
+
+
+def choose_product(store_id: str, now_utc: datetime, weather_data: dict, holiday_flag: int) -> dict:
+    if not settings.SALES_PRODUCTS:
+        raise ValueError("SALES_PRODUCTS is empty")
+
+    if not settings.STORE_PROFILE_ENABLED and not settings.SEASONALITY_ENABLED and not settings.PROMOTION_ENABLED:
+        return random.choice(settings.SALES_PRODUCTS)
+
+    profile = STORE_PROFILES.get(store_id, {})
+    affinity = profile.get("category_affinity", {})
+    weights: list[float] = []
+
+    for product in settings.SALES_PRODUCTS:
+        meta = get_product_meta(product["product_id"])
+        category = meta.get("category", "Other")
+
+        weight = 1.0
+        weight *= affinity.get(category, 1.0)
+        weight *= time_of_day_multiplier(category, now_utc)
+        weight *= day_of_week_multiplier(category, now_utc)
+        weight *= weather_demand_multiplier(
+            category,
+            weather_data.get("weather", "unknown"),
+            weather_data.get("temperature", 30),
+        )
+
+        if holiday_flag == 1 and category in {"Beverage", "Snacks", "Toys", "Accessories"}:
+            weight *= 1.15
+
+        weights.append(max(0.05, weight))
+
+    return random.choices(settings.SALES_PRODUCTS, weights=weights, k=1)[0]
+
+
+def random_quantity(
+    product_meta: dict,
+    store_id: str,
+    now_utc: datetime,
+    weather_data: dict,
+    holiday_flag: int,
+    promotion: dict,
+) -> int:
+    category = product_meta.get("category", "Other")
+    base_quantity = CATEGORY_BASE_QUANTITY.get(category, CATEGORY_BASE_QUANTITY["Other"])
+
+    profile = STORE_PROFILES.get(store_id, {}) if settings.STORE_PROFILE_ENABLED else {}
+    demand_multiplier = profile.get("demand_multiplier", 1.0)
+
+    quantity_expectation = base_quantity
+    quantity_expectation *= demand_multiplier
+    quantity_expectation *= time_of_day_multiplier(category, now_utc)
+    quantity_expectation *= day_of_week_multiplier(category, now_utc)
+    quantity_expectation *= weather_demand_multiplier(
+        category,
+        weather_data.get("weather", "unknown"),
+        weather_data.get("temperature", 30),
+    )
+
+    if holiday_flag == 1:
+        quantity_expectation *= 1.22
+
+    quantity_expectation *= promotion.get("qty_boost", 1.0)
+
+    sampled = random.gauss(quantity_expectation, 0.7)
+    quantity = int(round(sampled))
+    return max(1, min(12, quantity))
+
+
+def random_price(product: dict, store_id: str, promotion: dict) -> float:
     min_price = product["min_price"]
     max_price = product["max_price"]
-    price = random.uniform(min_price, max_price)
+
+    base_price = float(product.get("base_price", (min_price + max_price) / 2.0))
+    mode_price = min(max(base_price, min_price), max_price)
+    price = random.triangular(min_price, max_price, mode_price)
+
+    if settings.STORE_PROFILE_ENABLED:
+        price *= STORE_PROFILES.get(store_id, {}).get("price_index", 1.0)
+
+    discount = promotion.get("discount", 0.0)
+    if discount > 0:
+        price *= (1.0 - discount)
 
     # Optional drift injection for demo: amplify price for selected products.
     if settings.PRICE_SHOCK_ENABLED and settings.PRICE_SHOCK_MULTIPLIER > 0:
@@ -58,7 +337,9 @@ def random_price(product: dict) -> float:
         if selected:
             price = price * settings.PRICE_SHOCK_MULTIPLIER
 
-    return round(price, 2)
+    lower_bound = min_price * 0.70
+    upper_bound = max_price * 1.30
+    return round(min(max(price, lower_bound), upper_bound), 2)
 
 
 def normalize_weather_condition(raw_weather: str) -> str:
@@ -244,17 +525,27 @@ def get_holiday_flag() -> int:
 
 
 def build_sales_event() -> dict:
+    now_utc = utc_now_dt()
     store_id = choose_store_id()
-    product = choose_product()
     weather_data = get_weather_for_store(store_id)
     holiday_flag = get_holiday_flag()
+    product = choose_product(store_id, now_utc, weather_data, holiday_flag)
+    product_meta = get_product_meta(product["product_id"])
+    promotion = get_active_promotion(now_utc, store_id, product_meta, weather_data, holiday_flag)
 
     event = {
-        "timestamp": utc_now_iso(),
+        "timestamp": now_utc.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "store_id": store_id,
         "product_id": product["product_id"],
-        "quantity": random_quantity(),
-        "price": random_price(product),
+        "quantity": random_quantity(
+            product_meta=product_meta,
+            store_id=store_id,
+            now_utc=now_utc,
+            weather_data=weather_data,
+            holiday_flag=holiday_flag,
+            promotion=promotion,
+        ),
+        "price": random_price(product, store_id=store_id, promotion=promotion),
         "temperature": weather_data["temperature"],
         "weather": weather_data["weather"],
         "holiday": holiday_flag,

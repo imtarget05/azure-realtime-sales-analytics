@@ -25,6 +25,19 @@ $FUNCTION_APP_NAME = "func-sales-validation-$suffix"
 $APP_INSIGHTS_NAME = "appi-sales-analytics"
 $LOG_ANALYTICS_NAME = "log-sales-analytics"
 
+function Set-KeyVaultSecretSafe {
+  param(
+    [Parameter(Mandatory = $true)][string]$VaultName,
+    [Parameter(Mandatory = $true)][string]$SecretName,
+    [Parameter(Mandatory = $true)][string]$SecretValue
+  )
+
+  az keyvault secret set --vault-name $VaultName --name $SecretName --value $SecretValue --output none
+  if ($LASTEXITCODE -ne 0) {
+    throw "Failed to set secret '$SecretName' in Key Vault '$VaultName'."
+  }
+}
+
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host "  TRIEN KHAI HA TANG AZURE - HE THONG PHAN TICH BAN HANG" -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
@@ -212,10 +225,10 @@ az keyvault create `
   --output table
 
 Write-Host "[11a] Luu Secrets vao Key Vault..." -ForegroundColor Yellow
-az keyvault secret set --vault-name $KEY_VAULT_NAME --name "event-hub-connection-string" --value $EH_CONNECTION_STRING --output none
-az keyvault secret set --vault-name $KEY_VAULT_NAME --name "sql-connection-string" --value "Server=$SQL_SERVER_NAME.database.windows.net;Database=$SQL_DB_NAME;User=$SQL_ADMIN_USER;Password=$SQL_ADMIN_PASSWORD" --output none
-az keyvault secret set --vault-name $KEY_VAULT_NAME --name "sql-admin-password" --value $SQL_ADMIN_PASSWORD --output none
-az keyvault secret set --vault-name $KEY_VAULT_NAME --name "blob-connection-string" --value $BLOB_CONNECTION_STRING --output none
+Set-KeyVaultSecretSafe -VaultName $KEY_VAULT_NAME -SecretName "event-hub-connection-string" -SecretValue $EH_CONNECTION_STRING
+Set-KeyVaultSecretSafe -VaultName $KEY_VAULT_NAME -SecretName "sql-connection-string" -SecretValue "Server=$SQL_SERVER_NAME.database.windows.net;Database=$SQL_DB_NAME;User=$SQL_ADMIN_USER;Password=$SQL_ADMIN_PASSWORD"
+Set-KeyVaultSecretSafe -VaultName $KEY_VAULT_NAME -SecretName "sql-admin-password" -SecretValue $SQL_ADMIN_PASSWORD
+Set-KeyVaultSecretSafe -VaultName $KEY_VAULT_NAME -SecretName "blob-connection-string" -SecretValue $BLOB_CONNECTION_STRING
 Write-Host "  Secrets da duoc luu vao Key Vault: $KEY_VAULT_NAME" -ForegroundColor Green
 
 # 12. Application Insights + Log Analytics
@@ -244,7 +257,7 @@ $APP_INSIGHTS_KEY = az monitor app-insights component show `
   --resource-group $RESOURCE_GROUP `
   --query "connectionString" --output tsv
 
-az keyvault secret set --vault-name $KEY_VAULT_NAME --name "appinsights-connection-string" --value $APP_INSIGHTS_KEY --output none
+Set-KeyVaultSecretSafe -VaultName $KEY_VAULT_NAME -SecretName "appinsights-connection-string" -SecretValue $APP_INSIGHTS_KEY
 Write-Host "  App Insights Connection String saved to Key Vault" -ForegroundColor Green
 
 # 13. Azure Functions App (Validation Layer)

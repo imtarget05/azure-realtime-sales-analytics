@@ -38,6 +38,7 @@ plotly>=5.18.0
 
 # Web App
 flask>=3.0.0
+azure-functions>=1.21.0
 
 # Utilities
 requests>=2.31.0

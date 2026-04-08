@@ -25,29 +25,37 @@ def test_choose_store_id_valid():
 def test_choose_product_valid():
     """Product phải có đúng schema min_price/max_price."""
     from data_generator.sales_generator import choose_product
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc)
+    weather = {"weather": "sunny", "temperature": 30}
     for _ in range(50):
-        p = choose_product()
+        p = choose_product("S01", now, weather, 0)
         assert "product_id" in p
         assert "min_price" in p
         assert "max_price" in p
 
 
 def test_random_quantity_range():
-    """Quantity phải trong khoảng 1-5."""
+    """Quantity phải trong khoảng 1-12."""
     from data_generator.sales_generator import random_quantity
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc)
+    weather = {"weather": "sunny", "temperature": 30}
+    product_meta = {"category": "Beverage"}
+    promotion = {"qty_boost": 1.0}
     for _ in range(100):
-        q = random_quantity()
-        assert 1 <= q <= 5, f"quantity ngoài khoảng: {q}"
+        q = random_quantity(product_meta, "S01", now, weather, 0, promotion)
+        assert 1 <= q <= 12, f"quantity ngoài khoảng: {q}"
 
 
 def test_random_price_within_bounds():
-    """Price phải nằm trong [min_price, max_price]."""
+    """Price phải nằm trong [min_price*0.70, max_price*1.30]."""
     from data_generator.sales_generator import random_price
-    product = {"product_id": "TEST", "min_price": 1.0, "max_price": 5.0}
+    product = {"product_id": "TEST", "min_price": 1.0, "max_price": 5.0, "base_price": 3.0}
+    promotion = {"discount": 0.0}
     for _ in range(100):
-        price = random_price(product)
-        assert 1.0 <= price <= 5.0, f"price ngoài khoảng: {price}"
-        # Phải có 2 chữ số thập phân
+        price = random_price(product, "S01", promotion)
+        assert product["min_price"] * 0.70 <= price <= product["max_price"] * 1.30, f"price ngoài khoảng: {price}"
         assert price == round(price, 2)
 
 

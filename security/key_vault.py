@@ -44,11 +44,14 @@ class SecretManager:
     """Manages secrets via Azure Key Vault with Managed Identity."""
 
     def __init__(self, vault_url: str | None = None):
-        self.vault_url = vault_url or os.getenv(
-            "KEY_VAULT_URL", "https://kv-sales-analytics.vault.azure.net/"
-        )
+        self.vault_url = vault_url or os.getenv("KEY_VAULT_URL") or os.getenv("KEY_VAULT_URI")
 
         # Use Managed Identity in Azure, DefaultAzureCredential locally
+        if not self.vault_url:
+            logger.warning("KEY_VAULT_URL/KEY_VAULT_URI is not set. Falling back to env vars only.")
+            self.client = None
+            return
+
         try:
             if os.getenv("WEBSITE_INSTANCE_ID"):
                 # Running in Azure (App Service / Functions)

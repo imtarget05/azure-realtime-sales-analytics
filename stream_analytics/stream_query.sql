@@ -47,9 +47,18 @@ Enriched AS (
         END AS holiday,
         enqueued_time,
         CASE
-            WHEN product_id IN ('COKE', 'PEPSI') THEN 'Beverage'
-            WHEN product_id IN ('MILK') THEN 'Dairy'
-            WHEN product_id IN ('BREAD') THEN 'Bakery'
+            WHEN product_id IN ('COKE', 'PEPSI', 'P016', 'P017') THEN 'Beverage'
+            WHEN product_id IN ('MILK', 'P019', 'P020') THEN 'Dairy'
+            WHEN product_id IN ('BREAD', 'P018') THEN 'Bakery'
+            WHEN product_id IN ('P001', 'P002', 'P003', 'P004', 'P005', 'P014', 'P015') THEN 'Electronics'
+            WHEN product_id IN ('P006', 'P007', 'P008') THEN 'Clothing'
+            WHEN product_id IN ('P009', 'P010', 'P011') THEN 'Home'
+            WHEN product_id IN ('P012', 'P013') THEN 'Accessories'
+            WHEN product_id IN ('P021', 'P022', 'P023') THEN 'Snacks'
+            WHEN product_id IN ('P024', 'P025', 'P026') THEN 'Health & Beauty'
+            WHEN product_id IN ('P027', 'P028') THEN 'Sports'
+            WHEN product_id IN ('P029', 'P030') THEN 'Stationery'
+            WHEN product_id = 'P031' THEN 'Toys'
             ELSE 'Other'
         END AS category
     FROM Cleaned
@@ -145,3 +154,17 @@ SELECT
     value
 INTO SalesAlertsOutput
 FROM Alerts;
+
+-- 4) Realtime tiles/cards → Power BI Streaming Dataset (PowerBIRealtimeOutput)
+SELECT
+    System.Timestamp() AS [timestamp],
+    store_id,
+    category,
+    CAST(SUM(tx_count) AS bigint) AS transaction_count,
+    CAST(SUM(units_sold) AS bigint) AS total_quantity,
+    CAST(SUM(revenue) AS float) AS total_revenue,
+    CAST(CASE WHEN SUM(tx_count) = 0 THEN 0 ELSE SUM(revenue) / SUM(tx_count) END AS float) AS avg_order_value,
+    CAST(AVG(avg_price) AS float) AS avg_unit_price
+INTO PowerBIRealtimeOutput
+FROM Agg5m
+GROUP BY store_id, category, TumblingWindow(minute, 1);

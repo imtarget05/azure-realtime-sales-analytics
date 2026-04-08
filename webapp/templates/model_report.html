@@ -1,252 +1,285 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Model Report</title>
+    <title>Model Report — Sales Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #333; }
-        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
-        h1 { text-align: center; color: #1a73e8; margin: 30px 0 10px; font-size: 1.8em; }
-        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
-        .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 30px; margin-bottom: 20px; }
-        .card h2 { color: #1a73e8; margin-bottom: 20px; font-size: 1.2em; border-bottom: 2px solid #e8eaed; padding-bottom: 10px; }
-        .decision-banner { text-align: center; padding: 20px; border-radius: 12px; margin-bottom: 20px; font-size: 1.5em; font-weight: bold; }
-        .decision-promote { background: #e8f5e9; color: #2e7d32; border: 2px solid #4caf50; }
-        .decision-reject { background: #fce4ec; color: #c62828; border: 2px solid #f44336; }
-        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .metric-card { background: #f8f9fa; border-radius: 8px; padding: 20px; }
-        .metric-card h3 { font-size: 1em; color: #555; margin-bottom: 15px; }
-        .metric-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
-        .metric-row:last-child { border-bottom: none; }
-        .metric-label { color: #666; }
-        .metric-value { font-weight: 600; }
-        .delta-positive { color: #2e7d32; }
-        .delta-negative { color: #c62828; }
-        .config-table { width: 100%; border-collapse: collapse; }
-        .config-table th, .config-table td { padding: 10px 15px; text-align: left; border-bottom: 1px solid #eee; }
-        .config-table th { background: #f8f9fa; color: #555; font-weight: 600; }
-        .config-table .highlight { background: #e3f2fd; }
-        .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-        .summary-tile { background: #f8f9fa; border-radius: 10px; padding: 16px; }
-        .summary-tile .label { color: #666; font-size: 0.9em; margin-bottom: 8px; }
-        .summary-tile .value { font-size: 1.4em; font-weight: 700; color: #1a73e8; }
-        .summary-tile .delta { margin-top: 6px; font-size: 0.9em; }
-        .btn { display: inline-block; padding: 12px 30px; background: #1a73e8; color: #fff; border: none; border-radius: 8px; font-size: 1em; cursor: pointer; text-decoration: none; margin: 5px; }
-        .btn:hover { background: #1557b0; }
-        .btn-back { background: #5f6368; }
-        .btn-back:hover { background: #3c4043; }
-        .actions { text-align: center; margin: 30px 0; }
-        .no-report { text-align: center; padding: 60px 20px; color: #666; }
-        .no-report code { background: #f0f0f0; padding: 3px 8px; border-radius: 4px; font-size: 0.95em; }
-        .info-box { background: #e3f2fd; border-left: 4px solid #1a73e8; padding: 15px; border-radius: 0 8px 8px 0; margin: 15px 0; font-size: 0.9em; }
-        .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-        .chart-item { background: #f8f9fa; border-radius: 8px; overflow: hidden; }
-        .chart-item img { width: 100%; height: auto; display: block; }
-        .chart-caption { text-align: center; padding: 8px; font-size: 0.85em; color: #555; }
-        @media (max-width: 900px) {
-            .metrics-grid, .summary-grid, .charts-grid { grid-template-columns: 1fr; }
+        :root {
+            --bg: #0f1117; --surface: #1a1d27; --surface2: #22262f;
+            --border: #2d3140; --text: #e1e4ea; --text2: #8b90a0;
+            --accent: #4f8cff; --accent2: #6c5ce7; --green: #00b894;
+            --red: #ff6b6b; --orange: #fdcb6e; --radius: 12px;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+        a { color: var(--accent); text-decoration: none; }
+
+        .top-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 30px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .top-bar h1 { font-size: 1.15em; font-weight: 600; }
+        .nav { display: flex; gap: 8px; }
+        .container { max-width: 960px; margin: 0 auto; padding: 24px; }
+        .section { margin-bottom: 28px; }
+        .section-title { font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.78em; font-weight: 600; }
+        .badge-green { background: rgba(0,184,148,.15); color: var(--green); }
+        .badge-red { background: rgba(255,107,107,.15); color: var(--red); }
+        .badge-blue { background: rgba(79,140,255,.15); color: var(--accent); }
+        .pill { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.82em; font-weight: 600; }
+        .pill-up { background: rgba(0,184,148,.12); color: var(--green); }
+        .pill-down { background: rgba(255,107,107,.12); color: var(--red); }
+
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+
+        /* Decision Banner */
+        .decision-banner { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-radius: var(--radius); margin-bottom: 20px; }
+        .decision-ok { background: rgba(0,184,148,.08); border: 1px solid rgba(0,184,148,.25); }
+        .decision-bad { background: rgba(255,107,107,.08); border: 1px solid rgba(255,107,107,.25); }
+        .decision-banner .icon { font-size: 2em; }
+        .decision-banner .info h3 { font-size: 1em; margin-bottom: 2px; }
+        .decision-banner .info p { font-size: 0.85em; color: var(--text2); }
+
+        /* KPI Row */
+        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+        .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
+        .kpi .label { font-size: 0.72em; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+        .kpi .val { font-size: 1.6em; font-weight: 700; }
+        .kpi .delta { font-size: 0.8em; margin-top: 4px; }
+        .delta-up { color: var(--green); }
+        .delta-down { color: var(--red); }
+
+        /* Metrics Table */
+        .m-table { width: 100%; border-collapse: collapse; font-size: 0.88em; }
+        .m-table th, .m-table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+        .m-table th { color: var(--text2); font-size: 0.75em; text-transform: uppercase; letter-spacing: .5px; }
+        .m-table .arrow { color: var(--text2); }
+
+        /* Charts Grid */
+        .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .chart-card { background: var(--surface2); border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+        .chart-card img { width: 100%; height: auto; display: block; }
+        .chart-card .caption { padding: 8px 12px; font-size: 0.78em; color: var(--text2); border-top: 1px solid var(--border); }
+
+        /* Canvas */
+        .canvas-wrap { position: relative; height: 240px; }
+        .canvas-wrap canvas { width: 100% !important; height: 100% !important; }
+
+        /* Drift Banner */
+        .drift-row { display: flex; gap: 16px; align-items: center; padding: 14px 18px; border-radius: var(--radius); margin-bottom: 16px; }
+        .drift-ok { background: rgba(0,184,148,.06); border: 1px solid rgba(0,184,148,.2); }
+        .drift-alert { background: rgba(255,107,107,.06); border: 1px solid rgba(255,107,107,.2); }
+        .drift-row .icon { font-size: 1.6em; }
+        .drift-row .info { font-size: 0.88em; }
+        .drift-row .info strong { color: var(--text); }
+        .drift-row .info span { color: var(--text2); }
+
+        /* Timeline */
+        .timeline { padding-left: 20px; position: relative; }
+        .timeline::before { content:''; position: absolute; left: 6px; top: 4px; bottom: 4px; width: 2px; background: var(--border); }
+        .tl-item { position: relative; padding: 8px 0 8px 18px; }
+        .tl-item::before { content:''; position: absolute; left: -17px; top: 13px; width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--accent); background: var(--bg); }
+        .tl-item.promote::before { border-color: var(--green); background: var(--green); }
+        .tl-item.reject::before { border-color: var(--red); background: var(--red); }
+        .tl-item .time { font-size: 0.78em; color: var(--text2); }
+        .tl-item .detail { font-size: 0.88em; }
+        .tl-item .r2 { font-size: 0.78em; color: var(--text2); }
+
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 8px; font-size: 0.85em; font-weight: 500; border: none; cursor: pointer; transition: all .15s; text-decoration: none; }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: #3d7ae6; }
+        .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+        .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+        .actions { display: flex; gap: 10px; justify-content: center; margin-top: 30px; }
+
+        .empty { text-align: center; padding: 40px; color: var(--text2); }
+        .empty .big { font-size: 2.5em; margin-bottom: 10px; }
+
+        @media (max-width: 768px) {
+            .kpi-row { grid-template-columns: 1fr 1fr; }
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Dashboard Model training</h1>
-        <p class="subtitle">So sánh kết quả huấn luyện mới với lần trước</p>
+    <div class="top-bar">
+        <h1>📋 Model Report</h1>
+        <div class="nav">
+            <a href="/" class="btn btn-ghost">🔮 Predict</a>
+            <a href="/dashboard" class="btn btn-ghost">📊 Dashboard</a>
+            <a href="/model-report" class="btn btn-primary">📋 Report</a>
+            <a href="/api/health" class="btn btn-ghost">🏥 Health</a>
+        </div>
+    </div>
+
+    <div
+        id="page-data"
+        class="container"
+        data-drift-report='{{ (drift_report or {}) | tojson | forceescape }}'
+        data-history='{{ (history or []) | tojson | forceescape }}'>
 
         {% if not report %}
-        <div class="card no-report">
-            <h2>Chưa có báo cáo so sánh</h2>
-            <p>Chạy lệnh sau để tái huấn luyện và tạo báo cáo:</p>
-            <br>
-            <code>python ml/retrain_and_compare.py --new-samples 80000 --new-estimators 300</code>
-            <br><br>
-            <p>Hoặc với tự động đề xuất mô hình mới:</p>
-            <code>python ml/retrain_and_compare.py --new-samples 80000 --new-estimators 300 --promote</code>
+        <div class="card empty">
+            <div class="big">🔬</div>
+            <h2 style="color:var(--text);margin-bottom:8px;">Chưa có báo cáo so sánh</h2>
+            <p>Chạy retrain để tạo báo cáo đầu tiên:<br>
+            <code style="background:var(--surface2);padding:3px 10px;border-radius:6px;color:var(--accent);font-size:0.85em;">python ml/retrain_and_compare.py --new-samples 80000 --new-estimators 300 --promote</code></p>
         </div>
         {% else %}
 
-        <!-- Config Comparison -->
-        <div class="card">
-            <h2>Cấu hình huấn luyện</h2>
-            <table class="config-table">
-                <tr>
-                    <th>Tham số</th>
-                    <th>Old Model</th>
-                    <th>New Model</th>
-                </tr>
-                <tr>
-                    <td>Algorithm</td>
-                    <td>{{ report.old_config.get('algorithm', 'GradientBoosting') }}</td>
-                    <td class="highlight">{{ report.new_config.get('algorithm', 'GradientBoosting') }}</td>
-                </tr>
-                <tr>
-                    <td>Training Samples</td>
-                    <td>{{ "{:,}".format(report.old_config.n_samples) }}</td>
-                    <td class="highlight">{{ "{:,}".format(report.new_config.n_samples) }}</td>
-                </tr>
-                {% if report.new_config.get('n_estimators') %}
-                <tr>
-                    <td>N Estimators</td>
-                    <td>{{ report.old_config.get('n_estimators', '—') }}</td>
-                    <td class="highlight">{{ report.new_config.n_estimators }}</td>
-                </tr>
-                {% endif %}
-                {% if report.new_config.get('max_depth') %}
-                <tr>
-                    <td>Max Depth</td>
-                    <td>{{ report.old_config.get('max_depth', '—') }}</td>
-                    <td class="highlight">{{ report.new_config.max_depth }}</td>
-                </tr>
-                {% endif %}
-                {% if report.new_config.get('learning_rate') %}
-                <tr>
-                    <td>Learning Rate</td>
-                    <td>{{ report.old_config.get('learning_rate', '—') }}</td>
-                    <td class="highlight">{{ report.new_config.learning_rate }}</td>
-                </tr>
-                {% endif %}
-            </table>
+        <!-- Decision Banner -->
+        <div class="decision-banner {{ 'decision-ok' if report.decision == 'PROMOTE' else 'decision-bad' }}">
+            <div class="icon">{{ '🚀' if report.decision == 'PROMOTE' else '🛑' }}</div>
+            <div class="info">
+                <h3>{% if report.decision == 'PROMOTE' %}Model mới đã được PROMOTE{% else %}Model mới bị REJECT{% endif %}</h3>
+                <p>{{ report.timestamp }} · Algorithm: {{ report.new_config.get('algorithm', 'GBR') }} · Samples: {{ "{:,}".format(report.data_source.n_samples if report.data_source else 0) }} · Total retrains: {{ history_count }}</p>
+            </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-row">
+            <div class="kpi">
+                <div class="label">Revenue R²</div>
+                <div class="val" style="color:var(--accent)">{{ report.new_revenue_metrics.r2_score }}</div>
+                <div class="delta {{ 'delta-up' if report.improvements.revenue_r2_delta >= 0 else 'delta-down' }}">
+                    {{ '▲' if report.improvements.revenue_r2_delta >= 0 else '▼' }} {{ "%+.4f"|format(report.improvements.revenue_r2_delta) }}
+                </div>
+            </div>
+            <div class="kpi">
+                <div class="label">Revenue MAE</div>
+                <div class="val" style="color:var(--green)">{{ report.new_revenue_metrics.mae }}</div>
+                <div class="delta {{ 'delta-up' if report.improvements.revenue_mae_delta >= 0 else 'delta-down' }}">
+                    {{ '▲' if report.improvements.revenue_mae_delta >= 0 else '▼' }} {{ "%+.4f"|format(report.improvements.revenue_mae_delta) }}
+                </div>
+            </div>
+            <div class="kpi">
+                <div class="label">Quantity R²</div>
+                <div class="val" style="color:var(--accent2)">{{ report.new_quantity_metrics.r2_score }}</div>
+                <div class="delta {{ 'delta-up' if report.improvements.quantity_r2_delta >= 0 else 'delta-down' }}">
+                    {{ '▲' if report.improvements.quantity_r2_delta >= 0 else '▼' }} {{ "%+.4f"|format(report.improvements.quantity_r2_delta) }}
+                </div>
+            </div>
+            <div class="kpi">
+                <div class="label">Quantity MAE</div>
+                <div class="val" style="color:var(--orange)">{{ report.new_quantity_metrics.mae }}</div>
+                <div class="delta {{ 'delta-up' if report.improvements.quantity_mae_delta >= 0 else 'delta-down' }}">
+                    {{ '▲' if report.improvements.quantity_mae_delta >= 0 else '▼' }} {{ "%+.4f"|format(report.improvements.quantity_mae_delta) }}
+                </div>
+            </div>
         </div>
 
         <!-- Metrics Comparison -->
-        <div class="card">
-            <h2>So sánh Chỉ số</h2>
-            <div class="summary-grid" style="margin-bottom: 20px;">
-                <div class="summary-tile">
-                    <div class="label">Revenue R²</div>
-                    <div class="value">{{ report.new_revenue_metrics.r2_score }}</div>
-                    <div class="delta delta-positive">{{ "%+.4f"|format(report.improvements.revenue_r2_delta) }} so với model cũ</div>
-                </div>
-                <div class="summary-tile">
-                    <div class="label">Revenue MAE</div>
-                    <div class="value">{{ report.new_revenue_metrics.mae }}</div>
-                    <div class="delta delta-positive">{{ "%+.4f"|format(report.improvements.revenue_mae_delta) }} giảm lỗi tuyệt đối</div>
-                </div>
-                <div class="summary-tile">
-                    <div class="label">Quantity R²</div>
-                    <div class="value">{{ report.new_quantity_metrics.r2_score }}</div>
-                    <div class="delta delta-positive">{{ "%+.4f"|format(report.improvements.quantity_r2_delta) }} so với model cũ</div>
-                </div>
-                <div class="summary-tile">
-                    <div class="label">Quantity MAE</div>
-                    <div class="value">{{ report.new_quantity_metrics.mae }}</div>
-                    <div class="delta delta-positive">{{ "%+.4f"|format(report.improvements.quantity_mae_delta) }} giảm lỗi tuyệt đối</div>
-                </div>
-            </div>
-            <div class="metrics-grid">
-                <!-- Revenue -->
-                <div class="metric-card">
-                    <h3>Mô hình Doanh thu</h3>
-                    {% set rev_imp = report.improvements %}
-                    <div class="metric-row">
-                        <span class="metric-label">R² Score</span>
-                        <span class="metric-value">
-                            {{ report.old_revenue_metrics.r2_score }} → {{ report.new_revenue_metrics.r2_score }}
-                            <span class="{{ 'delta-positive' if rev_imp.revenue_r2_delta >= 0 else 'delta-negative' }}">
-                                ({{ "%+.4f"|format(rev_imp.revenue_r2_delta) }})
-                            </span>
-                        </span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">MAE</span>
-                        <span class="metric-value">
-                            {{ report.old_revenue_metrics.mae }} → {{ report.new_revenue_metrics.mae }}
-                            <span class="{{ 'delta-positive' if rev_imp.revenue_mae_delta >= 0 else 'delta-negative' }}">
-                                ({{ "%+.4f"|format(rev_imp.revenue_mae_delta) }})
-                            </span>
-                        </span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">RMSE</span>
-                        <span class="metric-value">
-                            {{ report.old_revenue_metrics.rmse }} → {{ report.new_revenue_metrics.rmse }}
-                        </span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">CV R² Mean</span>
-                        <span class="metric-value">
-                            {{ report.old_revenue_metrics.cv_r2_mean }} → {{ report.new_revenue_metrics.cv_r2_mean }}
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Quantity -->
-                <div class="metric-card">
-                    <h3>Mô hình Số lượng</h3>
-                    <div class="metric-row">
-                        <span class="metric-label">R² Score</span>
-                        <span class="metric-value">
-                            {{ report.old_quantity_metrics.r2_score }} → {{ report.new_quantity_metrics.r2_score }}
-                            <span class="{{ 'delta-positive' if rev_imp.quantity_r2_delta >= 0 else 'delta-negative' }}">
-                                ({{ "%+.4f"|format(rev_imp.quantity_r2_delta) }})
-                            </span>
-                        </span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">MAE</span>
-                        <span class="metric-value">
-                            {{ report.old_quantity_metrics.mae }} → {{ report.new_quantity_metrics.mae }}
-                            <span class="{{ 'delta-positive' if rev_imp.quantity_mae_delta >= 0 else 'delta-negative' }}">
-                                ({{ "%+.4f"|format(rev_imp.quantity_mae_delta) }})
-                            </span>
-                        </span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">RMSE</span>
-                        <span class="metric-value">
-                            {{ report.old_quantity_metrics.rmse }} → {{ report.new_quantity_metrics.rmse }}
-                        </span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">CV R² Mean</span>
-                        <span class="metric-value">
-                            {{ report.old_quantity_metrics.cv_r2_mean }} → {{ report.new_quantity_metrics.cv_r2_mean }}
-                        </span>
-                    </div>
-                </div>
+        <div class="section">
+            <div class="section-title">Metrics Comparison</div>
+            <div class="card" style="padding:0;overflow:hidden;">
+                <table class="m-table">
+                    <thead><tr><th>Metric</th><th>Old</th><th></th><th>New</th><th>Change</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td>Revenue R²</td>
+                            <td style="color:var(--text2)">{{ report.old_revenue_metrics.r2_score }}</td>
+                            <td class="arrow">→</td>
+                            <td><strong>{{ report.new_revenue_metrics.r2_score }}</strong></td>
+                            <td><span class="pill {{ 'pill-up' if report.improvements.revenue_r2_delta >= 0 else 'pill-down' }}">{{ "%+.4f"|format(report.improvements.revenue_r2_delta) }}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Revenue MAE</td>
+                            <td style="color:var(--text2)">{{ report.old_revenue_metrics.mae }}</td>
+                            <td class="arrow">→</td>
+                            <td><strong>{{ report.new_revenue_metrics.mae }}</strong></td>
+                            <td><span class="pill {{ 'pill-up' if report.improvements.revenue_mae_delta >= 0 else 'pill-down' }}">{{ "%+.4f"|format(report.improvements.revenue_mae_delta) }}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Quantity R²</td>
+                            <td style="color:var(--text2)">{{ report.old_quantity_metrics.r2_score }}</td>
+                            <td class="arrow">→</td>
+                            <td><strong>{{ report.new_quantity_metrics.r2_score }}</strong></td>
+                            <td><span class="pill {{ 'pill-up' if report.improvements.quantity_r2_delta >= 0 else 'pill-down' }}">{{ "%+.4f"|format(report.improvements.quantity_r2_delta) }}</span></td>
+                        </tr>
+                        <tr>
+                            <td>Quantity MAE</td>
+                            <td style="color:var(--text2)">{{ report.old_quantity_metrics.mae }}</td>
+                            <td class="arrow">→</td>
+                            <td><strong>{{ report.new_quantity_metrics.mae }}</strong></td>
+                            <td><span class="pill {{ 'pill-up' if report.improvements.quantity_mae_delta >= 0 else 'pill-down' }}">{{ "%+.4f"|format(report.improvements.quantity_mae_delta) }}</span></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="card">
-            <h2>Bằng chứng tự động học</h2>
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <h3>Lần tái huấn luyện hiện tại</h3>
-                    <div class="metric-row"><span class="metric-label">Thời gian</span><span class="metric-value">{{ report.timestamp }}</span></div>
-                    <div class="metric-row"><span class="metric-label">Chế độ dữ liệu</span><span class="metric-value">{{ report.data_source.mode if report.data_source else 'unknown' }}</span></div>
-                    <div class="metric-row"><span class="metric-label">Số mẫu huấn luyện</span><span class="metric-value">{{ report.data_source.n_samples if report.data_source else '-' }}</span></div>
-                    <div class="metric-row"><span class="metric-label">Số đặc trưng</span><span class="metric-value">{{ report.data_source.feature_count if report.data_source else '-' }}</span></div>
-                    <div class="metric-row"><span class="metric-label">Tổng số lần tái huấn luyện</span><span class="metric-value">{{ history_count }}</span></div>
-                </div>
-                <div class="metric-card">
-                    <h3>So với lần trước</h3>
-                    {% if previous_run %}
-                    <div class="metric-row"><span class="metric-label">Lần trước</span><span class="metric-value">{{ previous_run.timestamp }}</span></div>
-                    <div class="metric-row"><span class="metric-label">Revenue R²</span><span class="metric-value">{{ previous_run.revenue_r2 }} → {{ latest_run.revenue_r2 }}</span></div>
-                    <div class="metric-row"><span class="metric-label">Quantity R²</span><span class="metric-value">{{ previous_run.quantity_r2 }} → {{ latest_run.quantity_r2 }}</span></div>
-                    <div class="metric-row"><span class="metric-label">Quyết định</span><span class="metric-value">{{ latest_run.decision }}</span></div>
-                    {% else %}
-                    <div class="metric-row"><span class="metric-label">Trạng thái</span><span class="metric-value">Chưa có lần trước để so sánh</span></div>
-                    {% endif %}
+        <!-- R² Trend Chart -->
+        {% if history|length > 1 %}
+        <div class="section">
+            <div class="section-title">R² Score Trend</div>
+            <div class="card">
+                <div class="canvas-wrap">
+                    <canvas id="r2TrendChart"></canvas>
                 </div>
             </div>
         </div>
+        {% endif %}
 
-        <!-- Dynamic Charts -->
-        {% if chart_files %}
-        <div class="card">
-            <h2>Biểu đồ so sánh (cập nhật mỗi lần tái huấn luyện)</h2>
+        <!-- Drift Monitor -->
+        {% if drift_report %}
+        <div class="section">
+            <div class="section-title">Drift Monitor</div>
+            <div class="drift-row {{ 'drift-alert' if drift_report.triggered else 'drift-ok' }}">
+                <div class="icon">{{ '🚨' if drift_report.triggered else '🛡️' }}</div>
+                <div class="info">
+                    <strong>{% if drift_report.triggered %}DRIFT DETECTED{% else %}No Drift{% endif %}</strong>
+                    <span>{% if drift_report.metrics %} · MAE: {{ drift_report.metrics.mae }} · Threshold: {{ drift_report.threshold_mae }} · MAPE: {{ drift_report.metrics.mape }}% · Samples: {{ drift_report.metrics.n_samples }}{% else %} · {{ drift_report.error|default('No data') }}{% endif %}</span>
+                </div>
+            </div>
+            <div class="card">
+                <div class="canvas-wrap" style="height:180px">
+                    <canvas id="maeGaugeChart"></canvas>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Charts -->
+        {% if chart_files or training_chart_files %}
+        <div class="section">
+            <div class="section-title">Training & Comparison Charts</div>
             <div class="charts-grid">
-                {% for fname in chart_files %}
-                <div class="chart-item">
-                    <img src="/model-report-image/{{ fname }}"
-                         alt="{{ fname.replace('_', ' ').replace('.png', '') }}"
-                         loading="lazy">
-                    <p class="chart-caption">{{ fname.replace('_', ' ').replace('.png', '').title() }}</p>
+                {% for fname in chart_files[:4] %}
+                <div class="chart-card">
+                    <img src="/model-report-image/{{ fname }}" alt="{{ fname.replace('_', ' ').replace('.png', '') }}" loading="lazy">
+                    <div class="caption">{{ fname.replace('_', ' ').replace('.png', '').title() }}</div>
                 </div>
                 {% endfor %}
+                {% for fname in training_chart_files[:4] %}
+                <div class="chart-card">
+                    <img src="/model-chart-image/{{ fname }}" alt="{{ fname.replace('_', ' ').replace('.png', '') }}" loading="lazy">
+                    <div class="caption">{{ fname.replace('_', ' ').replace('.png', '').title() }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Retrain History -->
+        {% if history %}
+        <div class="section">
+            <div class="section-title">Retrain History ({{ history|length }} runs)</div>
+            <div class="card">
+                <div class="timeline">
+                    {% for run in history|reverse %}
+                    <div class="tl-item {{ run.decision|lower if run.decision else 'promote' }}">
+                        <div class="time">{{ run.timestamp }}</div>
+                        <div class="detail">
+                            <span class="badge {{ 'badge-green' if run.decision == 'PROMOTE' else 'badge-red' }}">{{ run.decision }}</span>
+                            {{ run.run_id }}
+                        </div>
+                        <div class="r2">Revenue R²: {{ run.revenue_r2 }} · Quantity R²: {{ run.quantity_r2 }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
         {% endif %}
@@ -254,12 +287,96 @@
         {% endif %}
 
         <div class="actions">
-            <a href="/" class="btn btn-back">← Trang chủ</a>
-            <a href="/retrain" class="btn" style="background:#0f9b58;">Retrain Model</a>
-            {% if report %}
-            <a href="/model-report" class="btn">↺ Làm mới</a>
-            {% endif %}
+            <a href="/" class="btn btn-ghost">🔮 Predict</a>
+            <a href="/dashboard" class="btn btn-ghost">📊 Dashboard</a>
+            <a href="/model-report" class="btn btn-primary">↻ Refresh</a>
         </div>
     </div>
+
+    <script>
+    (function() {
+        const pageDataEl = document.getElementById('page-data');
+        const driftReport = pageDataEl ? JSON.parse(pageDataEl.dataset.driftReport || '{}') : {};
+        const metrics = driftReport.metrics || {};
+        const historyData = pageDataEl ? JSON.parse(pageDataEl.dataset.history || '[]') : [];
+
+        if (document.getElementById('r2TrendChart') && historyData.length > 1) {
+        const labels = historyData.map(h => {
+            const d = new Date(h.timestamp);
+            return d.toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit'}) + ' ' + d.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+        });
+        new Chart(document.getElementById('r2TrendChart'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    { label: 'Revenue R²', data: historyData.map(h => h.revenue_r2), borderColor: '#4f8cff', backgroundColor: 'rgba(79,140,255,.1)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#4f8cff' },
+                    { label: 'Quantity R²', data: historyData.map(h => h.quantity_r2), borderColor: '#6c5ce7', backgroundColor: 'rgba(108,92,231,.1)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#6c5ce7' }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#8b90a0' } } },
+                scales: {
+                    x: { ticks: { color: '#8b90a0', maxRotation: 45, font: { size: 10 } }, grid: { color: 'rgba(45,49,64,.5)' } },
+                    y: { ticks: { color: '#8b90a0' }, grid: { color: 'rgba(45,49,64,.5)' }, min: 0, max: 1, title: { display: true, text: 'R² Score', color: '#8b90a0' } }
+                }
+            }
+        });
+        }
+
+        if (document.getElementById('maeGaugeChart') && typeof driftReport.threshold_mae === 'number') {
+        const mae = typeof metrics.mae === 'number' ? metrics.mae : 0;
+        const threshold = driftReport.threshold_mae;
+        const maxVal = Math.max(threshold * 2, mae * 1.5, 1);
+        new Chart(document.getElementById('maeGaugeChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Current MAE', 'Threshold'],
+                datasets: [{ data: [mae, threshold],
+                    backgroundColor: [mae > threshold ? '#ff6b6b' : '#00b894', 'rgba(253,203,110,.4)'],
+                    borderColor: [mae > threshold ? '#ff6b6b' : '#00b894', '#fdcb6e'],
+                    borderWidth: 2, borderRadius: 6, barPercentage: 0.5 }]
+            },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { min: 0, max: maxVal, ticks: { color: '#8b90a0' }, grid: { color: 'rgba(45,49,64,.5)' } },
+                    y: { ticks: { color: '#e1e4ea', font: { size: 13, weight: 'bold' } }, grid: { display: false } }
+                }
+            }
+        });
+        }
+
+        const evtSource = new EventSource('/api/sse/dashboard');
+        const indicator = document.createElement('div');
+        indicator.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:8px 16px;border-radius:8px;font-size:0.82em;z-index:999;background:var(--surface);border:1px solid var(--border);color:var(--text2);display:flex;align-items:center;gap:8px;';
+        indicator.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite"></span> Live';
+        document.body.appendChild(indicator);
+
+        evtSource.addEventListener('report_updated', function(e) {
+            const data = JSON.parse(e.data);
+            showToast('📊 Report updated — ' + data.decision, 'var(--accent)');
+            setTimeout(() => location.reload(), 3000);
+        });
+        evtSource.addEventListener('drift_updated', function(e) {
+            const data = JSON.parse(e.data);
+            showToast(data.triggered ? '🚨 Drift! MAE=' + data.mae.toFixed(4) : '🛡️ OK (MAE=' + data.mae.toFixed(4) + ')',
+                data.triggered ? 'var(--red)' : 'var(--green)');
+            setTimeout(() => location.reload(), 3000);
+        });
+        evtSource.onerror = function() {
+            indicator.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span> Disconnected';
+        };
+        function showToast(msg, color) {
+            const t = document.createElement('div');
+            t.style.cssText = 'position:fixed;top:70px;right:20px;padding:14px 24px;border-radius:10px;font-size:0.9em;z-index:1000;background:var(--surface);border:1px solid ' + color + ';color:' + color + ';box-shadow:0 4px 20px rgba(0,0,0,.3);transition:opacity .5s;';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 5000);
+        }
+    })();
+    </script>
 </body>
 </html>

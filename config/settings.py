@@ -183,6 +183,11 @@ BURST_ENABLED = _get_bool("BURST_ENABLED", True)
 BURST_MULTIPLIER = _get_int("BURST_MULTIPLIER", 3)
 BURST_DURATION_SECONDS = _get_int("BURST_DURATION_SECONDS", 15)
 
+# Realism controls for live generator
+SEASONALITY_ENABLED = _get_bool("SEASONALITY_ENABLED", True)
+PROMOTION_ENABLED = _get_bool("PROMOTION_ENABLED", True)
+STORE_PROFILE_ENABLED = _get_bool("STORE_PROFILE_ENABLED", True)
+
 # Price shock mode (for drift demo)
 PRICE_SHOCK_ENABLED = _get_bool("PRICE_SHOCK_ENABLED", False)
 PRICE_SHOCK_MULTIPLIER = _get_float("PRICE_SHOCK_MULTIPLIER", 1.0)
@@ -218,43 +223,43 @@ PRODUCTS = [
     {"id": "BREAD", "name": "Bread",          "category": "Bakery",       "base_price": 1.15, "min_price": 0.8, "max_price": 1.5},
     {"id": "MILK",  "name": "Milk",           "category": "Dairy",        "base_price": 1.6,  "min_price": 1.0, "max_price": 2.2},
     # ── Sản phẩm mở rộng (web app, blob reference, Power BI) ──
-    {"id": "P001", "name": "Laptop",         "category": "Electronics", "base_price": 999.99},
-    {"id": "P002", "name": "Smartphone",     "category": "Electronics", "base_price": 699.99},
-    {"id": "P003", "name": "Headphones",     "category": "Electronics", "base_price": 149.99},
-    {"id": "P004", "name": "Tablet",         "category": "Electronics", "base_price": 499.99},
-    {"id": "P005", "name": "Smart Watch",    "category": "Electronics", "base_price": 299.99},
-    {"id": "P006", "name": "T-Shirt",        "category": "Clothing",    "base_price": 29.99},
-    {"id": "P007", "name": "Jeans",          "category": "Clothing",    "base_price": 59.99},
-    {"id": "P008", "name": "Sneakers",       "category": "Clothing",    "base_price": 89.99},
-    {"id": "P009", "name": "Coffee Maker",   "category": "Home",        "base_price": 79.99},
-    {"id": "P010", "name": "Blender",        "category": "Home",        "base_price": 49.99},
-    {"id": "P011", "name": "Desk Lamp",      "category": "Home",        "base_price": 34.99},
-    {"id": "P012", "name": "Backpack",       "category": "Accessories", "base_price": 45.99},
-    {"id": "P013", "name": "Sunglasses",     "category": "Accessories", "base_price": 129.99},
-    {"id": "P014", "name": "Wireless Mouse", "category": "Electronics", "base_price": 39.99},
-    {"id": "P015", "name": "Keyboard",       "category": "Electronics", "base_price": 69.99},
+    {"id": "P001", "name": "Laptop",         "category": "Electronics", "base_price": 999.99, "min_price": 849.99, "max_price": 1149.99},
+    {"id": "P002", "name": "Smartphone",     "category": "Electronics", "base_price": 699.99, "min_price": 599.99, "max_price": 799.99},
+    {"id": "P003", "name": "Headphones",     "category": "Electronics", "base_price": 149.99, "min_price": 119.99, "max_price": 179.99},
+    {"id": "P004", "name": "Tablet",         "category": "Electronics", "base_price": 499.99, "min_price": 429.99, "max_price": 569.99},
+    {"id": "P005", "name": "Smart Watch",    "category": "Electronics", "base_price": 299.99, "min_price": 249.99, "max_price": 349.99},
+    {"id": "P006", "name": "T-Shirt",        "category": "Clothing",    "base_price": 29.99,  "min_price": 19.99,  "max_price": 39.99},
+    {"id": "P007", "name": "Jeans",          "category": "Clothing",    "base_price": 59.99,  "min_price": 44.99,  "max_price": 74.99},
+    {"id": "P008", "name": "Sneakers",       "category": "Clothing",    "base_price": 89.99,  "min_price": 69.99,  "max_price": 109.99},
+    {"id": "P009", "name": "Coffee Maker",   "category": "Home",        "base_price": 79.99,  "min_price": 64.99,  "max_price": 94.99},
+    {"id": "P010", "name": "Blender",        "category": "Home",        "base_price": 49.99,  "min_price": 39.99,  "max_price": 59.99},
+    {"id": "P011", "name": "Desk Lamp",      "category": "Home",        "base_price": 34.99,  "min_price": 24.99,  "max_price": 44.99},
+    {"id": "P012", "name": "Backpack",       "category": "Accessories", "base_price": 45.99,  "min_price": 34.99,  "max_price": 56.99},
+    {"id": "P013", "name": "Sunglasses",     "category": "Accessories", "base_price": 129.99, "min_price": 99.99,  "max_price": 159.99},
+    {"id": "P014", "name": "Wireless Mouse", "category": "Electronics", "base_price": 39.99,  "min_price": 29.99,  "max_price": 49.99},
+    {"id": "P015", "name": "Keyboard",       "category": "Electronics", "base_price": 69.99,  "min_price": 54.99,  "max_price": 84.99},
     # ── Thực phẩm & Đồ uống mở rộng ──
-    {"id": "P016", "name": "Nước ép cam",    "category": "Beverage",    "base_price": 2.50},
-    {"id": "P017", "name": "Trà xanh",       "category": "Beverage",    "base_price": 1.80},
-    {"id": "P018", "name": "Bánh mì sandwich","category": "Bakery",     "base_price": 3.50},
-    {"id": "P019", "name": "Sữa chua",       "category": "Dairy",       "base_price": 1.20},
-    {"id": "P020", "name": "Phô mai",        "category": "Dairy",       "base_price": 4.99},
+    {"id": "P016", "name": "Nước ép cam",    "category": "Beverage",    "base_price": 2.50,  "min_price": 1.80, "max_price": 3.20},
+    {"id": "P017", "name": "Trà xanh",       "category": "Beverage",    "base_price": 1.80,  "min_price": 1.30, "max_price": 2.30},
+    {"id": "P018", "name": "Bánh mì sandwich","category": "Bakery",     "base_price": 3.50,  "min_price": 2.80, "max_price": 4.20},
+    {"id": "P019", "name": "Sữa chua",       "category": "Dairy",       "base_price": 1.20,  "min_price": 0.90, "max_price": 1.50},
+    {"id": "P020", "name": "Phô mai",        "category": "Dairy",       "base_price": 4.99,  "min_price": 3.99, "max_price": 5.99},
     # ── Snacks ──
-    {"id": "P021", "name": "Khoai tây chiên", "category": "Snacks",     "base_price": 1.99},
-    {"id": "P022", "name": "Socola",          "category": "Snacks",     "base_price": 3.49},
-    {"id": "P023", "name": "Bánh quy",        "category": "Snacks",     "base_price": 2.29},
+    {"id": "P021", "name": "Khoai tây chiên", "category": "Snacks",     "base_price": 1.99,  "min_price": 1.49, "max_price": 2.49},
+    {"id": "P022", "name": "Socola",          "category": "Snacks",     "base_price": 3.49,  "min_price": 2.79, "max_price": 4.19},
+    {"id": "P023", "name": "Bánh quy",        "category": "Snacks",     "base_price": 2.29,  "min_price": 1.79, "max_price": 2.79},
     # ── Sức khỏe & Làm đẹp ──
-    {"id": "P024", "name": "Kem chống nắng",  "category": "Health & Beauty", "base_price": 12.99},
-    {"id": "P025", "name": "Dầu gội",         "category": "Health & Beauty", "base_price": 7.99},
-    {"id": "P026", "name": "Kem đánh răng",   "category": "Health & Beauty", "base_price": 3.49},
+    {"id": "P024", "name": "Kem chống nắng",  "category": "Health & Beauty", "base_price": 12.99, "min_price": 9.99,  "max_price": 15.99},
+    {"id": "P025", "name": "Dầu gội",         "category": "Health & Beauty", "base_price": 7.99,  "min_price": 5.99,  "max_price": 9.99},
+    {"id": "P026", "name": "Kem đánh răng",   "category": "Health & Beauty", "base_price": 3.49,  "min_price": 2.49,  "max_price": 4.49},
     # ── Thể thao ──
-    {"id": "P027", "name": "Bóng đá",         "category": "Sports",     "base_price": 24.99},
-    {"id": "P028", "name": "Bình nước thể thao","category": "Sports",   "base_price": 14.99},
+    {"id": "P027", "name": "Bóng đá",         "category": "Sports",     "base_price": 24.99, "min_price": 19.99, "max_price": 29.99},
+    {"id": "P028", "name": "Bình nước thể thao","category": "Sports",   "base_price": 14.99, "min_price": 11.99, "max_price": 17.99},
     # ── Văn phòng phẩm ──
-    {"id": "P029", "name": "Sổ tay",          "category": "Stationery", "base_price": 5.99},
-    {"id": "P030", "name": "Bút bi",          "category": "Stationery", "base_price": 1.49},
+    {"id": "P029", "name": "Sổ tay",          "category": "Stationery", "base_price": 5.99,  "min_price": 3.99, "max_price": 7.99},
+    {"id": "P030", "name": "Bút bi",          "category": "Stationery", "base_price": 1.49,  "min_price": 0.99, "max_price": 1.99},
     # ── Đồ chơi ──
-    {"id": "P031", "name": "Rubik",           "category": "Toys",       "base_price": 8.99},
+    {"id": "P031", "name": "Rubik",           "category": "Toys",       "base_price": 8.99,  "min_price": 6.99, "max_price": 10.99},
 ]
 
 # Derive SALES_PRODUCTS từ PRODUCTS (chỉ những sản phẩm có min_price/max_price)
@@ -297,6 +302,18 @@ DRIFT_MAE_ABS_THRESHOLD = _get_float("DRIFT_MAE_ABS_THRESHOLD", 25.0)
 # Auto-retrain
 AUTO_RETRAIN_ENABLED = _get_bool("AUTO_RETRAIN_ENABLED", True)
 RETRAIN_MIN_SAMPLES = _get_int("RETRAIN_MIN_SAMPLES", 50000)
+
+# ─────────────────────────────────────────────
+# Alert Notifications (Drift / MLOps events)
+# ─────────────────────────────────────────────
+ALERT_SLACK_WEBHOOK_URL = os.getenv("ALERT_SLACK_WEBHOOK_URL", "")
+ALERT_EMAIL_ENABLED = _get_bool("ALERT_EMAIL_ENABLED", False)
+ALERT_SMTP_SERVER = os.getenv("ALERT_SMTP_SERVER", "")
+ALERT_SMTP_PORT = _get_int("ALERT_SMTP_PORT", 587)
+ALERT_SMTP_USERNAME = os.getenv("ALERT_SMTP_USERNAME", "")
+ALERT_SMTP_PASSWORD = os.getenv("ALERT_SMTP_PASSWORD", "")
+ALERT_EMAIL_FROM = os.getenv("ALERT_EMAIL_FROM", "")
+ALERT_EMAIL_TO = os.getenv("ALERT_EMAIL_TO", "")
 
 
 def _is_missing(value: str) -> bool:
@@ -351,6 +368,9 @@ def get_runtime_config() -> dict:
         "BURST_ENABLED": BURST_ENABLED,
         "BURST_MULTIPLIER": BURST_MULTIPLIER,
         "BURST_DURATION_SECONDS": BURST_DURATION_SECONDS,
+        "SEASONALITY_ENABLED": SEASONALITY_ENABLED,
+        "PROMOTION_ENABLED": PROMOTION_ENABLED,
+        "STORE_PROFILE_ENABLED": STORE_PROFILE_ENABLED,
         "PRICE_SHOCK_ENABLED": PRICE_SHOCK_ENABLED,
         "PRICE_SHOCK_MULTIPLIER": PRICE_SHOCK_MULTIPLIER,
         "PRICE_SHOCK_PRODUCTS": sorted(list(PRICE_SHOCK_PRODUCTS)),

@@ -28,10 +28,61 @@ BASE_DIR = Path(__file__).resolve().parent
 MODEL_OUTPUT_DIR = BASE_DIR / "model_output"
 REPORT_PATH = MODEL_OUTPUT_DIR / "drift_monitor_report.json"
 STATE_PATH = MODEL_OUTPUT_DIR / "drift_monitor_state.json"
+LOCK_PATH = MODEL_OUTPUT_DIR / "drift_monitor.lock"
 
 
 def _utcnow_iso() -> str:
     return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+
+def _acquire_lock(timeout_seconds: int = 600) -> bool:
+    """Acquire a file-based lock. Returns True if lock acquired."""
+    MODEL_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    if LOCK_PATH.exists():
+        try:
+            lock_data = json.loads(LOCK_PATH.read_text(encoding="utf-8"))
+            pid = lock_data.get("pid")
+            created = lock_data.get("created_at", "")
+            # Check if the holding process is still alive
+            if pid is not None:
+                try:
+                    os.kill(pid, 0)  # signal 0 = check existence
+                except OSError:
+                    # Process is dead — stale lock
+                    print(f"[INFO] Removing stale lock (PID {pid} not running)")
+                    LOCK_PATH.unlink(missing_ok=True)
+                else:
+                    # Process alive — check if lock has expired
+                    if created:
+                        try:
+                            lock_dt = datetime.fromisoformat(created.replace("Z", ""))
+                            if datetime.utcnow() - lock_dt > timedelta(seconds=timeout_seconds):
+                                print(f"[WARN] Lock expired (held {timeout_seconds}s+), forcibly removing")
+                                LOCK_PATH.unlink(missing_ok=True)
+                            else:
+                                return False  # Lock is valid and held by running process
+                        except ValueError:
+                            return False
+                    else:
+                        return False
+        except (json.JSONDecodeError, OSError):
+            LOCK_PATH.unlink(missing_ok=True)
+
+    # Write lock file
+    lock_data = {"pid": os.getpid(), "created_at": _utcnow_iso()}
+    LOCK_PATH.write_text(json.dumps(lock_data), encoding="utf-8")
+    return True
+
+
+def _release_lock() -> None:
+    """Release the file-based lock if held by this process."""
+    if LOCK_PATH.exists():
+        try:
+            lock_data = json.loads(LOCK_PATH.read_text(encoding="utf-8"))
+            if lock_data.get("pid") == os.getpid():
+                LOCK_PATH.unlink(missing_ok=True)
+        except (json.JSONDecodeError, OSError):
+            LOCK_PATH.unlink(missing_ok=True)
 
 
 def get_sql_connection():
@@ -59,13 +110,12 @@ def fetch_recent_forecast_vs_actual(window_hours: int = 24) -> pd.DataFrame:
             predicted_revenue,
             actual_revenue,
             model_version,
-            DATEADD(HOUR, ISNULL(forecast_hour, 0), CAST(forecast_date AS datetime2)) AS forecast_dt
+            forecast_datetime AS forecast_dt
         FROM dbo.vw_ForecastVsActual
-        WHERE DATEADD(HOUR, ISNULL(forecast_hour, 0), CAST(forecast_date AS datetime2))
-              >= DATEADD(HOUR, ?, SYSUTCDATETIME())
+        WHERE forecast_datetime >= DATEADD(HOUR, ?, SYSUTCDATETIME())
           AND predicted_revenue IS NOT NULL
           AND actual_revenue IS NOT NULL
-        ORDER BY forecast_dt DESC
+        ORDER BY forecast_datetime DESC
     """
     df = pd.read_sql(query, conn, params=[-window_hours])
     conn.close()
@@ -258,6 +308,17 @@ def run_monitor(
     started_at = _utcnow_iso()
     state = _load_state()
 
+    # Acquire distributed lock to prevent concurrent retrain
+    if not _acquire_lock():
+        report = {
+            "timestamp": started_at,
+            "status": "skipped",
+            "reason": "Another drift monitor instance is running",
+            "triggered": False,
+        }
+        _save_report(report)
+        return report
+
     try:
         df = fetch_recent_forecast_vs_actual(window_hours=window_hours)
         metrics = compute_metrics(df)
@@ -270,6 +331,13 @@ def run_monitor(
 
         trigger_result = None
         if should_trigger:
+            # Backup current model before retraining (for rollback)
+            try:
+                from monitoring.model_health_check import backup_current_model
+                backup_current_model()
+            except Exception as bkp_exc:
+                print(f"[WARN] Model backup failed: {bkp_exc}")
+
             if dry_run:
                 trigger_result = {"success": True, "dry_run": True, "message": "Would trigger retrain"}
             else:
@@ -289,6 +357,23 @@ def run_monitor(
                 if success_flags and all(success_flags):
                     state["last_trigger_at"] = _utcnow_iso()
                     _save_state(state)
+
+            # Send alert notifications
+            try:
+                from monitoring.alerts import send_drift_alert
+                alert_result = send_drift_alert(report if 'report' in dir() else {
+                    "timestamp": started_at,
+                    "metrics": metrics,
+                    "triggered": True,
+                    "threshold_mae": threshold_mae,
+                    "window_hours": window_hours,
+                    "trigger_mode": trigger_mode,
+                })
+                if trigger_result is None:
+                    trigger_result = {}
+                trigger_result["alerts"] = alert_result
+            except Exception as alert_exc:
+                print(f"[WARN] Alert notification failed: {alert_exc}")
 
         report = {
             "timestamp": started_at,
@@ -318,6 +403,25 @@ def run_monitor(
         }
 
     _save_report(report)
+
+    # Log to SQL MonitoringEvents table
+    try:
+        from monitoring.notifications import log_to_sql
+        metrics = report.get("metrics", {})
+        event_type = "drift_detected" if report.get("triggered") else "drift_check_ok"
+        if report.get("status") == "error":
+            event_type = "monitor_error"
+        log_to_sql(
+            event_type=event_type,
+            mae_value=metrics.get("mae", 0),
+            threshold=report.get("threshold_mae", 0),
+            retrain_triggered=report.get("triggered", False),
+            details=json.dumps(report, default=str),
+        )
+    except Exception as log_exc:
+        print(f"[WARN] SQL logging failed: {log_exc}")
+
+    _release_lock()
     return report
 
 

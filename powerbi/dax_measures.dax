@@ -516,3 +516,94 @@ AR Department Count =
 -- 9.15  Unique resources
 AR Resource Count =
     DISTINCTCOUNT ( access_rights[resource_name] )
+
+
+-- ====================================================================
+-- 10. ETL MONITORING MEASURES
+--    Dùng cho trang "ETL Monitoring" để chứng minh dữ liệu đi qua ETL
+--    trước khi lên BI.
+-- ====================================================================
+
+-- 10.1 Tổng records sau ETL (Gold layer)
+ETL Rows Processed =
+    [Order Total]
+
+
+-- 10.2 Số dòng aggregate đang được BI đọc
+ETL Aggregate Rows =
+    COUNTROWS ( hourly_summary )
+
+
+-- 10.3 Tỉ lệ nén ETL = records giao dịch / aggregate rows
+ETL Compression Ratio =
+    DIVIDE ( [ETL Rows Processed], [ETL Aggregate Rows], BLANK () )
+
+
+-- 10.4 Thời điểm event mới nhất sau ETL
+ETL Last Event Time =
+    MAX ( hourly_summary[event_time] )
+
+
+-- 10.5 Độ trễ dữ liệu tính theo phút
+ETL Freshness (Min) =
+    VAR _last = [ETL Last Event Time]
+    RETURN
+        IF (
+            ISBLANK ( _last ),
+            BLANK (),
+            DATEDIFF ( _last, UTCNOW (), MINUTE )
+        )
+
+
+-- 10.6 Throughput doanh thu theo phút (cửa sổ 30 ngày)
+ETL Revenue Throughput per Min =
+    DIVIDE ( [Revenue Rolling 30D], 30 * 24 * 60, 0 )
+
+
+-- 10.7 Throughput đơn hàng theo phút (cửa sổ 30 ngày)
+ETL Orders Throughput per Min =
+    DIVIDE ( [Order Total], 30 * 24 * 60, 0 )
+
+
+-- 10.8 Độ phủ dữ liệu tại lớp ETL
+ETL Active Stores =
+    DISTINCTCOUNT ( hourly_summary[store_id] )
+
+
+ETL Active Categories =
+    DISTINCTCOUNT ( hourly_summary[category] )
+
+
+-- 10.9 Điểm sức khỏe pipeline ETL (0-100)
+ETL Pipeline Health Score =
+    VAR _freshness = [ETL Freshness (Min)]
+    VAR _stores = [ETL Active Stores]
+    VAR _categories = [ETL Active Categories]
+    VAR _freshnessScore =
+        SWITCH (
+            TRUE (),
+            ISBLANK ( _freshness ), 0,
+            _freshness <= 2, 100,
+            _freshness <= 5, 85,
+            _freshness <= 10, 65,
+            _freshness <= 20, 40,
+            15
+        )
+    VAR _coverageScore =
+        MIN ( 100, (_stores * 20) + (_categories * 4) )
+    RETURN
+        ROUND ( _freshnessScore * 0.65 + _coverageScore * 0.35, 0 )
+
+
+-- 10.10 Trạng thái pipeline để hiển thị card text
+ETL Pipeline Status =
+    VAR _score = [ETL Pipeline Health Score]
+    RETURN
+        SWITCH (
+            TRUE (),
+            ISBLANK ( _score ), "No data",
+            _score >= 85, "Healthy",
+            _score >= 65, "Degraded",
+            _score >= 40, "Warning",
+            "Critical"
+        )

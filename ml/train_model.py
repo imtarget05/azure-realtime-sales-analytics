@@ -29,6 +29,74 @@ except ImportError:
     AZUREML_AVAILABLE = False
     print("[WARN] Azure ML SDK not available. Running locally.")
 
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+
+# ── Load training data from Azure SQL ─────────────────────────────
+def load_sql_training_data(min_samples: int = 1000) -> pd.DataFrame | None:
+    """
+    Load real sales transactions from Azure SQL and transform to training format.
+    Returns None if SQL is unavailable or insufficient data.
+    """
+    try:
+        from config.settings import SQL_SERVER, SQL_DATABASE, SQL_USERNAME, SQL_PASSWORD, SQL_DRIVER
+    except ImportError:
+        print("[WARN] config.settings not available for SQL")
+        return None
+
+    if not SQL_SERVER or not SQL_USERNAME or not SQL_PASSWORD:
+        print("[INFO] SQL credentials not configured, skipping SQL data load")
+        return None
+
+    try:
+        import pyodbc
+    except ImportError:
+        print("[WARN] pyodbc not installed, skipping SQL data load")
+        return None
+
+    try:
+        conn_str = (
+            f"DRIVER={SQL_DRIVER};"
+            f"SERVER={SQL_SERVER};"
+            f"DATABASE={SQL_DATABASE};"
+            f"UID={SQL_USERNAME};"
+            f"PWD={SQL_PASSWORD};"
+            "Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30"
+        )
+        conn = pyodbc.connect(conn_str)
+        query = """
+            SELECT
+                DATEPART(HOUR, event_time) AS hour,
+                DATEPART(DAY, event_time)  AS day_of_month,
+                DATEPART(MONTH, event_time) AS month,
+                CASE WHEN DATEPART(WEEKDAY, event_time) IN (1,7) THEN 1 ELSE 0 END AS is_weekend,
+                store_id,
+                product_id,
+                category,
+                ISNULL(temperature, 25.0) AS temperature,
+                CASE WHEN ISNULL(weather, 'Clear') IN ('Rain', 'Rainy', 'Storm') THEN 1 ELSE 0 END AS is_rainy,
+                ISNULL(holiday, 0) AS holiday,
+                units_sold AS quantity,
+                revenue
+            FROM dbo.SalesTransactions
+            WHERE revenue IS NOT NULL AND units_sold IS NOT NULL
+            ORDER BY event_time DESC
+        """
+        df = pd.read_sql(query, conn)
+        conn.close()
+
+        if len(df) < min_samples:
+            print(f"[INFO] SQL has only {len(df)} rows (need {min_samples}), skipping")
+            return None
+
+        print(f"[INFO] Loaded {len(df)} training samples from Azure SQL")
+        return df
+
+    except Exception as e:
+        print(f"[WARN] Failed to load SQL training data: {e}")
+        return None
+
 
 # ── Synthetic data that mirrors the generator schema ──────────────
 def generate_training_data(n_samples: int = 50000) -> pd.DataFrame:
@@ -320,9 +388,18 @@ def main():
     if args.data_path and os.path.exists(args.data_path):
         print(f"[INFO] Loading data from {args.data_path}")
         df = pd.read_csv(args.data_path)
+        data_source = "csv"
     else:
-        print(f"[INFO] Generating synthetic data ({args.n_samples} samples)...")
-        df = generate_training_data(args.n_samples)
+        # Try SQL first, fall back to synthetic
+        sql_df = load_sql_training_data(min_samples=1000)
+        if sql_df is not None:
+            df = sql_df
+            data_source = "sql"
+            print(f"[INFO] Using real SQL data ({len(df)} samples)")
+        else:
+            print(f"[INFO] Generating synthetic data ({args.n_samples} samples)...")
+            df = generate_training_data(args.n_samples)
+            data_source = "synthetic"
         df.to_csv(os.path.join(args.output_dir, "training_data.csv"), index=False)
 
     print(f"[INFO] Shape: {df.shape}")
@@ -350,6 +427,7 @@ def main():
         "revenue_metrics": rev_metrics,
         "quantity_metrics": qty_metrics,
         "training_samples": len(df),
+        "data_source": data_source,
         "trained_at": datetime.utcnow().isoformat(),
         "model_version": "v2.0",
     }

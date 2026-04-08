@@ -234,11 +234,25 @@ USERPRINCIPALNAME() → SecurityMapping[user_email]
 ### 5.2 Stream Analytics → Power BI
 
 ### Bước 1: Azure Portal → Stream Analytics Job
-- **Output alias**: `PowerBIOutput`
+- **Output alias**: `PowerBIRealtimeOutput`
 - **Group workspace**: Chọn workspace của bạn
-- **Dataset name**: `SalesAnalyticsStream`
+- **Dataset name**: `SalesRealtimeStream`
 - **Table name**: `RealtimeSales`
 - **Authentication mode**: User token
+
+Schema cần khớp với output trong `stream_analytics/stream_query.sql`:
+- timestamp (DateTime)
+- store_id (String)
+- category (String)
+- transaction_count (Int64)
+- total_quantity (Int64)
+- total_revenue (Double)
+- avg_order_value (Double)
+- avg_unit_price (Double)
+
+Tài liệu bổ sung:
+- Publish checklist: `docs/POWERBI_PUBLISH_PROCESS.md`
+- Demo template checklist: `powerbi/DEMO_PBIX_TEMPLATE.md`
 
 ---
 

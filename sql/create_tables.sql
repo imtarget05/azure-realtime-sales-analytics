@@ -98,6 +98,30 @@ END
 GO
 
 -- ========================
+-- 5. WeatherSalesCorrelation (from WeatherSalesCorrelationOutput in Stream Analytics)
+-- ========================
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'WeatherSalesCorrelation')
+BEGIN
+    CREATE TABLE dbo.WeatherSalesCorrelation (
+        id                      BIGINT IDENTITY(1,1) PRIMARY KEY,
+        window_end              DATETIME2     NOT NULL,
+        store_id                NVARCHAR(20)  NOT NULL,
+        weather                 NVARCHAR(30)  NULL,
+        avg_temperature         FLOAT         NULL,
+        avg_stock_price         FLOAT         NULL,
+        stock_symbol            NVARCHAR(20)  NULL,
+        total_revenue           FLOAT         NOT NULL,
+        total_units             BIGINT        NOT NULL,
+        tx_count                BIGINT        NOT NULL,
+        avg_unit_price          FLOAT         NULL,
+        correlation_signal      NVARCHAR(50)  NULL,
+        created_at              DATETIME2     NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+    PRINT 'Created table: WeatherSalesCorrelation';
+END
+GO
+
+-- ========================
 -- INDEXES
 -- ========================
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_SalesTransactions_EventTime')
@@ -120,9 +144,30 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_SalesForecast_Date')
         ON dbo.SalesForecast(forecast_date, store_id, category);
 GO
 
+-- Computed column for drift monitor: enables index seek on forecast datetime
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.SalesForecast') AND name = 'forecast_datetime')
+BEGIN
+    ALTER TABLE dbo.SalesForecast
+        ADD forecast_datetime AS DATEADD(HOUR, ISNULL(forecast_hour, 0), CAST(forecast_date AS datetime2)) PERSISTED;
+    PRINT 'Added computed column: SalesForecast.forecast_datetime';
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_SalesForecast_DateTime')
+    CREATE NONCLUSTERED INDEX IX_SalesForecast_DateTime
+        ON dbo.SalesForecast(forecast_datetime DESC)
+        INCLUDE (store_id, category, predicted_revenue);
+GO
+
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_SalesAlerts_TimeStore')
     CREATE NONCLUSTERED INDEX IX_SalesAlerts_TimeStore
         ON dbo.SalesAlerts(alert_time, store_id);
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_WeatherSalesCorrelation_WindowStore')
+    CREATE NONCLUSTERED INDEX IX_WeatherSalesCorrelation_WindowStore
+        ON dbo.WeatherSalesCorrelation(window_end, store_id)
+        INCLUDE (total_revenue, avg_temperature, avg_stock_price, correlation_signal);
 GO
 
 PRINT 'All indexes created.';
@@ -165,6 +210,7 @@ CREATE VIEW dbo.vw_ForecastVsActual AS
 SELECT
     f.forecast_date,
     f.forecast_hour,
+    f.forecast_datetime,
     f.store_id,
     f.category,
     f.predicted_quantity,

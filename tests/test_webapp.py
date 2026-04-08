@@ -40,6 +40,8 @@ def test_api_predict_returns_json(client):
         "base_price": 50,
         "discount_percent": 10,
         "quantity": 2,
+        "store_id": "S01",
+        "product_id": "COKE",
     }
     resp = client.post("/api/predict", json=payload)
     assert resp.status_code == 200

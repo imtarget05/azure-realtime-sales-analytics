@@ -25,11 +25,6 @@ import os
 import sys
 
 from databricks.sdk import WorkspaceClient
-from databricks.sdk.service.jobs import (
-    JobSettings,
-    CronSchedule,
-    JobEmailNotifications,
-)
 
 
 def load_job_config(path: str) -> dict:
@@ -41,22 +36,53 @@ def load_job_config(path: str) -> dict:
     for task in config.get("tasks", []):
         for lib in task.get("libraries", []):
             lib.pop("_comment", None)
+
+        # For git_source jobs, Databricks expects repo-relative notebook paths.
+        notebook_task = task.get("notebook_task", {})
+        notebook_path = notebook_task.get("notebook_path", "")
+        if notebook_path.startswith("/"):
+            notebook_task["notebook_path"] = notebook_path.lstrip("/")
+
     config.pop("continuous", None)  # Chỉ dùng schedule
+
+    # Remove placeholders that commonly fail validation in student/demo environments.
+    webhook_notifications = config.get("webhook_notifications")
+    if webhook_notifications:
+        on_failure = webhook_notifications.get("on_failure", [])
+        cleaned = [item for item in on_failure if item.get("id") and "placeholder" not in item.get("id", "") and "webhook-id" not in item.get("id", "")]
+        if cleaned:
+            webhook_notifications["on_failure"] = cleaned
+        else:
+            config.pop("webhook_notifications", None)
+
+    email_notifications = config.get("email_notifications")
+    if email_notifications:
+        on_failure = email_notifications.get("on_failure", [])
+        cleaned_emails = [e for e in on_failure if "@" in e and "yourdomain" not in e]
+        if cleaned_emails:
+            email_notifications["on_failure"] = cleaned_emails
+        else:
+            config.pop("email_notifications", None)
 
     return config
 
 
 def create_job(client: WorkspaceClient, config: dict) -> int:
     """Tạo Databricks Job mới."""
-    job = client.jobs.create(**config)
-    print(f"✓ Job created: ID={job.job_id}, Name={config['name']}")
+    response = client.api_client.do("POST", "/api/2.1/jobs/create", body=config)
+    job_id = int(response.get("job_id"))
+    print(f"✓ Job created: ID={job_id}, Name={config['name']}")
     print(f"  Schedule: {config['schedule']['quartz_cron_expression']}")
-    return job.job_id
+    return job_id
 
 
 def update_job(client: WorkspaceClient, job_id: int, config: dict):
     """Cập nhật job đã tồn tại."""
-    client.jobs.reset(job_id=job_id, new_settings=JobSettings(**config))
+    client.api_client.do(
+        "POST",
+        "/api/2.1/jobs/reset",
+        body={"job_id": job_id, "new_settings": config},
+    )
     print(f"✓ Job updated: ID={job_id}")
 
 

@@ -113,8 +113,8 @@ azure-realtime-sales-analytics/
 │   └── upload_reference_data.py      # Upload dữ liệu tham chiếu lên Blob
 │
 ├── 📂 stream_analytics/              # ETL thời gian thực
-│   ├── queries.sql                   # 9 queries: aggregation, anomaly, JOIN
-│   └── stream_query.sql              # Stream Analytics query bổ sung
+│   ├── stream_query.sql              # Query chính: sales enrich + alerts + Power BI output
+│   └── weather_sales_correlation.sql # Query JOIN 3 luồng: Weather × Sales × Stock
 │
 ├── 📂 sql/                           # Cơ sở dữ liệu
 │   ├── create_tables.sql             # Schema: 7 bảng + 3 view + index
@@ -387,6 +387,24 @@ Chạy thử không trigger retrain:
 python ml/drift_monitor.py --dry-run
 ```
 
+## ☁ Runtime Health Check (Azure)
+
+Quick check trạng thái dịch vụ chính sau deploy:
+
+```bash
+az functionapp show -g rg-sales-analytics-dev -n func-sales-validation-d9bt2m --query "{name:name,state:state}" -o table
+az stream-analytics job show -g rg-sales-analytics-dev -n sa-sales-analytics-d9bt2m --query "{name:name,jobState:jobState,provisioningState:provisioningState}" -o table
+```
+
+Start lại runtime services khi cần:
+
+```bash
+az functionapp start -g rg-sales-analytics-dev -n func-sales-validation-d9bt2m
+az stream-analytics job start -g rg-sales-analytics-dev -n sa-sales-analytics-d9bt2m --output-start-mode JobStartTime
+```
+
+Nếu Stream Analytics báo lỗi Event Hub signature/host, kiểm tra namespace + input mapping trước khi start lại.
+
 ### Bước 4 — Upload dữ liệu tham chiếu lên Blob Storage
 
 ```bash
@@ -400,6 +418,18 @@ Chạy hai file SQL sau trên Azure SQL Database:
 ```
 sql/create_tables.sql       ← Tạo 7 bảng + 3 view + index
 sql/stored_procedures.sql   ← Tạo stored procedures
+```
+
+Test nhanh visual correlation trong Power BI (khong can cho du lieu that):
+
+```
+sql/insert_mock_weather_sales_correlation.sql
+```
+
+Kiem tra nhanh 5 nhom KPI cho Power BI (mot lenh):
+
+```
+sql/verify_powerbi_kpi_pack.sql
 ```
 
 > 💡 Dùng **Azure Data Studio**, **SSMS**, hoặc **Azure Portal → Query editor**.
@@ -421,16 +451,21 @@ sql/stored_procedures.sql   ← Tạo stored procedures
 
    | Output name | Đích |
    |---|---|
-   | `SQLOutput` | Azure SQL → `SalesTransactions` |
-   | `HourlySummaryOutput` | Azure SQL → `HourlySalesSummary` |
-   | `ProductSummaryOutput` | Azure SQL → `ProductSalesSummary` |
-   | `AlertsOutput` | Azure SQL → `SalesAlerts` |
-   | `WeatherOutput` | Azure SQL → `WeatherData` |
-   | `StockOutput` | Azure SQL → `StockData` |
-   | `PowerBIOutput` | Power BI Dataset |
+   | `SalesTransactionsOutput` | Azure SQL → `SalesTransactions` |
+   | `HourlySalesSummaryOutput` | Azure SQL → `HourlySalesSummary` |
+   | `SalesAlertsOutput` | Azure SQL → `SalesAlerts` |
+   | `WeatherSalesCorrelationOutput` | Azure SQL → `WeatherSalesCorrelation` |
+   | `PowerBIRealtimeOutput` | Power BI Streaming Dataset |
 
-4. Dán nội dung `stream_analytics/queries.sql` vào **Query**
-5. Nhấn **Start** để khởi chạy job
+4. Dán nội dung `stream_analytics/stream_query.sql` vào **Query**
+5. Nếu muốn chạy correlation 3 luồng riêng biệt, dùng thêm `stream_analytics/weather_sales_correlation.sql`
+6. Nhấn **Start** để khởi chạy job
+
+Checklist mapping output de copy-paste khi cau hinh Azure Portal:
+
+```
+stream_analytics/output_mapping_checklist.md
+```
 
 ### Bước 7 — Chạy Data Generator
 
@@ -484,6 +519,17 @@ Xem hướng dẫn chi tiết tại [`powerbi/POWERBI_SETUP.md`](powerbi/POWERBI
 2. Tạo Streaming Dataset trên Power BI Service
 3. Thiết lập RLS (Row-Level Security) theo vùng
 4. Tạo Mobile Layout cho điện thoại
+5. Quy trình publish chi tiết: [`docs/POWERBI_PUBLISH_PROCESS.md`](docs/POWERBI_PUBLISH_PROCESS.md)
+
+### Power BI Dashboard Screenshots
+
+Thêm ảnh demo vào thư mục [`docs/screenshots`](docs/screenshots/README.md), sau đó cập nhật trực tiếp các ảnh sau trong README:
+
+- Executive Overview: `docs/screenshots/powerbi-executive-overview.png`
+- Realtime Monitoring: `docs/screenshots/powerbi-realtime-monitoring.png`
+- Forecast vs Actual: `docs/screenshots/powerbi-forecast-vs-actual.png`
+- Weather Correlation: `docs/screenshots/powerbi-weather-correlation.png`
+- Alerts and Operations: `docs/screenshots/powerbi-alerts-operations.png`
 
 ---
 

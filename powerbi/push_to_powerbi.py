@@ -1,6 +1,10 @@
 ﻿"""
 Push real-time data from Azure SQL to Power BI Streaming Dataset.
 Queries dbo.SalesTransactions (aligned with Stream Analytics output).
+
+Usage:
+    # Set POWERBI_PUSH_URL in .env first, then:
+    python powerbi/push_to_powerbi.py
 """
 
 import json
@@ -11,6 +15,9 @@ import urllib.request
 from datetime import datetime, timezone
 
 import pyodbc
+from dotenv import load_dotenv
+
+load_dotenv()
 
 sys.path.insert(0, ".")
 from config.settings import (
@@ -51,18 +58,20 @@ def get_realtime_summary_from_sql() -> list[dict]:
         conn = pyodbc.connect(conn_string)
         cursor = conn.cursor()
 
+        # Schema matches Power BI Streaming Dataset: SalesRealtimeStream
         query = """
-        SELECT TOP 50
+        SELECT TOP 100
             store_id,
             category,
-            COUNT(*)         AS transaction_count,
-            SUM(units_sold)  AS total_quantity,
-            SUM(revenue)     AS total_revenue,
-            AVG(unit_price)  AS avg_unit_price,
+            product_id,
+            COUNT(*)     AS transaction_count,
+            SUM(revenue) AS total_revenue,
+            SUM(units_sold) AS total_units,
+            AVG(unit_price) AS avg_price,
             AVG(temperature) AS avg_temperature
         FROM dbo.SalesTransactions
         WHERE event_time >= DATEADD(minute, -5, SYSUTCDATETIME())
-        GROUP BY store_id, category
+        GROUP BY store_id, category, product_id
         ORDER BY total_revenue DESC
         """
 
@@ -76,11 +85,12 @@ def get_realtime_summary_from_sql() -> list[dict]:
                 "timestamp": now,
                 "store_id": row[0],
                 "category": row[1],
-                "transaction_count": row[2],
-                "total_quantity": int(row[3]),
+                "product_id": row[2],
+                "transaction_count": row[3],
                 "total_revenue": round(float(row[4]), 2),
-                "avg_unit_price": round(float(row[5]), 2),
-                "avg_temperature": round(float(row[6]), 1) if row[6] else None,
+                "total_units": int(row[5]),
+                "avg_price": round(float(row[6]), 2),
+                "avg_temperature": round(float(row[7]), 1) if row[7] else None,
             })
 
         cursor.close()
@@ -107,13 +117,13 @@ def main():
                 print(f"[{ts}] Pushed {len(data)} rows")
             else:
                 print("[INFO] No new data.")
-            time.sleep(60)
+            time.sleep(5)
         except KeyboardInterrupt:
             print("\n[INFO] Stopped.")
             break
         except Exception as e:
             print(f"[ERROR] {e}")
-            time.sleep(30)
+            time.sleep(10)
 
 
 if __name__ == "__main__":
