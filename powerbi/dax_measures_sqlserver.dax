@@ -1,0 +1,184 @@
+-- ╔══════════════════════════════════════════════════════════════════╗
+-- ║  DAX Measures — SQL Server DirectQuery Version                   ║
+-- ║  Khớp 100% với schema SQL Server hiện tại                       ║
+-- ║                                                                  ║
+-- ║  Bảng nguồn (SQL Server):                                       ║
+-- ║    • SalesTransactions  — Giao dịch chi tiết (313K+ rows)       ║
+-- ║    • SalesForecast      — Dự báo ML (5K rows)                   ║
+-- ║    • SalesAlerts         — Cảnh báo bất thường (4K rows)        ║
+-- ║    • ModelRegistry       — Model versions + metrics (5 rows)    ║
+-- ║    • StoreRegions        — Phân vùng miền Bắc/Trung/Nam        ║
+-- ║    • vw_ForecastAccuracy — View forecast vs actual              ║
+-- ║                                                                  ║
+-- ║  Import thứ tự: Tạo measures → Tạo relationships → Assign      ║
+-- ╚══════════════════════════════════════════════════════════════════╝
+
+
+-- ====================================================================
+-- 0. RELATIONSHIPS (Tạo trong Power BI Model View)
+-- ====================================================================
+-- SalesTransactions[store_id]  →  StoreRegions[store_id]    (Many:1, Single)
+-- SalesTransactions[product_id] → SalesForecast[product_id] (Many:Many, Single)
+-- SalesAlerts[store_id]        →  StoreRegions[store_id]    (Many:1, Single)
+-- SalesForecast[store_id]      →  StoreRegions[store_id]    (Many:1, Single)
+
+
+-- ====================================================================
+-- 1. CORE KPI MEASURES (from SalesTransactions)
+-- ====================================================================
+
+Revenue Total =
+    SUM ( SalesTransactions[revenue] )
+
+Order Total =
+    COUNTROWS ( SalesTransactions )
+
+Average Order Value =
+    DIVIDE ( [Revenue Total], [Order Total], 0 )
+
+Units Sold =
+    SUM ( SalesTransactions[units_sold] )
+
+
+-- ====================================================================
+-- 2. TIME INTELLIGENCE (không dùng Calendar table — query trực tiếp)
+-- ====================================================================
+
+-- Ngày mới nhất có data
+_LatestDate =
+    CALCULATE (
+        MAX ( SalesTransactions[event_time] ),
+        ALL ( SalesTransactions )
+    )
+
+Revenue Latest Day =
+    VAR _maxDate = INT ( [_LatestDate] )
+    RETURN
+        CALCULATE (
+            [Revenue Total],
+            INT ( SalesTransactions[event_time] ) = _maxDate
+        )
+
+Revenue Previous Day =
+    VAR _maxDate = INT ( [_LatestDate] )
+    RETURN
+        CALCULATE (
+            [Revenue Total],
+            INT ( SalesTransactions[event_time] ) = _maxDate - 1
+        )
+
+Revenue DoD Growth % =
+    VAR _latest = [Revenue Latest Day]
+    VAR _prev   = [Revenue Previous Day]
+    RETURN
+        IF (
+            ISBLANK ( _prev ) || _prev = 0,
+            BLANK (),
+            DIVIDE ( _latest - _prev, _prev )
+        )
+
+
+-- ====================================================================
+-- 3. REGIONAL MEASURES (from StoreRegions JOIN)
+-- ====================================================================
+
+Revenue by Region =
+    SUM ( SalesTransactions[revenue] )
+-- Dùng với StoreRegions[region] trên axis/legend
+
+Orders by Region =
+    COUNTROWS ( SalesTransactions )
+
+Region Store Count =
+    DISTINCTCOUNT ( StoreRegions[store_id] )
+
+
+-- ====================================================================
+-- 4. PRODUCT MEASURES (from SalesTransactions — GROUP BY product_id)
+-- ====================================================================
+
+Product Revenue =
+    SUM ( SalesTransactions[revenue] )
+
+Product Units =
+    SUM ( SalesTransactions[units_sold] )
+
+Product Avg Price =
+    AVERAGE ( SalesTransactions[unit_price] )
+
+Product Transaction Count =
+    COUNTROWS ( SalesTransactions )
+
+
+-- ====================================================================
+-- 5. ALERT MEASURES (from SalesAlerts)
+-- ====================================================================
+
+Alert Count =
+    COUNTROWS ( SalesAlerts )
+
+Alert Today =
+    VAR _maxAlertDate = CALCULATE ( MAX ( SalesAlerts[alert_time] ), ALL ( SalesAlerts ) )
+    VAR _maxDate = INT ( _maxAlertDate )
+    RETURN
+        CALCULATE (
+            COUNTROWS ( SalesAlerts ),
+            INT ( SalesAlerts[alert_time] ) = _maxDate
+        )
+
+Alert High Value Count =
+    CALCULATE (
+        COUNTROWS ( SalesAlerts ),
+        SalesAlerts[is_high_value] = 1
+    )
+
+Alert Avg Value =
+    AVERAGE ( SalesAlerts[value] )
+
+
+-- ====================================================================
+-- 6. FORECAST MEASURES (from ModelRegistry + SalesForecast)
+-- ====================================================================
+
+-- Model R² (production model)
+Forecast Accuracy =
+    CALCULATE (
+        MAX ( ModelRegistry[r2_score] ),
+        ModelRegistry[status] = "production"
+    )
+
+Predicted Revenue =
+    SUM ( SalesForecast[predicted_revenue] )
+
+Forecast MAE =
+    CALCULATE (
+        MIN ( ModelRegistry[mae] ),
+        ModelRegistry[status] = "production"
+    )
+
+
+-- ====================================================================
+-- 7. FORMATTING HELPERS
+-- ====================================================================
+
+DoD Arrow =
+    VAR _g = [Revenue DoD Growth %]
+    RETURN
+        SWITCH (
+            TRUE (),
+            ISBLANK ( _g ), "--",
+            _g > 0.05,  "▲ " & FORMAT ( _g, "0.0%" ),
+            _g < -0.05, "▼ " & FORMAT ( _g, "0.0%" ),
+            "► " & FORMAT ( _g, "0.0%" )
+        )
+
+Revenue Format =
+    IF (
+        [Revenue Total] >= 1000000,
+        FORMAT ( [Revenue Total] / 1000000, "$#,0.00M" ),
+        IF (
+            [Revenue Total] >= 1000,
+            FORMAT ( [Revenue Total] / 1000, "$#,0.0K" ),
+            FORMAT ( [Revenue Total], "$#,0.00" )
+        )
+    )

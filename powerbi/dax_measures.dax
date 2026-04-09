@@ -68,30 +68,64 @@ Revenue per Customer =
 -- ====================================================================
 
 -- 2.1  Doanh thu hôm nay (real-time card)
+--      Dùng ngày mới nhất có trong data thay vì TODAY()
+--      để tránh "--" khi Stream Analytics chưa đẩy data ngày hôm nay.
 Revenue Today =
-    CALCULATE (
-        [Revenue Total],
-        'Calendar'[Date] = TODAY ()
-    )
+    VAR _latestDate =
+        CALCULATE (
+            MAX ( SalesTransactions[event_time] ),
+            ALL ( SalesTransactions )
+        )
+    RETURN
+        CALCULATE (
+            [Revenue Total],
+            CAST ( SalesTransactions[event_time], VARCHAR ) >= FORMAT ( _latestDate, "YYYY-MM-DD" ) &&
+            CAST ( SalesTransactions[event_time], VARCHAR ) <  FORMAT ( _latestDate + 1, "YYYY-MM-DD" )
+        )
+
+-- NOTE: Nếu bảng nguồn là SQL Server, dùng measure đơn giản hơn:
+-- Revenue Today (SQL) =
+--     CALCULATE (
+--         [Revenue Total],
+--         DATEVALUE ( FORMAT ( MAX ( SalesTransactions[event_time] ), "YYYY-MM-DD" ) )
+--             = DATEVALUE ( FORMAT ( MAX ( SalesTransactions[event_time] ), "YYYY-MM-DD" ) )
+--     )
+
+-- 2.1b Phiên bản đơn giản hoạt động với SQL Server DirectQuery:
+Revenue Latest Day =
+    VAR _maxDate = DATEVALUE ( FORMAT ( CALCULATE ( MAX ( SalesTransactions[event_time] ), ALL ( SalesTransactions ) ), "YYYY-MM-DD" ) )
+    RETURN
+        CALCULATE (
+            [Revenue Total],
+            DATEVALUE ( FORMAT ( SalesTransactions[event_time], "YYYY-MM-DD" ) ) = _maxDate
+        )
 
 
--- 2.2  Doanh thu hôm qua
+-- 2.2  Doanh thu ngày trước ngày mới nhất
 Revenue Yesterday =
-    CALCULATE (
-        [Revenue Total],
-        'Calendar'[Date] = TODAY () - 1
-    )
+    VAR _maxDate = DATEVALUE ( FORMAT ( CALCULATE ( MAX ( SalesTransactions[event_time] ), ALL ( SalesTransactions ) ), "YYYY-MM-DD" ) )
+    RETURN
+        CALCULATE (
+            [Revenue Total],
+            DATEVALUE ( FORMAT ( SalesTransactions[event_time], "YYYY-MM-DD" ) ) = _maxDate - 1
+        )
 
 
 -- 2.3  Tăng trưởng so với hôm qua (%)
+--      Dùng ngày mới nhất trong data (không dùng TODAY()) để tránh blank
+--      khi Stream Analytics chưa cập nhật dữ liệu ngày hôm nay.
 Revenue DoD Growth % =
-    VAR _today     = [Revenue Today]
+    VAR _latest    = [Revenue Latest Day]
     VAR _yesterday = [Revenue Yesterday]
     RETURN
-        DIVIDE (
-            _today - _yesterday,
-            _yesterday,
-            BLANK ()
+        IF (
+            _latest = 0 || ISBLANK ( _latest ),
+            BLANK (),
+            DIVIDE (
+                _latest - _yesterday,
+                _yesterday,
+                BLANK ()
+            )
         )
 
 
@@ -234,6 +268,48 @@ Avg Viral Rate =
 -- 4.4  Unique Buyers
 Unique Buyers =
     SUM ( product_summary[unique_buyers] )
+
+
+-- ====================================================================
+-- 4b. ALERT HIGH VALUE COUNT
+--     Dùng is_high_value computed column (đã thêm vào SQL via fix_powerbi_sql.py)
+-- ====================================================================
+
+-- 4b.1  Số alert có value > 1000 (high severity)
+Alert High Value Count =
+    CALCULATE (
+        COUNTROWS ( SalesAlerts ),
+        SalesAlerts[is_high_value] = 1
+    )
+
+-- 4b.2  Alert hôm nay (theo ngày mới nhất trong data)
+Alert Today (Latest) =
+    VAR _maxDate = DATEVALUE ( FORMAT ( CALCULATE ( MAX ( SalesAlerts[alert_time] ), ALL ( SalesAlerts ) ), "YYYY-MM-DD" ) )
+    RETURN
+        CALCULATE (
+            COUNTROWS ( SalesAlerts ),
+            DATEVALUE ( FORMAT ( SalesAlerts[alert_time], "YYYY-MM-DD" ) ) = _maxDate
+        )
+
+-- 4b.3  Forecast Accuracy từ ModelRegistry (R² metric thực tế của model)
+--       Nguồn: ModelRegistry[r2_score] của model production
+Forecast Accuracy =
+    CALCULATE (
+        MAX ( ModelRegistry[r2_score] ),
+        ModelRegistry[status] = "production"
+    )
+
+-- 4b.4  Forecast Accuracy từ vw_ForecastAccuracy view (so sánh real vs predicted)
+--       Được tính bởi: AVERAGE(accuracy_score) trong view (0-1 capped)
+--       Dùng cái này nếu Power BI đã import vw_ForecastAccuracy vào model.
+Forecast Accuracy Detail =
+    AVERAGEX (
+        FILTER (
+            vw_ForecastAccuracy,
+            vw_ForecastAccuracy[actual_revenue] > 0
+        ),
+        vw_ForecastAccuracy[accuracy_score]
+    )
 
 
 -- ====================================================================
