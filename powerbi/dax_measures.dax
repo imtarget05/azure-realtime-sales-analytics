@@ -358,20 +358,19 @@ DoD Arrow =
 -- ====================================================================
 
 -- Calendar =
---     VAR _minDate = MIN ( hourly_summary[event_date] )
---     VAR _maxDate = MAX ( hourly_summary[event_date] )
---     RETURN
---         ADDCOLUMNS (
---             CALENDAR ( _minDate, _maxDate ),
---             "Year",        YEAR ( [Date] ),
---             "Month",       MONTH ( [Date] ),
---             "MonthName",   FORMAT ( [Date], "MMMM" ),
---             "Quarter",     "Q" & FORMAT ( [Date], "Q" ),
---             "WeekDay",     FORMAT ( [Date], "dddd" ),
---             "WeekDayNum",  WEEKDAY ( [Date], 2 ),
---             "IsWeekend",   IF ( WEEKDAY ( [Date], 2 ) >= 6, TRUE (), FALSE () ),
---             "YearMonth",   FORMAT ( [Date], "YYYY-MM" )
---         )
+--     ADDCOLUMNS (
+--         CALENDAR ( DATE(2026, 1, 1), DATE(2026, 12, 31) ),
+--         "Year",        YEAR ( [Date] ),
+--         "Month",       MONTH ( [Date] ),
+--         "MonthName",   FORMAT ( [Date], "MMMM" ),
+--         "Quarter",     "Q" & FORMAT ( [Date], "Q" ),
+--         "WeekDay",     FORMAT ( [Date], "dddd" ),
+--         "WeekDayNum",  WEEKDAY ( [Date], 2 ),
+--         "IsWeekend",   IF ( WEEKDAY ( [Date], 2 ) >= 6, TRUE (), FALSE () ),
+--         "YearMonth",   FORMAT ( [Date], "YYYY-MM" )
+--     )
+--   NOTE: Dùng fixed dates thay vì MIN/MAX(hourly_summary)
+--         để tránh cyclic reference với bidirectional filters.
 
 
 -- ====================================================================

@@ -125,7 +125,7 @@
       "name": "Calendar",
       "mode": "Calculated",
       "description": "Date dimension — tạo bằng DAX CALENDAR(), đánh dấu Date table",
-      "daxExpression": "VAR _minDate = MIN ( hourly_summary[event_date] ) VAR _maxDate = MAX ( hourly_summary[event_date] ) RETURN ADDCOLUMNS ( CALENDAR ( _minDate, _maxDate ), \"Year\", YEAR ( [Date] ), \"Month\", MONTH ( [Date] ), \"MonthName\", FORMAT ( [Date], \"MMMM\" ), \"Quarter\", \"Q\" & FORMAT ( [Date], \"Q\" ), \"WeekDay\", FORMAT ( [Date], \"dddd\" ), \"WeekDayNum\", WEEKDAY ( [Date], 2 ), \"IsWeekend\", IF ( WEEKDAY ( [Date], 2 ) >= 6, TRUE(), FALSE() ), \"YearMonth\", FORMAT ( [Date], \"YYYY-MM\" ) )",
+      "daxExpression": "ADDCOLUMNS ( CALENDAR ( DATE(2026, 1, 1), DATE(2026, 12, 31) ), \"Year\", YEAR ( [Date] ), \"Month\", MONTH ( [Date] ), \"MonthName\", FORMAT ( [Date], \"MMMM\" ), \"Quarter\", \"Q\" & FORMAT ( [Date], \"Q\" ), \"WeekDay\", FORMAT ( [Date], \"dddd\" ), \"WeekDayNum\", WEEKDAY ( [Date], 2 ), \"IsWeekend\", IF ( WEEKDAY ( [Date], 2 ) >= 6, TRUE(), FALSE() ), \"YearMonth\", FORMAT ( [Date], \"YYYY-MM\" ) )",
       "isDateTable": true,
       "dateColumn": "Date",
       "columns": [
@@ -184,9 +184,9 @@
       "toTable": "hourly_summary",
       "toColumn": "event_date",
       "cardinality": "OneToMany",
-      "crossFilterDirection": "Both",
+      "crossFilterDirection": "Single",
       "isActive": true,
-      "description": "Date dim → Fact hourly. Cho phép Time Intelligence hoạt động."
+      "description": "Date dim → Fact hourly. Single-direction to avoid cyclic reference with Calendar calculated table."
     },
     {
       "name": "Calendar_to_CustomerSummary_Last",
@@ -206,9 +206,9 @@
       "toTable": "product_summary",
       "toColumn": "category",
       "cardinality": "ManyToMany",
-      "crossFilterDirection": "Both",
+      "crossFilterDirection": "Single",
       "isActive": true,
-      "description": "Category bridge giữa hourly và product (ManyToMany)."
+      "description": "Category bridge giữa hourly và product. Single-direction to prevent ambiguity."
     },
     {
       "name": "HourlySummary_to_SimilarityScores",
