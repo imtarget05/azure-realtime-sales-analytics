@@ -207,7 +207,7 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 # ─────────────────────────────────────────────
 DATABRICKS_HOST = _get_secret(
     "DATABRICKS_HOST", "databricks-host",
-    default="https://adb-7405619740283965.5.azuredatabricks.net",
+    default="https://adb-7405607469187602.2.azuredatabricks.net",
 )
 DATABRICKS_TOKEN = _get_secret("DATABRICKS_TOKEN", "databricks-token")
 

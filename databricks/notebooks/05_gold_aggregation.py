@@ -37,12 +37,12 @@ from delta.tables import DeltaTable
 silver_df = spark.read.format("delta").load(SILVER_PATH)
 
 # Load predictions nếu có
+HAS_PREDICTIONS = False
 try:
     viral_df = spark.read.format("delta").load(GOLD_VIRAL_PATH)
     HAS_PREDICTIONS = True
     print(f"✓ Viral predictions loaded: {viral_df.count():,} rows")
 except Exception:
-    HAS_PREDICTIONS = False
     print("⚠ No viral predictions found — using Silver only")
 
 print(f"✓ Silver loaded: {silver_df.count():,} rows")
@@ -139,6 +139,7 @@ print(f"✓ Hourly summary saved: {hourly_summary.count():,} rows")
 # COMMAND ----------
 
 # Load similarity nếu có
+HAS_SIM = False
 try:
     sim_df = spark.read.format("delta").load(GOLD_SIMILARITY_PATH)
     HAS_SIM = True
@@ -342,6 +343,7 @@ spark.sql(f"""
 """)
 
 # ── View: Product Performance + Viral Rate ──
+_viral_cols = "viral_rate, avg_viral_prob," if HAS_PREDICTIONS else ""
 spark.sql(f"""
     CREATE OR REPLACE VIEW {GOLD_DB}.v_product_performance AS
     SELECT
@@ -353,7 +355,7 @@ spark.sql(f"""
         avg_price,
         category_rank,
         unique_buyers,
-        {'viral_rate, avg_viral_prob,' if HAS_PREDICTIONS else ''}
+        {_viral_cols}
         orders_per_day
     FROM {GOLD_DB}.product_summary
     ORDER BY total_revenue DESC

@@ -2,14 +2,20 @@
   "name": "Sales_Lakehouse_Pipeline",
   "description": "Full Lakehouse pipeline: Event Hub → Bronze → Silver → Feature Eng → ML → Gold (chạy mỗi 5 phút)",
 
+  "git_source": {
+    "git_url": "https://github.com/imtarget05/azure-realtime-sales-analytics.git",
+    "git_provider": "gitHub",
+    "git_branch": "main"
+  },
+
   "tasks": [
     {
       "task_key": "bronze_ingestion",
       "description": "Đọc events từ Azure Event Hub → ghi vào Delta Lake Bronze",
       "notebook_task": {
-        "notebook_path": "/Workspace/Repos/azure-realtime-sales-analytics/databricks/notebooks/01_bronze_ingestion",
+        "notebook_path": "databricks/notebooks/01_bronze_ingestion",
         "base_parameters": {},
-        "source": "WORKSPACE"
+        "source": "GIT"
       },
       "job_cluster_key": "etl_cluster",
       "timeout_seconds": 0,
@@ -26,11 +32,11 @@
         { "task_key": "bronze_ingestion" }
       ],
       "notebook_task": {
-        "notebook_path": "/Workspace/Repos/azure-realtime-sales-analytics/databricks/notebooks/02_silver_etl",
+        "notebook_path": "databricks/notebooks/02_silver_etl",
         "base_parameters": {
           "pipeline.etl_mode": "batch"
         },
-        "source": "WORKSPACE"
+        "source": "GIT"
       },
       "job_cluster_key": "etl_cluster",
       "timeout_seconds": 1800,
@@ -44,9 +50,9 @@
         { "task_key": "silver_etl" }
       ],
       "notebook_task": {
-        "notebook_path": "/Workspace/Repos/azure-realtime-sales-analytics/databricks/notebooks/03_feature_engineering",
+        "notebook_path": "databricks/notebooks/03_feature_engineering",
         "base_parameters": {},
-        "source": "WORKSPACE"
+        "source": "GIT"
       },
       "job_cluster_key": "ml_cluster",
       "timeout_seconds": 3600,
@@ -60,11 +66,11 @@
         { "task_key": "feature_engineering" }
       ],
       "notebook_task": {
-        "notebook_path": "/Workspace/Repos/azure-realtime-sales-analytics/databricks/notebooks/04_ml_prediction",
+        "notebook_path": "databricks/notebooks/04_ml_prediction",
         "base_parameters": {
           "pipeline.ml_mode": "inference"
         },
-        "source": "WORKSPACE"
+        "source": "GIT"
       },
       "job_cluster_key": "ml_cluster",
       "timeout_seconds": 1800,
@@ -78,9 +84,9 @@
         { "task_key": "ml_prediction" }
       ],
       "notebook_task": {
-        "notebook_path": "/Workspace/Repos/azure-realtime-sales-analytics/databricks/notebooks/05_gold_aggregation",
+        "notebook_path": "databricks/notebooks/05_gold_aggregation",
         "base_parameters": {},
-        "source": "WORKSPACE"
+        "source": "GIT"
       },
       "job_cluster_key": "etl_cluster",
       "timeout_seconds": 1800,
