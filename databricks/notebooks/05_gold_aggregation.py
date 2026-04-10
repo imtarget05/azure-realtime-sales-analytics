@@ -125,7 +125,10 @@ spark.sql(f"""
     LOCATION '{GOLD_HOURLY_PATH}'
 """)
 
-spark.sql(f"OPTIMIZE delta.`{GOLD_HOURLY_PATH}` ZORDER BY (store_id, event_hour)")
+try:
+    spark.sql(f"OPTIMIZE delta.`{GOLD_HOURLY_PATH}` ZORDER BY (store_id, event_hour)")
+except Exception as e:
+    print(f"⚠ OPTIMIZE hourly skipped: {e}")
 
 print(f"✓ Hourly summary saved: {hourly_summary.count():,} rows")
 
@@ -293,7 +296,10 @@ spark.sql(f"""
     LOCATION '{GOLD_CUSTOMER_PATH}'
 """)
 
-spark.sql(f"OPTIMIZE delta.`{GOLD_CUSTOMER_PATH}` ZORDER BY (customer_id)")
+try:
+    spark.sql(f"OPTIMIZE delta.`{GOLD_CUSTOMER_PATH}` ZORDER BY (customer_id)")
+except Exception as e:
+    print(f"⚠ OPTIMIZE customer skipped: {e}")
 
 print(f"✓ Customer summary saved: {customer_summary.count():,} rows")
 

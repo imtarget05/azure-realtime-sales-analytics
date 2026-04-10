@@ -320,7 +320,10 @@ spark.sql(f"""
     LOCATION '{GOLD_PATH}/ml_features'
 """)
 
-spark.sql(f"OPTIMIZE delta.`{GOLD_PATH}/ml_features` ZORDER BY (category, store_id)")
+try:
+    spark.sql(f"OPTIMIZE delta.`{GOLD_PATH}/ml_features` ZORDER BY (category, store_id)")
+except Exception as e:
+    print(f"⚠ OPTIMIZE ml_features skipped: {e}")
 
 print(f"✓ Feature table saved: {GOLD_DB}.ml_features")
 print(f"  Shape: {ml_features.count():,} rows × {len(ml_feature_columns)} cols")

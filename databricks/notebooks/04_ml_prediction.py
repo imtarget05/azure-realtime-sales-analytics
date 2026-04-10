@@ -36,8 +36,13 @@ import numpy as np
 # COMMAND ----------
 
 # Chế độ chạy: "train" hoặc "inference"
+# Demo mode: luôn train trước rồi predict (không có model trong registry)
 RUN_MODE = spark.conf.get("pipeline.ml_mode", "inference")
-print(f"ML Mode: {RUN_MODE}")
+if DEMO_MODE:
+    RUN_MODE = "train"
+    print(f"ML Mode: {RUN_MODE} (demo — sẽ train inline rồi predict)")
+else:
+    print(f"ML Mode: {RUN_MODE}")
 
 # COMMAND ----------
 
@@ -214,6 +219,30 @@ if RUN_MODE == "train":
         print(f"\n  MLflow Run ID: {run.info.run_id}")
         print(f"  Model registered: {MLFLOW_MODEL_NAME}")
 
+    # ── Demo mode: cũng chạy predict sau khi train ──
+    if DEMO_MODE:
+        print("\n[Demo] Running predictions with freshly trained model...")
+        predictions = cv_model.transform(prepared_df)
+        result_df = (
+            predictions
+            .withColumn("is_viral_prediction", F.col("prediction").cast(IntegerType()))
+            .withColumn(
+                "viral_probability",
+                F.round(F.element_at(F.col("probability"), 2), 4)
+            )
+            .select(
+                "transaction_id", "event_timestamp", "event_date",
+                "store_id", "region", "product_id", "product_name", "category",
+                "customer_id", "customer_segment",
+                "quantity", "unit_price", "total_amount",
+                "similarity_score", "similarity_bin",
+                "is_viral",
+                "is_viral_prediction",
+                "viral_probability",
+            )
+        )
+        print(f"✓ Demo predictions: {result_df.count():,} rows")
+
 # COMMAND ----------
 
 # MAGIC %md
@@ -279,7 +308,7 @@ if RUN_MODE == "inference":
 
 # COMMAND ----------
 
-if RUN_MODE == "inference":
+if RUN_MODE == "inference" or DEMO_MODE:
     (
         result_df.write
         .format("delta")
@@ -295,7 +324,10 @@ if RUN_MODE == "inference":
         LOCATION '{GOLD_VIRAL_PATH}'
     """)
 
-    spark.sql(f"OPTIMIZE delta.`{GOLD_VIRAL_PATH}` ZORDER BY (store_id, category)")
+    try:
+        spark.sql(f"OPTIMIZE delta.`{GOLD_VIRAL_PATH}` ZORDER BY (store_id, category)")
+    except Exception as e:
+        print(f"⚠ OPTIMIZE skipped: {e}")
 
     print(f"✓ Predictions saved: {GOLD_DB}.viral_predictions")
 
@@ -306,8 +338,7 @@ if RUN_MODE == "inference":
 
 # COMMAND ----------
 
-if RUN_MODE == "inference":
-    # So sánh actual vs predicted
+if RUN_MODE == "inference" or DEMO_MODE:
     accuracy = result_df.filter(
         F.col("is_viral") == F.col("is_viral_prediction")
     ).count() / result_df.count()

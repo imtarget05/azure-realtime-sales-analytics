@@ -47,26 +47,33 @@ from delta.tables import DeltaTable
 # COMMAND ----------
 
 # Chế độ: "streaming" hoặc "batch"
+# Demo mode luôn dùng batch (toàn bộ Bronze)
 ETL_MODE = spark.conf.get("pipeline.etl_mode", "streaming")
+if DEMO_MODE:
+    ETL_MODE = "batch"
 
 if ETL_MODE == "streaming":
     bronze_df = (
         spark.readStream
         .format("delta")
-        .option("maxFilesPerTrigger", 100)    # Kiểm soát micro-batch size
-        .option("ignoreChanges", "true")       # Bỏ qua compaction/optimize
+        .option("maxFilesPerTrigger", 100)
+        .option("ignoreChanges", "true")
         .load(BRONZE_PATH)
     )
     print("✓ Bronze stream opened (Structured Streaming)")
 else:
-    # Batch mode — đọc incremental dựa trên _ingested_at
-    from datetime import datetime, timedelta
-    cutoff = (datetime.utcnow() - timedelta(minutes=10)).strftime("%Y-%m-%d %H:%M:%S")
-    bronze_df = (
-        spark.read.format("delta").load(BRONZE_PATH)
-        .filter(F.col("_ingested_at") >= cutoff)
-    )
-    print(f"✓ Bronze batch loaded (since {cutoff})")
+    if DEMO_MODE:
+        # Demo: đọc toàn bộ Bronze (không filter by time)
+        bronze_df = spark.read.format("delta").load(BRONZE_PATH)
+        print(f"✓ Bronze batch loaded (demo mode, all rows: {bronze_df.count():,})")
+    else:
+        from datetime import datetime, timedelta
+        cutoff = (datetime.utcnow() - timedelta(minutes=10)).strftime("%Y-%m-%d %H:%M:%S")
+        bronze_df = (
+            spark.read.format("delta").load(BRONZE_PATH)
+            .filter(F.col("_ingested_at") >= cutoff)
+        )
+        print(f"✓ Bronze batch loaded (since {cutoff})")
 
 print(f"  Mode: {ETL_MODE}")
 
@@ -356,14 +363,17 @@ spark.sql(f"""
     LOCATION '{SILVER_PATH}'
 """)
 
-# OPTIMIZE + Z-ORDER cho query performance
-spark.sql(f"""
-    OPTIMIZE delta.`{SILVER_PATH}`
-    ZORDER BY (store_id, event_date)
-""")
-
 print(f"✓ Silver table registered: {SILVER_DB}.sales_transactions")
-print(f"✓ OPTIMIZE + ZORDER complete")
+
+# OPTIMIZE + Z-ORDER cho query performance
+try:
+    spark.sql(f"""
+        OPTIMIZE delta.`{SILVER_PATH}`
+        ZORDER BY (store_id, event_date)
+    """)
+    print(f"✓ OPTIMIZE + ZORDER complete")
+except Exception as e:
+    print(f"⚠ OPTIMIZE skipped: {e}")
 
 # COMMAND ----------
 
