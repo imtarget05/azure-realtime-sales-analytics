@@ -98,6 +98,7 @@ jobs:
             --settings "EVENT_HUB_NAME=sales-events" \
               "SCM_DO_BUILD_DURING_DEPLOYMENT=false" \
               "ENABLE_ORYX_BUILD=false" \
+              "WEBSITE_RUN_FROM_PACKAGE=1" \
               "AzureWebJobsFeatureFlags=EnableWorkerIndexing" \
             --output none
 
@@ -110,7 +111,8 @@ jobs:
       - name: Deploy via zip push
         if: steps.verify.outputs.app_exists == 'true'
         run: |
-          az webapp deployment source config-zip \
+          az functionapp deployment source config-zip \
             --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --src deploy.zip
+            --src deploy.zip \
+            --timeout 300
