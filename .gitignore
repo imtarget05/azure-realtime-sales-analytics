@@ -54,3 +54,10 @@ ml/model_output/*.png
 # Local binaries / exports
 demo.pbix
 nul
+
+# Build artifacts / staging
+*.zip
+deploy_build.log
+adf_pipeline_current.json
+func_stage/
+=

@@ -21,23 +21,23 @@
     "category"
   ],
   "revenue_metrics": {
-    "mae": 8.1614,
-    "rmse": 10.1968,
-    "r2_score": 0.8675,
-    "cv_r2_mean": 0.8606,
-    "cv_r2_std": 0.0051
+    "mae": 7.9739,
+    "rmse": 9.8948,
+    "r2_score": 0.8791,
+    "cv_r2_mean": 0.8626,
+    "cv_r2_std": 0.0017
   },
   "quantity_metrics": {
-    "mae": 7.8638,
-    "rmse": 10.1452,
-    "r2_score": 0.7854,
-    "cv_r2_mean": 0.7733,
-    "cv_r2_std": 0.0085
+    "mae": 7.7624,
+    "rmse": 10.0351,
+    "r2_score": 0.8002,
+    "cv_r2_mean": 0.7678,
+    "cv_r2_std": 0.005
   },
-  "training_samples": 30000,
+  "training_samples": 80000,
   "data_source": "Azure SQL",
-  "trained_at": "2026-04-11T04:22:23.519020",
-  "model_version": "v5.0",
+  "trained_at": "2026-04-11T06:44:00.541849",
+  "model_version": "v10.0",
   "sklearn_version": "1.8.0",
   "revenue_r2": 0.7559,
   "revenue_rmse": 40.9916,
@@ -89,6 +89,86 @@
         "n_estimators": 200,
         "max_depth": 7,
         "learning_rate": 0.08
+      },
+      "decision": "PROMOTE"
+    },
+    {
+      "timestamp": "2026-04-11T05:17:42.187501",
+      "old_config": {
+        "n_samples": 30000,
+        "algorithm": "Ridge Regression",
+        "alpha": 1.0
+      },
+      "new_config": {
+        "n_samples": 80000,
+        "algorithm": "GradientBoosting",
+        "n_estimators": 300,
+        "max_depth": 6,
+        "learning_rate": 0.1
+      },
+      "decision": "PROMOTE"
+    },
+    {
+      "timestamp": "2026-04-11T05:20:14.074436",
+      "old_config": {
+        "n_samples": 80000,
+        "algorithm": "Ridge Regression",
+        "alpha": 1.0
+      },
+      "new_config": {
+        "n_samples": 80000,
+        "algorithm": "GradientBoosting",
+        "n_estimators": 300,
+        "max_depth": 6,
+        "learning_rate": 0.1
+      },
+      "decision": "PROMOTE"
+    },
+    {
+      "timestamp": "2026-04-11T06:37:19.679551",
+      "old_config": {
+        "n_samples": 80000,
+        "algorithm": "Ridge Regression",
+        "alpha": 1.0
+      },
+      "new_config": {
+        "n_samples": 80000,
+        "algorithm": "GradientBoosting",
+        "n_estimators": 300,
+        "max_depth": 6,
+        "learning_rate": 0.1
+      },
+      "decision": "PROMOTE"
+    },
+    {
+      "timestamp": "2026-04-11T06:41:19.121024",
+      "old_config": {
+        "n_samples": 80000,
+        "algorithm": "Ridge Regression",
+        "alpha": 1.0
+      },
+      "new_config": {
+        "n_samples": 80000,
+        "algorithm": "GradientBoosting",
+        "n_estimators": 300,
+        "max_depth": 6,
+        "learning_rate": 0.1
+      },
+      "decision": "PROMOTE"
+    },
+    {
+      "timestamp": "2026-04-11T06:44:00.541849",
+      "old_config": {
+        "n_samples": 80000,
+        "algorithm": "Ridge Regression",
+        "alpha": 1.0
+      },
+      "new_config": {
+        "n_samples": 80000,
+        "algorithm": "GradientBoosting",
+        "n_estimators": 300,
+        "max_depth": 6,
+        "learning_rate": 0.1
       },
       "decision": "PROMOTE"
     }
