@@ -143,24 +143,27 @@ resource "azurerm_eventhub_namespace" "main" {
 }
 
 resource "azurerm_eventhub" "sales" {
-  name              = "sales-events"
-  namespace_id      = azurerm_eventhub_namespace.main.id
-  partition_count   = 4
-  message_retention = 7
+  name                = "sales-events"
+  namespace_name      = azurerm_eventhub_namespace.main.name
+  resource_group_name = azurerm_resource_group.main.name
+  partition_count     = 4
+  message_retention   = 7
 }
 
 resource "azurerm_eventhub" "weather" {
-  name              = "weather-events"
-  namespace_id      = azurerm_eventhub_namespace.main.id
-  partition_count   = 2
-  message_retention = 7
+  name                = "weather-events"
+  namespace_name      = azurerm_eventhub_namespace.main.name
+  resource_group_name = azurerm_resource_group.main.name
+  partition_count     = 2
+  message_retention   = 7
 }
 
 resource "azurerm_eventhub" "stock" {
-  name              = "stock-events"
-  namespace_id      = azurerm_eventhub_namespace.main.id
-  partition_count   = 2
-  message_retention = 7
+  name                = "stock-events"
+  namespace_name      = azurerm_eventhub_namespace.main.name
+  resource_group_name = azurerm_resource_group.main.name
+  partition_count     = 2
+  message_retention   = 7
 }
 
 resource "azurerm_eventhub_consumer_group" "stream_analytics" {
