@@ -196,10 +196,10 @@ def _score_local(input_data: dict) -> dict | None:
     return {
         "status": "success",
         "prediction": {
-            "predicted_revenue": round(pred_rev, 2),
+            "predicted_revenue": max(0.0, round(pred_rev, 2)),
             "predicted_quantity": max(1, pred_qty),
             "confidence_interval": {
-                "lower": round(pred_rev - 1.96 * rev_rmse, 2),
+                "lower": max(0.0, round(pred_rev - 1.96 * rev_rmse, 2)),
                 "upper": round(pred_rev + 1.96 * rev_rmse, 2),
                 "quantity_lower": max(0, int(round(pred_qty - 1.96 * qty_rmse))),
                 "quantity_upper": int(round(pred_qty + 1.96 * qty_rmse)),
@@ -236,8 +236,8 @@ def call_ml_endpoint(input_data: dict) -> dict:
             return {
                 "status": "success",
                 "prediction": {
-                    "predicted_revenue": pred.get("predicted_revenue", 0),
-                    "predicted_quantity": pred.get("predicted_quantity", 0),
+                    "predicted_revenue": max(0.0, float(pred.get("predicted_revenue", 0) or 0)),
+                    "predicted_quantity": max(0, int(round(float(pred.get("predicted_quantity", 0) or 0)))),
                     "confidence_interval": ci,
                 },
                 "source": "Azure ML Endpoint",

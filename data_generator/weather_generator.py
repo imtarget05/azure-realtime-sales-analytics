@@ -4,6 +4,7 @@ Dữ liệu thời tiết ảnh hưởng đến dự đoán bán hàng.
 """
 
 import json
+import os
 import random
 import time
 import signal
@@ -50,11 +51,14 @@ class WeatherDataGenerator:
         )
         self.running = True
         self.total_sent = 0
-        signal.signal(signal.SIGINT, self._shutdown)
-        signal.signal(signal.SIGTERM, self._shutdown)
 
     def _shutdown(self, signum, frame):
-        print(f"\n[INFO] Đang dừng... Đã gửi tổng cộng {self.total_sent} bản ghi thời tiết.")
+        # Avoid re-entrant buffered stdout writes when called from signal handlers.
+        try:
+            msg = f"\n[INFO] Đang dừng... Đã gửi tổng cộng {self.total_sent} bản ghi thời tiết.\n"
+            os.write(2, msg.encode("utf-8", errors="ignore"))
+        except Exception:
+            pass
         self.running = False
 
     def generate_weather_event(self, region: str) -> dict:
@@ -113,6 +117,9 @@ class WeatherDataGenerator:
 
     def run(self, interval: float = 30.0):
         """Chạy vòng lặp sinh dữ liệu thời tiết (mỗi 30 giây)."""
+        signal.signal(signal.SIGINT, self._shutdown)
+        signal.signal(signal.SIGTERM, self._shutdown)
+
         print("=" * 60)
         print("  HỆ THỐNG SINH DỮ LIỆU THỜI TIẾT THỜI GIAN THỰC")
         print(f"  Event Hub: {WEATHER_EVENT_HUB_NAME}")

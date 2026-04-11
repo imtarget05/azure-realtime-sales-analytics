@@ -3,7 +3,7 @@ Tests for data_generator modules — sales, stock, weather generators.
 """
 
 import pytest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from datetime import datetime
 
 
@@ -143,7 +143,11 @@ class TestSalesGenerator:
 class TestStockGenerator:
     def test_stock_generator_instantiates(self):
         from data_generator.stock_generator import StockDataGenerator
-        gen = StockDataGenerator()
+        with patch(
+            "data_generator.stock_generator.EventHubProducerClient.from_connection_string",
+            return_value=MagicMock(),
+        ):
+            gen = StockDataGenerator()
         assert gen is not None
 
 
@@ -152,5 +156,9 @@ class TestStockGenerator:
 class TestWeatherGenerator:
     def test_weather_generator_instantiates(self):
         from data_generator.weather_generator import WeatherDataGenerator
-        gen = WeatherDataGenerator()
+        with patch(
+            "data_generator.weather_generator.EventHubProducerClient.from_connection_string",
+            return_value=MagicMock(),
+        ):
+            gen = WeatherDataGenerator()
         assert gen is not None

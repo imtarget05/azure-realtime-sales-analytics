@@ -4,6 +4,7 @@ Mô phỏng dữ liệu cổ phiếu biến động theo thời gian thực.
 """
 
 import json
+import os
 import random
 import time
 import signal
@@ -49,11 +50,14 @@ class StockDataGenerator:
         self.total_sent = 0
         # Theo dõi giá hiện tại của mỗi cổ phiếu
         self.current_prices = {s["symbol"]: s["base_price"] for s in self.STOCKS}
-        signal.signal(signal.SIGINT, self._shutdown)
-        signal.signal(signal.SIGTERM, self._shutdown)
 
     def _shutdown(self, signum, frame):
-        print(f"\n[INFO] Đang dừng... Tổng cộng {self.total_sent} bản ghi chứng khoán.")
+        # Avoid re-entrant buffered stdout writes when called from signal handlers.
+        try:
+            msg = f"\n[INFO] Đang dừng... Tổng cộng {self.total_sent} bản ghi chứng khoán.\n"
+            os.write(2, msg.encode("utf-8", errors="ignore"))
+        except Exception:
+            pass
         self.running = False
 
     def generate_stock_event(self, stock: dict) -> dict:
@@ -115,6 +119,9 @@ class StockDataGenerator:
 
     def run(self, interval: float = 5.0):
         """Chạy vòng lặp sinh dữ liệu chứng khoán (mỗi 5 giây)."""
+        signal.signal(signal.SIGINT, self._shutdown)
+        signal.signal(signal.SIGTERM, self._shutdown)
+
         print("=" * 60)
         print("  HỆ THỐNG SINH DỮ LIỆU CHỨNG KHOÁN THỜI GIAN THỰC")
         print(f"  Event Hub: {STOCK_EVENT_HUB_NAME}")
