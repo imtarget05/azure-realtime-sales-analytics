@@ -101,6 +101,19 @@ jobs:
               "AzureWebJobsFeatureFlags=EnableWorkerIndexing" \
             --output none
 
+      - name: Reset Function App (clear malformed state)
+        if: steps.verify.outputs.app_exists == 'true'
+        run: |
+          az functionapp config appsettings delete \
+            --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --setting-names WEBSITE_RUN_FROM_PACKAGE \
+            --output none 2>/dev/null || true
+          az functionapp restart \
+            --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
+          sleep 30
+
       - name: Deploy Azure Functions
         if: steps.verify.outputs.app_exists == 'true'
         uses: Azure/functions-action@v1
