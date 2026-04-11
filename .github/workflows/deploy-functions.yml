@@ -89,36 +89,67 @@ jobs:
             echo "app_exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Ensure Function App settings
+      # ── Clean up corrupted state from previous failed deploys ──
+      - name: Stop Function App and clear stale settings
         if: steps.verify.outputs.app_exists == 'true'
         run: |
-          az functionapp config appsettings set \
+          echo "── Stopping function app to clear malformed state ──"
+          az functionapp stop \
             --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --settings "EVENT_HUB_NAME=sales-events" \
-              "SCM_DO_BUILD_DURING_DEPLOYMENT=false" \
-              "ENABLE_ORYX_BUILD=false" \
-              "AzureWebJobsFeatureFlags=EnableWorkerIndexing" \
-            --output none
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
 
-      - name: Reset Function App (clear malformed state)
-        if: steps.verify.outputs.app_exists == 'true'
-        run: |
+          echo "── Removing WEBSITE_RUN_FROM_PACKAGE if present ──"
           az functionapp config appsettings delete \
             --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
             --setting-names WEBSITE_RUN_FROM_PACKAGE \
             --output none 2>/dev/null || true
-          az functionapp restart \
+
+          echo "── Setting required app settings ──"
+          az functionapp config appsettings set \
+            --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --settings \
+              "EVENT_HUB_NAME=sales-events" \
+              "SCM_DO_BUILD_DURING_DEPLOYMENT=false" \
+              "ENABLE_ORYX_BUILD=false" \
+              "AzureWebJobsFeatureFlags=EnableWorkerIndexing" \
+            --output none
+
+          echo "── Starting function app ──"
+          az functionapp start \
             --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
           sleep 30
 
-      - name: Deploy Azure Functions
+      # ── Create zip and deploy (same method as successful run #12) ──
+      - name: Create deployment package
         if: steps.verify.outputs.app_exists == 'true'
-        uses: Azure/functions-action@v1
-        with:
-          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          scm-do-build-during-deployment: false
-          enable-oryx-build: false
+        run: |
+          cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          zip -r ../deploy.zip . -x "*.pyc" "__pycache__/*" ".python_packages/lib/site-packages/*.dist-info/*"
+          echo "── Zip size: $(du -h ../deploy.zip | cut -f1) ──"
+
+      - name: Deploy via zip push
+        if: steps.verify.outputs.app_exists == 'true'
+        run: |
+          az functionapp deployment source config-zip \
+            --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --src deploy.zip
+
+      - name: Verify deployment
+        if: steps.verify.outputs.app_exists == 'true'
+        run: |
+          sleep 15
+          STATUS=$(az functionapp show \
+            --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --query state -o tsv)
+          echo "Function App state: $STATUS"
+          if [ "$STATUS" != "Running" ]; then
+            echo "::warning::Function App is not running (state=$STATUS), attempting restart..."
+            az functionapp restart \
+              --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
+          fi
