@@ -1,0 +1,91 @@
+{
+  "ranking": [
+    {
+      "model": "Random Forest",
+      "MAE": 3.9685,
+      "RMSE": 4.697,
+      "R2": 0.101,
+      "MAPE_%": 96.87,
+      "train_time_sec": 2.541,
+      "cv_mae_mean": 4.0295
+    },
+    {
+      "model": "AdaBoost",
+      "MAE": 3.9745,
+      "RMSE": 4.6876,
+      "R2": 0.1046,
+      "MAPE_%": 99.25,
+      "train_time_sec": 0.332,
+      "cv_mae_mean": 4.0033
+    },
+    {
+      "model": "Linear Regression",
+      "MAE": 3.9935,
+      "RMSE": 4.7245,
+      "R2": 0.0905,
+      "MAPE_%": 98.28,
+      "train_time_sec": 0.006,
+      "cv_mae_mean": 4.0246
+    },
+    {
+      "model": "Ridge Regression",
+      "MAE": 3.9935,
+      "RMSE": 4.7245,
+      "R2": 0.0905,
+      "MAPE_%": 98.28,
+      "train_time_sec": 0.004,
+      "cv_mae_mean": 4.0246
+    },
+    {
+      "model": "Gradient Boosting",
+      "MAE": 3.9979,
+      "RMSE": 4.7447,
+      "R2": 0.0827,
+      "MAPE_%": 97.36,
+      "train_time_sec": 4.337,
+      "cv_mae_mean": 4.0634
+    },
+    {
+      "model": "Lasso Regression",
+      "MAE": 4.0187,
+      "RMSE": 4.764,
+      "R2": 0.0752,
+      "MAPE_%": 99.47,
+      "train_time_sec": 0.017,
+      "cv_mae_mean": 4.0417
+    },
+    {
+      "model": "Decision Tree",
+      "MAE": 4.1247,
+      "RMSE": 4.9415,
+      "R2": 0.005,
+      "MAPE_%": 98.51,
+      "train_time_sec": 0.057,
+      "cv_mae_mean": 4.2496
+    },
+    {
+      "model": "KNN (k=5)",
+      "MAE": 4.2427,
+      "RMSE": 5.1213,
+      "R2": -0.0687,
+      "MAPE_%": 100.83,
+      "train_time_sec": 0.05,
+      "cv_mae_mean": 4.2389
+    },
+    {
+      "model": "SVR (RBF)",
+      "MAE": 4.3585,
+      "RMSE": 5.3256,
+      "R2": -0.1557,
+      "MAPE_%": 101.86,
+      "train_time_sec": 13.133,
+      "cv_mae_mean": 4.564
+    }
+  ],
+  "best_model": "Random Forest",
+  "best_metrics": {
+    "MAE": 3.9685,
+    "R2": 0.101,
+    "MAPE_%": 96.87
+  }
+}

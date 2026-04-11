@@ -1,0 +1,48 @@
+{
+  "feature_columns": [
+    "hour",
+    "day_of_month",
+    "month",
+    "is_weekend",
+    "hour_sin",
+    "hour_cos",
+    "month_sin",
+    "month_cos",
+    "store_id_enc",
+    "product_id_enc",
+    "category_enc",
+    "temperature",
+    "is_rainy",
+    "holiday"
+  ],
+  "categorical_columns": [
+    "store_id",
+    "product_id",
+    "category"
+  ],
+  "revenue_metrics": {
+    "model_name": "revenue",
+    "mae": 10.8144,
+    "rmse": 40.9916,
+    "r2_score": 0.7559,
+    "cv_r2_mean": -0.2643,
+    "cv_r2_std": 1.9096
+  },
+  "quantity_metrics": {
+    "model_name": "quantity",
+    "mae": 1.4732,
+    "rmse": 1.7617,
+    "r2_score": 0.1424,
+    "cv_r2_mean": -0.0766,
+    "cv_r2_std": 0.0688
+  },
+  "training_samples": 88746,
+  "data_source": "Azure SQL",
+  "trained_at": "2026-04-09T15:23:52.772039",
+  "model_version": "v2.0",
+  "sklearn_version": "1.8.0",
+  "revenue_r2": 0.7559,
+  "revenue_rmse": 40.9916,
+  "algorithm": "GradientBoostingRegressor",
+  "n_features": 14
+}

@@ -1,0 +1,171 @@
+﻿{
+  "activities": [
+    {
+      "additionalProperties": null,
+      "dataIntegrationUnits": null,
+      "dependsOn": null,
+      "description": null,
+      "enableSkipIncompatibleRow": null,
+      "enableStaging": null,
+      "inputs": [
+        {
+          "parameters": null,
+          "referenceName": "BlobStagingDataset",
+          "type": "DatasetReference"
+        }
+      ],
+      "linkedServiceName": null,
+      "logSettings": null,
+      "logStorageSettings": null,
+      "name": "CopyBlobToSQL",
+      "onInactiveMarkAs": null,
+      "outputs": [
+        {
+          "parameters": null,
+          "referenceName": "SqlSalesDataset",
+          "type": "DatasetReference"
+        }
+      ],
+      "parallelCopies": null,
+      "policy": null,
+      "preserve": null,
+      "preserveRules": null,
+      "redirectIncompatibleRowSettings": null,
+      "sink": {
+        "additionalProperties": null,
+        "disableMetricsCollection": null,
+        "maxConcurrentConnections": null,
+        "preCopyScript": null,
+        "sinkRetryCount": null,
+        "sinkRetryWait": null,
+        "sqlWriterStoredProcedureName": null,
+        "sqlWriterTableType": null,
+        "sqlWriterUseTableLock": null,
+        "storedProcedureParameters": null,
+        "storedProcedureTableTypeParameterName": null,
+        "tableOption": null,
+        "type": "SqlSink",
+        "upsertSettings": null,
+        "writeBatchSize": null,
+        "writeBatchTimeout": null,
+        "writeBehavior": "insert"
+      },
+      "skipErrorFile": null,
+      "source": {
+        "additionalProperties": null,
+        "disableMetricsCollection": null,
+        "maxConcurrentConnections": null,
+        "recursive": null,
+        "skipHeaderLineCount": null,
+        "sourceRetryCount": null,
+        "sourceRetryWait": null,
+        "treatEmptyAsNull": null,
+        "type": "BlobSource"
+      },
+      "stagingSettings": null,
+      "state": null,
+      "translator": null,
+      "type": "Copy",
+      "userProperties": null,
+      "validateDataConsistency": null
+    },
+    {
+      "additionalProperties": null,
+      "dependsOn": [
+        {
+          "activity": "CopyBlobToSQL",
+          "additionalProperties": null,
+          "dependencyConditions": [
+            "Succeeded"
+          ]
+        }
+      ],
+      "description": null,
+      "linkedServiceName": {
+        "parameters": null,
+        "referenceName": "AzureSqlDatabaseLS",
+        "type": "LinkedServiceReference"
+      },
+      "name": "PrepareTrainingData",
+      "onInactiveMarkAs": null,
+      "policy": null,
+      "state": null,
+      "storedProcedureName": "sp_PrepareTrainingData",
+      "storedProcedureParameters": null,
+      "type": "SqlServerStoredProcedure",
+      "userProperties": null
+    },
+    {
+      "additionalProperties": null,
+      "continueOnStepFailure": null,
+      "dataPathAssignments": null,
+      "dependsOn": [
+        {
+          "activity": "PrepareTrainingData",
+          "additionalProperties": null,
+          "dependencyConditions": [
+            "Succeeded"
+          ]
+        }
+      ],
+      "description": null,
+      "experimentName": null,
+      "linkedServiceName": {
+        "parameters": null,
+        "referenceName": "AzureMLServiceLS",
+        "type": "LinkedServiceReference"
+      },
+      "mlParentRunId": null,
+      "mlPipelineEndpointId": null,
+      "mlPipelineId": "sales-retrain-pipeline-v1",
+      "mlPipelineParameters": null,
+      "name": "RunMLPipeline",
+      "onInactiveMarkAs": null,
+      "policy": null,
+      "state": null,
+      "type": "AzureMLExecutePipeline",
+      "userProperties": null,
+      "version": null
+    },
+    {
+      "additionalProperties": null,
+      "dependsOn": [
+        {
+          "activity": "RunMLPipeline",
+          "additionalProperties": null,
+          "dependencyConditions": [
+            "Succeeded"
+          ]
+        }
+      ],
+      "description": null,
+      "linkedServiceName": {
+        "parameters": null,
+        "referenceName": "AzureSqlDatabaseLS",
+        "type": "LinkedServiceReference"
+      },
+      "name": "UpdateForecasts",
+      "onInactiveMarkAs": null,
+      "policy": null,
+      "state": null,
+      "storedProcedureName": "sp_UpdateForecasts",
+      "storedProcedureParameters": null,
+      "type": "SqlServerStoredProcedure",
+      "userProperties": null
+    }
+  ],
+  "additionalProperties": null,
+  "annotations": null,
+  "concurrency": null,
+  "description": "Pipeline tng hp: Copy d liu Blob  SQL  ML Prediction  Update Forecasts",
+  "etag": "8a0131d9-0000-1800-0000-69d8f6850000",
+  "folder": null,
+  "id": "/subscriptions/34849ef9-3814-44df-ba32-a86ed9f2a69a/resourceGroups/rg-sales-analytics-dev/providers/Microsoft.DataFactory/factories/adf-sales-paivm/pipelines/SalesAnalyticsPipeline",
+  "name": "SalesAnalyticsPipeline",
+  "parameters": null,
+  "policy": null,
+  "resourceGroup": "rg-sales-analytics-dev",
+  "runDimensions": null,
+  "type": "Microsoft.DataFactory/factories/pipelines",
+  "variables": null
+}

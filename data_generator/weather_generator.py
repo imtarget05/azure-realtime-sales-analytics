@@ -82,11 +82,14 @@ class WeatherDataGenerator:
             "date": now.strftime("%Y-%m-%d"),
             "hour": now.hour,
             "region": region,
+            "store_id": region,
             "temperature_celsius": temperature,
+            "temperature": temperature,
             "humidity_percent": humidity,
             "wind_speed_kmh": wind_speed,
             "precipitation_mm": precipitation,
             "weather_condition": condition,
+            "weather": condition.lower(),
             "uv_index": random.randint(0, 11) if condition == "Sunny" else random.randint(0, 4),
         }
 

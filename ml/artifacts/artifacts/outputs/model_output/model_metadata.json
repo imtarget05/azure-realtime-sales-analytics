@@ -1,0 +1,48 @@
+{
+  "feature_columns": [
+    "hour",
+    "day_of_month",
+    "month",
+    "is_weekend",
+    "hour_sin",
+    "hour_cos",
+    "month_sin",
+    "month_cos",
+    "store_id_enc",
+    "product_id_enc",
+    "category_enc",
+    "temperature",
+    "is_rainy",
+    "holiday"
+  ],
+  "categorical_columns": [
+    "store_id",
+    "product_id",
+    "category"
+  ],
+  "revenue_metrics": {
+    "model_name": "revenue",
+    "mae": 8.1051,
+    "rmse": 10.1243,
+    "r2_score": 0.8694,
+    "cv_r2_mean": 0.8747,
+    "cv_r2_std": 0.0016
+  },
+  "quantity_metrics": {
+    "model_name": "quantity",
+    "mae": 7.8232,
+    "rmse": 10.0837,
+    "r2_score": 0.788,
+    "cv_r2_mean": 0.7904,
+    "cv_r2_std": 0.0036
+  },
+  "training_samples": 30000,
+  "data_source": "synthetic",
+  "trained_at": "2026-04-11T04:32:14.512502",
+  "model_version": "v2.0",
+  "sklearn_version": "1.7.2",
+  "revenue_r2": 0.8694,
+  "revenue_rmse": 10.1243,
+  "algorithm": "GradientBoostingRegressor",
+  "n_features": 14
+}

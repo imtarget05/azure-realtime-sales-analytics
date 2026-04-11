@@ -3,12 +3,19 @@
 -- ║  Khớp 100% với schema SQL Server hiện tại                       ║
 -- ║                                                                  ║
 -- ║  Bảng nguồn (SQL Server):                                       ║
--- ║    • SalesTransactions  — Giao dịch chi tiết (313K+ rows)       ║
+-- ║    • SalesTransactions  — Giao dịch chi tiết (89K rows)        ║
 -- ║    • SalesForecast      — Dự báo ML (5K rows)                   ║
 -- ║    • SalesAlerts         — Cảnh báo bất thường (4K rows)        ║
 -- ║    • ModelRegistry       — Model versions + metrics (5 rows)    ║
 -- ║    • StoreRegions        — Phân vùng miền Bắc/Trung/Nam        ║
+-- ║    • Products            — Dimension table (35 products)        ║
+-- ║    • SecurityMapping     — RLS role mappings (5 rows)           ║
+-- ║    • AccessAudit         — Access audit trail (180 rows)        ║
+-- ║    • LatencyBenchmark    — Load test results (5 rows)           ║
 -- ║    • vw_ForecastAccuracy — View forecast vs actual              ║
+-- ║    • vw_PerformanceMetrics — Hourly throughput/latency view     ║
+-- ║    • vw_DoDGrowthOverall — DoD growth view                      ║
+-- ║    • vw_ProductSales     — Pre-aggregated product sales view    ║
 -- ║                                                                  ║
 -- ║  Import thứ tự: Tạo measures → Tạo relationships → Assign      ║
 -- ╚══════════════════════════════════════════════════════════════════╝
@@ -17,10 +24,17 @@
 -- ====================================================================
 -- 0. RELATIONSHIPS (Tạo trong Power BI Model View)
 -- ====================================================================
--- SalesTransactions[store_id]  →  StoreRegions[store_id]    (Many:1, Single)
--- SalesTransactions[product_id] → SalesForecast[product_id] (Many:Many, Single)
--- SalesAlerts[store_id]        →  StoreRegions[store_id]    (Many:1, Single)
--- SalesForecast[store_id]      →  StoreRegions[store_id]    (Many:1, Single)
+-- SalesTransactions[store_id]   →  StoreRegions[store_id]    (Many:1, Single)
+-- SalesTransactions[product_id] →  Products[product_id]      (Many:1, Single)  ★ NEW
+-- SalesAlerts[store_id]         →  StoreRegions[store_id]    (Many:1, Single)
+-- SalesForecast[store_id]       →  StoreRegions[store_id]    (Many:1, Single)
+-- SalesForecast[product_id]     →  Products[product_id]      (Many:1, Single)  ★ NEW
+--
+-- Import thêm bảng/view mới:
+--   • Products              — Dimension table (35 products)
+--   • vw_ProductSales       — Pre-aggregated product sales
+--   • vw_DoDGrowth          — DoD growth by region
+--   • vw_DoDGrowthOverall   — DoD growth overall
 
 
 -- ====================================================================
@@ -68,14 +82,20 @@ Revenue Previous Day =
         )
 
 Revenue DoD Growth % =
-    VAR _latest = [Revenue Latest Day]
-    VAR _prev   = [Revenue Previous Day]
-    RETURN
-        IF (
-            ISBLANK ( _prev ) || _prev = 0,
-            BLANK (),
-            DIVIDE ( _latest - _prev, _prev )
+    IF (
+        HASONEVALUE ( StoreRegions[region] ),
+        -- Per-region DoD from vw_DoDGrowth
+        CALCULATE (
+            MAX ( vw_DoDGrowth[dod_growth_pct] ) / 100,
+            vw_DoDGrowth[date_rank] = 1,
+            TREATAS ( VALUES ( StoreRegions[region] ), vw_DoDGrowth[region] )
+        ),
+        -- Overall DoD
+        CALCULATE (
+            MAX ( vw_DoDGrowthOverall[dod_growth_pct] ) / 100,
+            vw_DoDGrowthOverall[date_rank] = 1
         )
+    )
 
 
 -- ====================================================================
@@ -94,8 +114,10 @@ Region Store Count =
 
 
 -- ====================================================================
--- 4. PRODUCT MEASURES (from SalesTransactions — GROUP BY product_id)
+-- 4. PRODUCT MEASURES (from Products dimension + SalesTransactions)
 -- ====================================================================
+-- ★ QUAN TRỌNG: Trong Product Table visual, dùng Products[product_name]
+--   hoặc Products[product_id] cho rows — KHÔNG dùng SalesForecast[product_id]
 
 Product Revenue =
     SUM ( SalesTransactions[revenue] )

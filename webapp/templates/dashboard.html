@@ -74,6 +74,12 @@
         .v-ok { color: var(--green); }
         .v-warn { color: var(--orange); }
 
+        .flow-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        .flow-step { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+        .flow-step .n { font-size: 0.75em; color: var(--text2); margin-bottom: 4px; }
+        .flow-step .t { font-size: 0.86em; font-weight: 600; margin-bottom: 4px; }
+        .flow-step .d { font-size: 0.78em; color: var(--text2); }
+
         .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 8px; font-size: 0.85em; font-weight: 500; border: none; cursor: pointer; transition: all .15s; text-decoration: none; }
         .btn-primary { background: var(--accent); color: #fff; }
         .btn-primary:hover { background: #3d7ae6; }
@@ -87,6 +93,7 @@
         @media (max-width: 768px) {
             .kpi-row { grid-template-columns: 1fr 1fr; }
             .sys-grid { grid-template-columns: 1fr; }
+            .flow-grid { grid-template-columns: 1fr; }
         }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
     </style>
@@ -139,7 +146,27 @@
             <div class="kpi">
                 <div class="label">Total Retrains</div>
                 <div class="val" style="color:var(--orange)">{{ history|length }}</div>
-                <div class="sub">{% if history %}Last: {{ history[-1].timestamp[:16] }}{% else %}No retrains{% endif %}</div>
+                <div class="sub">{% if history %}Last: {{ history[-1].timestamp_display }}{% else %}No retrains{% endif %}</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">MLOps Self-Learning Flow</div>
+            <div class="card">
+                <div style="margin-bottom:12px;color:var(--text2);font-size:0.85em;">
+                    Timezone hiển thị đã đồng bộ: <strong style="color:var(--text)">UTC+07:00 (Asia/Ho_Chi_Minh)</strong>.
+                    Cơ chế tự học hiện tại: <strong style="color:var(--text)">{{ mlops_status.mode }}</strong>.
+                </div>
+                <div class="flow-grid">
+                    <div class="flow-step"><div class="n">Step 1</div><div class="t">Ingest</div><div class="d">Client/EventHub đưa dữ liệu mới vào hệ thống.</div></div>
+                    <div class="flow-step"><div class="n">Step 2</div><div class="t">Detect Drift</div><div class="d">Drift monitor chạy {{ mlops_status.drift_monitor_schedule }} và tính MAE.</div></div>
+                    <div class="flow-step"><div class="n">Step 3</div><div class="t">Trigger Retrain</div><div class="d">Khi MAE vượt ngưỡng, pipeline retrain được kích hoạt.</div></div>
+                    <div class="flow-step"><div class="n">Step 4</div><div class="t">Evaluate</div><div class="d">So sánh model mới/cũ theo R², MAE, RMSE.</div></div>
+                    <div class="flow-step"><div class="n">Step 5</div><div class="t">Promote/Hold</div><div class="d">Ra quyết định {{ mlops_status.last_decision }} và cập nhật dashboard/report.</div></div>
+                </div>
+                <div style="margin-top:12px;font-size:0.82em;color:var(--text2);">
+                    Last drift check: {{ mlops_status.last_drift_check }} · Last model update: {{ mlops_status.last_model_update }} · Last trigger: {{ mlops_status.last_trigger }}
+                </div>
             </div>
         </div>
 
@@ -172,7 +199,7 @@
                 <div class="timeline">
                     {% for run in history[-5:]|reverse %}
                     <div class="tl-item {{ run.decision|lower if run.decision else 'promote' }}">
-                        <div class="time">{{ run.timestamp }}</div>
+                        <div class="time">{{ run.timestamp_display }}</div>
                         <div class="detail">
                             <span class="badge {{ 'badge-green' if run.decision == 'PROMOTE' else 'badge-red' }}">{{ run.decision }}</span>
                             {{ run.run_id }}
@@ -197,7 +224,7 @@
                     <tbody>
                         {% for evt in monitoring_events[:10] %}
                         <tr>
-                            <td style="white-space:nowrap">{{ evt.event_time[:19] }}</td>
+                            <td style="white-space:nowrap">{{ evt.event_time_display }}</td>
                             <td><span class="type-{{ evt.event_type }}">{{ evt.event_type }}</span></td>
                             <td>{{ "%.4f"|format(evt.mae_value) if evt.mae_value else '—' }}</td>
                             <td>{{ evt.threshold if evt.threshold else '—' }}</td>
@@ -224,7 +251,7 @@
                 <div class="sys-card">
                     <h4>🤖 Drift Monitor</h4>
                     <div class="sys-row"><span class="k">Schedule</span><span class="v">Every 1 hour</span></div>
-                    <div class="sys-row"><span class="k">Last Run</span><span class="v">{{ drift_report.timestamp if drift_report else 'Never' }}</span></div>
+                    <div class="sys-row"><span class="k">Last Run</span><span class="v">{{ drift_report.timestamp_display if drift_report else 'Never' }}</span></div>
                     <div class="sys-row"><span class="k">Status</span>
                         <span class="v {{ 'v-ok' if drift_report and drift_report.get('status') == 'ok' else 'v-warn' }}">
                             {{ drift_report.get('status', 'unknown')|upper if drift_report else 'NOT RUN' }}
@@ -241,11 +268,25 @@
                     <h4>🗄️ SQL Database</h4>
                     <div class="sys-row"><span class="k">DB</span><span class="v">SalesAnalyticsDB</span></div>
                     <div class="sys-row"><span class="k">Tier</span><span class="v">Basic</span></div>
+                    <div class="sys-row"><span class="k">Status</span>
+                        <span class="v {{ 'v-ok' if service_status and service_status.sql_ok else 'v-warn' }}">
+                            {{ service_status.sql if service_status else 'Unknown' }}
+                        </span>
+                    </div>
                 </div>
                 <div class="sys-card">
                     <h4>📡 Pipeline</h4>
-                    <div class="sys-row"><span class="k">Mode</span><span class="v">Local simulation</span></div>
-                    <div class="sys-row"><span class="k">Event Hub</span><span class="v v-warn">Stopped</span></div>
+                    <div class="sys-row"><span class="k">Mode</span><span class="v">{{ service_status.pipeline_mode if service_status else 'Unknown' }}</span></div>
+                    <div class="sys-row"><span class="k">Event Hub</span>
+                        <span class="v {{ 'v-ok' if service_status and service_status.eventhub_ok else 'v-warn' }}">
+                            {{ service_status.eventhub if service_status else 'Unknown' }}
+                        </span>
+                    </div>
+                    <div class="sys-row"><span class="k">Slack</span>
+                        <span class="v {{ 'v-ok' if service_status and service_status.slack_configured else 'v-warn' }}">
+                            {{ 'Configured' if service_status and service_status.slack_configured else 'Not configured' }}
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>

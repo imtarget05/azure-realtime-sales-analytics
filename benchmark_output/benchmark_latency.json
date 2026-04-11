@@ -1,0 +1,104 @@
+{
+  "timestamp": "2026-04-10T15:21:57.098904",
+  "client_location": "Local Machine",
+  "dns_resolution": {
+    "SQL Server": {
+      "host": "sql-sales-analytics-d9bt2m.database.windows.net",
+      "ip": "20.195.65.33",
+      "resolve_ms": 75.34
+    },
+    "Azure Portal": {
+      "host": "portal.azure.com",
+      "ip": "150.171.84.20",
+      "resolve_ms": 33.86
+    },
+    "Azure Management": {
+      "host": "management.azure.com",
+      "ip": "4.150.240.10",
+      "resolve_ms": 33.71
+    }
+  },
+  "tcp_latency_sql": {
+    "host": "sql-sales-analytics-d9bt2m.database.windows.net",
+    "min_ms": 24.89,
+    "max_ms": 53.23,
+    "avg_ms": 40.54,
+    "median_ms": 46.38,
+    "stdev_ms": 11.35,
+    "successful": 10,
+    "errors": 0
+  },
+  "sql_latency": {
+    "server": "sql-sales-analytics-d9bt2m.database.windows.net",
+    "connection_time_ms": 433.76,
+    "simple_query": {
+      "min_ms": 25.16,
+      "max_ms": 33.98,
+      "avg_ms": 27.67,
+      "median_ms": 26.26
+    },
+    "complex_query": {
+      "min_ms": 25.07,
+      "max_ms": 29.08,
+      "avg_ms": 26.82,
+      "median_ms": 26.84
+    }
+  },
+  "multi_region_latency": {
+    "East US": {
+      "host": "eastus.api.azureml.ms",
+      "min_ms": 235.14,
+      "max_ms": 464.97,
+      "avg_ms": 290.73,
+      "median_ms": 252.5,
+      "stdev_ms": 97.67,
+      "successful": 5,
+      "errors": 0
+    },
+    "West Europe": {
+      "host": "westeurope.api.azureml.ms",
+      "min_ms": 183.31,
+      "max_ms": 312.52,
+      "avg_ms": 216.13,
+      "median_ms": 197.91,
+      "stdev_ms": 54.42,
+      "successful": 5,
+      "errors": 0
+    },
+    "Southeast Asia": {
+      "host": "southeastasia.api.azureml.ms",
+      "min_ms": 30.33,
+      "max_ms": 165.29,
+      "avg_ms": 69.28,
+      "median_ms": 49.9,
+      "stdev_ms": 54.38,
+      "successful": 5,
+      "errors": 0
+    },
+    "Japan East": {
+      "host": "japaneast.api.azureml.ms",
+      "min_ms": 93.94,
+      "max_ms": 225.23,
+      "avg_ms": 130.49,
+      "median_ms": 111.33,
+      "stdev_ms": 53.57,
+      "successful": 5,
+      "errors": 0
+    },
+    "Australia East": {
+      "host": "australiaeast.api.azureml.ms",
+      "min_ms": 114.83,
+      "max_ms": 261.16,
+      "avg_ms": 149.56,
+      "median_ms": 116.52,
+      "stdev_ms": 63.2,
+      "successful": 5,
+      "errors": 0
+    }
+  },
+  "recommendation": {
+    "best_region": "Southeast Asia",
+    "avg_latency_ms": 69.28,
+    "note": "Region Southeast Asia có latency thấp nhất (69.28ms) từ vị trí hiện tại. Nên deploy resources ở region này."
+  }
+}

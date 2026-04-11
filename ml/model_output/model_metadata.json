@@ -21,27 +21,33 @@
     "category"
   ],
   "revenue_metrics": {
-    "mae": 7.9706,
-    "rmse": 9.8853,
-    "r2_score": 0.8794,
-    "cv_r2_mean": 0.8624,
-    "cv_r2_std": 0.0018
+    "mae": 8.1614,
+    "rmse": 10.1968,
+    "r2_score": 0.8675,
+    "cv_r2_mean": 0.8606,
+    "cv_r2_std": 0.0051
   },
   "quantity_metrics": {
-    "mae": 7.759,
-    "rmse": 10.0312,
-    "r2_score": 0.8003,
-    "cv_r2_mean": 0.7687,
-    "cv_r2_std": 0.0052
+    "mae": 7.8638,
+    "rmse": 10.1452,
+    "r2_score": 0.7854,
+    "cv_r2_mean": 0.7733,
+    "cv_r2_std": 0.0085
   },
-  "training_samples": 80000,
-  "trained_at": "2026-04-06T22:56:52.999469",
-  "model_version": "v27.0",
+  "training_samples": 30000,
+  "data_source": "Azure SQL",
+  "trained_at": "2026-04-11T04:22:23.519020",
+  "model_version": "v5.0",
+  "sklearn_version": "1.8.0",
+  "revenue_r2": 0.7559,
+  "revenue_rmse": 40.9916,
+  "algorithm": "GradientBoostingRegressor",
+  "n_features": 14,
   "retrain_history": [
     {
-      "timestamp": "2026-04-02T12:28:00.461928",
+      "timestamp": "2026-04-11T03:15:32.385150",
       "old_config": {
-        "n_samples": 50000,
+        "n_samples": 88746,
         "algorithm": "Ridge Regression",
         "alpha": 1.0
       },
@@ -55,386 +61,34 @@
       "decision": "PROMOTE"
     },
     {
-      "timestamp": "2026-04-02T14:01:57.587506",
+      "timestamp": "2026-04-11T03:57:21.091296",
       "old_config": {
         "n_samples": 80000,
         "algorithm": "Ridge Regression",
         "alpha": 1.0
       },
       "new_config": {
-        "n_samples": 80000,
+        "n_samples": 30000,
         "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
+        "n_estimators": 200,
+        "max_depth": 7,
+        "learning_rate": 0.08
       },
       "decision": "PROMOTE"
     },
     {
-      "timestamp": "2026-04-02T16:49:37.897459",
+      "timestamp": "2026-04-11T04:22:23.519020",
       "old_config": {
-        "n_samples": 80000,
+        "n_samples": 30000,
         "algorithm": "Ridge Regression",
         "alpha": 1.0
       },
       "new_config": {
-        "n_samples": 20000,
+        "n_samples": 30000,
         "algorithm": "GradientBoosting",
-        "n_estimators": 100,
-        "max_depth": 4,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-02T16:53:18.042969",
-      "old_config": {
-        "n_samples": 20000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-02T16:58:49.121620",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-02T17:00:06.763128",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-02T17:01:54.686344",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-02T17:31:08.716217",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 8000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 120,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-03T16:30:48.093387",
-      "old_config": {
-        "n_samples": 8000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-03T16:32:12.943211",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-03T16:34:14.905055",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-03T16:36:23.046823",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-03T16:38:32.822025",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-03T16:40:29.731783",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-03T16:51:50.454660",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-04T12:23:50.406490",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-04T12:26:23.002349",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-04T12:28:01.565047",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-04T12:29:44.687701",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-04T12:31:57.563035",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-04T05:59:42.989305",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-04T06:01:58.969319",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-04T06:04:46.603179",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-06T21:56:24.966287",
-      "old_config": {
-        "n_samples": 80000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 50000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 250,
-        "max_depth": 6,
-        "learning_rate": 0.1
-      },
-      "decision": "PROMOTE"
-    },
-    {
-      "timestamp": "2026-04-06T22:56:52.999469",
-      "old_config": {
-        "n_samples": 50000,
-        "algorithm": "Ridge Regression",
-        "alpha": 1.0
-      },
-      "new_config": {
-        "n_samples": 80000,
-        "algorithm": "GradientBoosting",
-        "n_estimators": 300,
-        "max_depth": 6,
-        "learning_rate": 0.1
+        "n_estimators": 200,
+        "max_depth": 7,
+        "learning_rate": 0.08
       },
       "decision": "PROMOTE"
     }

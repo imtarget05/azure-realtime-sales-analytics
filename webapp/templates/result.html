@@ -110,7 +110,13 @@
             {% endif %}
 
             <div class="source-center">
-                <span class="source-badge source-azure">Azure ML Prediction</span>
+                {% if 'Azure ML' in result.get('source', '') %}
+                <span class="source-badge source-azure">{{ result.source }}</span>
+                {% elif 'Mock' in result.get('source', '') %}
+                <span class="source-badge source-mock">{{ result.source }}</span>
+                {% else %}
+                <span class="source-badge source-azure">{{ result.get('source', 'ML Prediction') }}</span>
+                {% endif %}
             </div>
         </div>
 

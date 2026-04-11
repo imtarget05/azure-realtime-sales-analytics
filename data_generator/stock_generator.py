@@ -86,6 +86,7 @@ class StockDataGenerator:
             "sector": stock["sector"],
             "open_price": old_price,
             "close_price": new_price,
+            "price": new_price,
             "high_price": high,
             "low_price": low,
             "price_change": price_change,

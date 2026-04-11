@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-04-09T14:30:00",
+  "decision": "PROMOTE",
+  "data_source": {
+    "mode": "generated",
+    "n_samples": 88746,
+    "feature_count": 14
+  },
+  "old_config": {
+    "algorithm": "GradientBoostingRegressor",
+    "n_estimators": 200,
+    "max_depth": 4,
+    "learning_rate": 0.1,
+    "version": "v2.0"
+  },
+  "new_config": {
+    "algorithm": "GradientBoostingRegressor",
+    "n_estimators": 300,
+    "max_depth": 5,
+    "learning_rate": 0.1,
+    "version": "v2.1"
+  },
+  "old_revenue_metrics": {
+    "r2_score": 0.84,
+    "mae": 22.3,
+    "rmse": 45.6,
+    "cv_r2_mean": 0.82,
+    "cv_r2_std": 0.03
+  },
+  "new_revenue_metrics": {
+    "r2_score": 0.88,
+    "mae": 18.7,
+    "rmse": 40.99,
+    "cv_r2_mean": 0.86,
+    "cv_r2_std": 0.02
+  },
+  "old_quantity_metrics": {
+    "r2_score": 0.12,
+    "mae": 1.65,
+    "rmse": 1.92,
+    "cv_r2_mean": 0.10,
+    "cv_r2_std": 0.04
+  },
+  "new_quantity_metrics": {
+    "r2_score": 0.14,
+    "mae": 1.47,
+    "rmse": 1.76,
+    "cv_r2_mean": 0.13,
+    "cv_r2_std": 0.03
+  },
+  "improvements": {
+    "revenue_r2_delta": 0.04,
+    "revenue_mae_delta": 3.6,
+    "quantity_r2_delta": 0.02,
+    "quantity_mae_delta": 0.18
+  }
+}

@@ -1,0 +1,32 @@
+/bin/bash: /azureml-envs/azureml_f844de22a0243a87f3c95a8a5bbb8e74/lib/libtinfo.so.6: no version information available (required by /bin/bash)
+[INFO] Azure ML Experiment: sales-forecast-training
+[WARN] Failed to load SQL training data: ('01000', "[01000] [unixODBC][Driver Manager]Can't open lib 'ODBC Driver 18 for SQL Server' : file not found (0) (SQLDriverConnect)")
+[INFO] Generating synthetic data (30000 samples)...
+[INFO] Shape: (30000, 12)
+
+[INFO] Training model: revenue
+  MAE:  8.1051  |  RMSE: 10.1243  |  R2: 0.8694  |  CV R2: 0.8747
+    hour: 0.6542
+    hour_cos: 0.1433
+    is_weekend: 0.0597
+    is_rainy: 0.0373
+    holiday: 0.0298
+
+[INFO] Training model: quantity
+  MAE:  7.8232  |  RMSE: 10.0837  |  R2: 0.7880  |  CV R2: 0.7904
+    hour: 0.5678
+    hour_cos: 0.1826
+    is_weekend: 0.0546
+    category_enc: 0.0525
+    is_rainy: 0.0344
+[INFO] Generating charts for revenue -> ./outputs/model_output/charts
+  ✓ Charts saved to ./outputs/model_output/charts
+[INFO] Generating charts for quantity -> ./outputs/model_output/charts
+  ✓ Charts saved to ./outputs/model_output/charts
+  ✓ Summary chart saved
+
+[INFO] Models saved to: ./outputs/model_output
+
+[INFO] Registering model in AML Model Registry...
+[INFO] Model registered: sales-forecast-model v7
+[INFO] Model ID: sales-forecast-model:7

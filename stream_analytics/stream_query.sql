@@ -30,38 +30,38 @@ WITH Cleaned AS (
 
 Enriched AS (
     SELECT
-        event_time,
-        store_id,
-        product_id,
-        CAST(quantity AS bigint) AS units_sold,
-        CAST(price AS float) AS unit_price,
-        CAST(quantity * price AS float) AS revenue,
-        CAST(temperature AS float) AS temperature,
+        c.event_time,
+        c.store_id,
+        c.product_id,
+        CAST(c.quantity AS bigint) AS units_sold,
+        CAST(c.price AS float) AS unit_price,
+        CAST(c.quantity * c.price AS float) AS revenue,
+        CAST(c.temperature AS float) AS temperature,
         CASE
-            WHEN weather IS NULL OR LTRIM(RTRIM(weather)) = '' THEN 'unknown'
-            ELSE LOWER(weather)
+            WHEN c.weather IS NULL OR LTRIM(RTRIM(c.weather)) = '' THEN 'unknown'
+            ELSE LOWER(c.weather)
         END AS weather,
         CASE
-            WHEN holiday IS NULL THEN 0
-            ELSE CAST(holiday AS bigint)
+            WHEN c.holiday IS NULL THEN 0
+            ELSE CAST(c.holiday AS bigint)
         END AS holiday,
-        enqueued_time,
+        c.enqueued_time,
         CASE
-            WHEN product_id IN ('COKE', 'PEPSI', 'P016', 'P017') THEN 'Beverage'
-            WHEN product_id IN ('MILK', 'P019', 'P020') THEN 'Dairy'
-            WHEN product_id IN ('BREAD', 'P018') THEN 'Bakery'
-            WHEN product_id IN ('P001', 'P002', 'P003', 'P004', 'P005', 'P014', 'P015') THEN 'Electronics'
-            WHEN product_id IN ('P006', 'P007', 'P008') THEN 'Clothing'
-            WHEN product_id IN ('P009', 'P010', 'P011') THEN 'Home'
-            WHEN product_id IN ('P012', 'P013') THEN 'Accessories'
-            WHEN product_id IN ('P021', 'P022', 'P023') THEN 'Snacks'
-            WHEN product_id IN ('P024', 'P025', 'P026') THEN 'Health & Beauty'
-            WHEN product_id IN ('P027', 'P028') THEN 'Sports'
-            WHEN product_id IN ('P029', 'P030') THEN 'Stationery'
-            WHEN product_id = 'P031' THEN 'Toys'
+            WHEN c.product_id IN ('COKE', 'PEPSI', 'P016', 'P017') THEN 'Beverage'
+            WHEN c.product_id IN ('MILK', 'P019', 'P020') THEN 'Dairy'
+            WHEN c.product_id IN ('BREAD', 'P018') THEN 'Bakery'
+            WHEN c.product_id IN ('P001', 'P002', 'P003', 'P004', 'P005', 'P014', 'P015') THEN 'Electronics'
+            WHEN c.product_id IN ('P006', 'P007', 'P008') THEN 'Clothing'
+            WHEN c.product_id IN ('P009', 'P010', 'P011') THEN 'Home'
+            WHEN c.product_id IN ('P012', 'P013') THEN 'Accessories'
+            WHEN c.product_id IN ('P021', 'P022', 'P023') THEN 'Snacks'
+            WHEN c.product_id IN ('P024', 'P025', 'P026') THEN 'Health & Beauty'
+            WHEN c.product_id IN ('P027', 'P028') THEN 'Sports'
+            WHEN c.product_id IN ('P029', 'P030') THEN 'Stationery'
+            WHEN c.product_id = 'P031' THEN 'Toys'
             ELSE 'Other'
         END AS category
-    FROM Cleaned
+    FROM Cleaned c
 ),
 
 Agg5m AS (
@@ -94,7 +94,7 @@ AnomalySignals AS (
             95,
             120,
             'spikesanddips'
-        ) OVER (PARTITION BY store_id LIMIT DURATION(minute, 30)) AS anomaly_score
+        ) OVER (PARTITION BY store_id LIMIT DURATION(minute, 30)) AS anomaly_record
     FROM Enriched
 ),
 
@@ -102,13 +102,10 @@ Alerts AS (
     SELECT
         event_time AS alert_time,
         store_id,
-        CASE
-            WHEN anomaly_score > 0 THEN 'spike'
-            ELSE 'dip'
-        END AS type,
+        'spike_or_dip' AS type,
         CAST(revenue AS float) AS value
     FROM AnomalySignals
-    WHERE anomaly_score <> 0
+    WHERE CAST(GetRecordPropertyValue(anomaly_record, 'IsAnomaly') AS bigint) = 1
 )
 
 -- 1) Raw transactions → Azure SQL dbo.SalesTransactions

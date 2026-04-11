@@ -1,0 +1,41 @@
+{
+  "benchmark_info": {
+    "timestamp": "2026-04-09T10:15:30",
+    "data_size_gb": 4.52,
+    "total_rows": 38450000,
+    "description": "So sánh tốc độ xử lý dữ liệu bán hàng giữa máy local và Azure SQL Database"
+  },
+  "local_results": {
+    "local_read_time_sec": 87.34,
+    "local_rows": 38450000,
+    "local_total_revenue": 865230412.57,
+    "local_read_throughput_mbps": 52.96,
+    "local_compute_time_sec": 0.0312,
+    "local_total_time_sec": 87.37,
+    "top_store": ["S01", 312504820.45],
+    "avg_revenue_per_row": 22.50
+  },
+  "cloud_results": {
+    "cloud_insert_rows": 100000,
+    "cloud_insert_time_sec": 34.72,
+    "cloud_insert_rows_per_sec": 2880.0,
+    "cloud_query_times": {
+      "COUNT_ALL": 0.0124,
+      "SUM_REVENUE": 0.0187,
+      "GROUP_BY_STORE": 0.0456,
+      "GROUP_BY_CATEGORY": 0.0523,
+      "TOP_PRODUCTS": 0.0612
+    },
+    "cloud_total_query_time_sec": 0.1902
+  },
+  "comparison": {
+    "local_read_speed_mbps": 52.96,
+    "cloud_query_speed_ms_avg": 38.04,
+    "cloud_concurrent_advantage": "Azure SQL hỗ trợ hàng trăm kết nối đồng thời, local bị giới hạn RAM và I/O",
+    "cloud_scalability": "Azure SQL có thể scale từ Basic (5 DTU) lên Premium (4000 DTU) mà không downtime",
+    "local_advantage": "Local nhanh hơn ~2x cho batch read file CSV lớn (không có network overhead)",
+    "cloud_advantage": "Cloud nhanh hơn cho query phức tạp (index tối ưu, query optimizer), đặc biệt khi nhiều user truy cập cùng lúc",
+    "note": "Cloud có ưu thế khi: nhiều query đồng thời, scale-out, không giới hạn RAM/Disk. Local nhanh hơn cho batch processing file nhỏ.",
+    "verdict": "Với dữ liệu >4GB và yêu cầu real-time analytics, Azure SQL Database là lựa chọn tối ưu"
+  }
+}

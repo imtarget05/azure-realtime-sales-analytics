@@ -1,0 +1,86 @@
+{
+  "timestamp": "2026-04-09T11:22:15",
+  "insert_benchmarks": [
+    {
+      "method": "Single INSERT (1 row at a time)",
+      "rows": 1000,
+      "time_sec": 12.45,
+      "rows_per_sec": 80.3
+    },
+    {
+      "method": "Batch INSERT (1000 rows/batch)",
+      "rows": 1000,
+      "time_sec": 0.87,
+      "rows_per_sec": 1149.4
+    },
+    {
+      "method": "Single INSERT (1 row at a time)",
+      "rows": 1000,
+      "time_sec": 12.31,
+      "rows_per_sec": 81.2
+    },
+    {
+      "method": "Batch INSERT (1000 rows/batch)",
+      "rows": 5000,
+      "time_sec": 3.92,
+      "rows_per_sec": 1275.5
+    },
+    {
+      "method": "Single INSERT (1 row at a time)",
+      "rows": 1000,
+      "time_sec": 12.67,
+      "rows_per_sec": 78.9
+    },
+    {
+      "method": "Batch INSERT (1000 rows/batch)",
+      "rows": 10000,
+      "time_sec": 7.54,
+      "rows_per_sec": 1326.3
+    }
+  ],
+  "query_benchmarks": [
+    {
+      "query": "COUNT(*)",
+      "time_sec": 0.0089,
+      "result_rows": 1
+    },
+    {
+      "query": "SUM(revenue) toàn bộ",
+      "time_sec": 0.0156,
+      "result_rows": 1
+    },
+    {
+      "query": "GROUP BY store_id",
+      "time_sec": 0.0342,
+      "result_rows": 3
+    },
+    {
+      "query": "GROUP BY category",
+      "time_sec": 0.0487,
+      "result_rows": 12
+    },
+    {
+      "query": "JOIN Products + SUM",
+      "time_sec": 0.0623,
+      "result_rows": 35
+    },
+    {
+      "query": "Window function ranking",
+      "time_sec": 0.0891,
+      "result_rows": 35
+    },
+    {
+      "query": "Multi-condition filter",
+      "time_sec": 0.0234,
+      "result_rows": 8
+    }
+  ],
+  "summary": {
+    "single_insert_avg_rows_per_sec": 80.1,
+    "batch_insert_avg_rows_per_sec": 1250.4,
+    "batch_vs_single_speedup": "15.6x",
+    "fastest_query": "COUNT(*) at 8.9ms",
+    "slowest_query": "Window function at 89.1ms",
+    "conclusion": "Batch INSERT nhanh hơn Single INSERT 15.6 lần. Các query aggregation chạy dưới 100ms nhờ index tối ưu trên Azure SQL Database Standard S2 tier."
+  }
+}

@@ -75,6 +75,12 @@
         .drift-row .info strong { color: var(--text); }
         .drift-row .info span { color: var(--text2); }
 
+        .flow-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        .flow-step { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+        .flow-step .n { font-size: 0.75em; color: var(--text2); margin-bottom: 4px; }
+        .flow-step .t { font-size: 0.86em; font-weight: 600; margin-bottom: 4px; }
+        .flow-step .d { font-size: 0.78em; color: var(--text2); }
+
         /* Timeline */
         .timeline { padding-left: 20px; position: relative; }
         .timeline::before { content:''; position: absolute; left: 6px; top: 4px; bottom: 4px; width: 2px; background: var(--border); }
@@ -100,6 +106,7 @@
         @media (max-width: 768px) {
             .kpi-row { grid-template-columns: 1fr 1fr; }
             .charts-grid { grid-template-columns: 1fr; }
+            .flow-grid { grid-template-columns: 1fr; }
         }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
     </style>
@@ -135,7 +142,27 @@
             <div class="icon">{{ '🚀' if report.decision == 'PROMOTE' else '🛑' }}</div>
             <div class="info">
                 <h3>{% if report.decision == 'PROMOTE' %}Model mới đã được PROMOTE{% else %}Model mới bị REJECT{% endif %}</h3>
-                <p>{{ report.timestamp }} · Algorithm: {{ report.new_config.get('algorithm', 'GBR') }} · Samples: {{ "{:,}".format(report.data_source.n_samples if report.data_source else 0) }} · Total retrains: {{ history_count }}</p>
+                <p>{{ report.timestamp_display or report.timestamp }} · Algorithm: {{ report.new_config.get('algorithm', 'GBR') }} · Samples: {{ "{:,}".format(report.data_source.n_samples if report.data_source else 0) }} · Total retrains: {{ history_count }}</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">MLOps Self-Learning Flow</div>
+            <div class="card">
+                <div style="margin-bottom:12px;color:var(--text2);font-size:0.85em;">
+                    Timezone hiển thị đã đồng bộ: <strong style="color:var(--text)">UTC+07:00 (Asia/Ho_Chi_Minh)</strong>.
+                    Cơ chế tự học hiện tại: <strong style="color:var(--text)">{{ mlops_status.mode }}</strong>.
+                </div>
+                <div class="flow-grid">
+                    <div class="flow-step"><div class="n">Step 1</div><div class="t">Ingest</div><div class="d">Dữ liệu mới đi vào Event Hub/SQL từ web và stream.</div></div>
+                    <div class="flow-step"><div class="n">Step 2</div><div class="t">Detect Drift</div><div class="d">Drift monitor chạy {{ mlops_status.drift_monitor_schedule }} và kiểm tra MAE.</div></div>
+                    <div class="flow-step"><div class="n">Step 3</div><div class="t">Trigger Retrain</div><div class="d">Khi drift vượt ngưỡng, pipeline retrain tự chạy.</div></div>
+                    <div class="flow-step"><div class="n">Step 4</div><div class="t">Evaluate</div><div class="d">So sánh model mới/cũ trên các metric chính.</div></div>
+                    <div class="flow-step"><div class="n">Step 5</div><div class="t">Promote/Hold</div><div class="d">Quyết định cuối: {{ mlops_status.last_decision }} (trigger: {{ mlops_status.last_trigger }}).</div></div>
+                </div>
+                <div style="margin-top:12px;font-size:0.82em;color:var(--text2);">
+                    Last drift check: {{ mlops_status.last_drift_check }} · Last model update: {{ mlops_status.last_model_update }} · Total retrains: {{ mlops_status.retrain_count }}
+                </div>
             </div>
         </div>
 
@@ -231,7 +258,7 @@
                 <div class="icon">{{ '🚨' if drift_report.triggered else '🛡️' }}</div>
                 <div class="info">
                     <strong>{% if drift_report.triggered %}DRIFT DETECTED{% else %}No Drift{% endif %}</strong>
-                    <span>{% if drift_report.metrics %} · MAE: {{ drift_report.metrics.mae }} · Threshold: {{ drift_report.threshold_mae }} · MAPE: {{ drift_report.metrics.mape }}% · Samples: {{ drift_report.metrics.n_samples }}{% else %} · {{ drift_report.error|default('No data') }}{% endif %}</span>
+                    <span>{% if drift_report.metrics %} · MAE: {{ drift_report.metrics.mae }} · Threshold: {{ drift_report.threshold_mae }} · MAPE: {{ drift_report.metrics.mape }}% · Samples: {{ drift_report.metrics.n_samples }} · Last check: {{ drift_report.timestamp_display or drift_report.timestamp }}{% else %} · {{ drift_report.error|default('No data') }}{% endif %}</span>
                 </div>
             </div>
             <div class="card">
@@ -271,7 +298,7 @@
                 <div class="timeline">
                     {% for run in history|reverse %}
                     <div class="tl-item {{ run.decision|lower if run.decision else 'promote' }}">
-                        <div class="time">{{ run.timestamp }}</div>
+                        <div class="time">{{ run.timestamp_display or run.timestamp }}</div>
                         <div class="detail">
                             <span class="badge {{ 'badge-green' if run.decision == 'PROMOTE' else 'badge-red' }}">{{ run.decision }}</span>
                             {{ run.run_id }}

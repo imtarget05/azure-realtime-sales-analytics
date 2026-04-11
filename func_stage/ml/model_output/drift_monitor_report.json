@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-04-10T11:37:17Z",
+  "window_hours": 720,
+  "threshold_mae": 25.0,
+  "min_samples": 24,
+  "cooldown_minutes": 120,
+  "trigger_mode": "local",
+  "trigger_github_actions": false,
+  "metrics": {
+    "n_samples": 4998,
+    "mae": 2310.8482,
+    "mape": 402.6057,
+    "mean_actual": 621.465
+  },
+  "triggered": true,
+  "trigger_result": {
+    "success": true,
+    "dry_run": true,
+    "message": "Would trigger retrain",
+    "alerts": {
+      "slack": {
+        "success": true,
+        "status_code": 200
+      }
+    }
+  },
+  "status": "ok"
+}

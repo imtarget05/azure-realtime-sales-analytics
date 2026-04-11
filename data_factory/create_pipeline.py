@@ -42,7 +42,7 @@ try:
         AzureMLExecutePipelineActivity,
         ActivityDependency,
         DependencyCondition,
-        ScheduleTriggerResource,
+        TriggerResource,
         ScheduleTrigger,
         ScheduleTriggerRecurrence,
         TriggerPipelineReference,
@@ -135,6 +135,7 @@ def create_datasets(client: DataFactoryManagementClient):
     blob_dataset = DatasetResource(
         properties=AzureBlobDataset(
             linked_service_name=LinkedServiceReference(
+                type="LinkedServiceReference",
                 reference_name="AzureBlobStorageLS"
             ),
             folder_path="data-factory-staging",
@@ -153,6 +154,7 @@ def create_datasets(client: DataFactoryManagementClient):
     sql_dataset = DatasetResource(
         properties=AzureSqlTableDataset(
             linked_service_name=LinkedServiceReference(
+                type="LinkedServiceReference",
                 reference_name="AzureSqlDatabaseLS"
             ),
             table_name="dbo.SalesTransactions",
@@ -168,6 +170,7 @@ def create_datasets(client: DataFactoryManagementClient):
     forecast_dataset = DatasetResource(
         properties=AzureSqlTableDataset(
             linked_service_name=LinkedServiceReference(
+                type="LinkedServiceReference",
                 reference_name="AzureSqlDatabaseLS"
             ),
             table_name="dbo.SalesForecast",
@@ -180,10 +183,11 @@ def create_datasets(client: DataFactoryManagementClient):
     print("  [OK] Dataset: SqlForecastDataset")
 
 
-def create_pipeline_copy_to_sql(client: DataFactoryManagementClient):
-    """Bước 4: Tạo Pipeline - Copy dữ liệu từ Blob staging vào SQL."""
-    print("[4/6] Tạo Pipeline: CopyStagingToSQL...")
+def create_sales_analytics_pipeline(client: DataFactoryManagementClient):
+    """Bước 4: Tạo Pipeline SalesAnalyticsPipeline với 4 activities."""
+    print("[4/5] Tạo Pipeline: SalesAnalyticsPipeline...")
 
+    # Activity 1: Copy dữ liệu từ Blob staging vào SQL
     copy_activity = CopyActivity(
         name="CopyBlobToSQL",
         source=BlobSource(),
@@ -198,38 +202,30 @@ def create_pipeline_copy_to_sql(client: DataFactoryManagementClient):
         }],
     )
 
-    pipeline = PipelineResource(
-        activities=[copy_activity],
-        description="Copy dữ liệu staging từ Blob Storage vào Azure SQL Database",
-    )
-
-    client.pipelines.create_or_update(
-        AZURE_RESOURCE_GROUP, DATA_FACTORY_NAME,
-        "CopyStagingToSQL", pipeline
-    )
-    print("  [OK] Pipeline: CopyStagingToSQL")
-
-
-def create_pipeline_ml_orchestration(client: DataFactoryManagementClient):
-    """Bước 5: Tạo Pipeline - Orchestrate ML training và forecasting."""
-    print("[5/6] Tạo Pipeline: MLOrchestration...")
-
-    # Activity 1: Chạy stored procedure để chuẩn bị training data
+    # Activity 2: Chuẩn bị training data (depends on CopyBlobToSQL)
     prepare_data = SqlServerStoredProcedureActivity(
         name="PrepareTrainingData",
         linked_service_name=LinkedServiceReference(
+            type="LinkedServiceReference",
             reference_name="AzureSqlDatabaseLS"
         ),
         stored_procedure_name="sp_PrepareTrainingData",
+        depends_on=[
+            ActivityDependency(
+                activity="CopyBlobToSQL",
+                dependency_conditions=[DependencyCondition.SUCCEEDED],
+            )
+        ],
     )
 
-    # Activity 2: Trigger ML Pipeline (huấn luyện model)
+    # Activity 3: Trigger ML Pipeline (depends on PrepareTrainingData)
     run_ml = AzureMLExecutePipelineActivity(
-        name="RunMLTraining",
+        name="RunMLPipeline",
         linked_service_name=LinkedServiceReference(
+            type="LinkedServiceReference",
             reference_name="AzureMLServiceLS"
         ),
-        ml_pipeline_id="<ml-pipeline-id>",  # Cần cập nhật sau khi tạo ML pipeline
+        ml_pipeline_id=os.getenv("AML_PIPELINE_ID", "sales-retrain-pipeline-v1"),
         depends_on=[
             ActivityDependency(
                 activity="PrepareTrainingData",
@@ -238,45 +234,47 @@ def create_pipeline_ml_orchestration(client: DataFactoryManagementClient):
         ],
     )
 
-    # Activity 3: Chạy stored procedure cập nhật forecasts
+    # Activity 4: Cập nhật forecasts (depends on RunMLPipeline)
     update_forecasts = SqlServerStoredProcedureActivity(
         name="UpdateForecasts",
         linked_service_name=LinkedServiceReference(
+            type="LinkedServiceReference",
             reference_name="AzureSqlDatabaseLS"
         ),
         stored_procedure_name="sp_UpdateForecasts",
         depends_on=[
             ActivityDependency(
-                activity="RunMLTraining",
+                activity="RunMLPipeline",
                 dependency_conditions=[DependencyCondition.SUCCEEDED],
             )
         ],
     )
 
     pipeline = PipelineResource(
-        activities=[prepare_data, run_ml, update_forecasts],
-        description="Pipeline điều phối: chuẩn bị dữ liệu → huấn luyện ML → cập nhật dự đoán",
+        activities=[copy_activity, prepare_data, run_ml, update_forecasts],
+        description="Pipeline tổng hợp: Copy dữ liệu Blob → SQL → ML Prediction → Update Forecasts",
     )
 
     client.pipelines.create_or_update(
         AZURE_RESOURCE_GROUP, DATA_FACTORY_NAME,
-        "MLOrchestration", pipeline
+        "SalesAnalyticsPipeline", pipeline
     )
-    print("  [OK] Pipeline: MLOrchestration")
+    print("  [OK] Pipeline: SalesAnalyticsPipeline (4 activities)")
 
 
 def create_scheduled_trigger(client: DataFactoryManagementClient):
-    """Bước 6: Tạo Trigger chạy pipeline theo lịch."""
-    print("[6/6] Tạo Scheduled Trigger...")
+    """Bước 5: Tạo Trigger chạy pipeline theo lịch."""
+    print("[5/5] Tạo Scheduled Trigger...")
 
-    # Trigger chạy ML pipeline mỗi ngày lúc 2:00 AM UTC
-    trigger = ScheduleTriggerResource(
+    # Trigger chạy SalesAnalyticsPipeline mỗi ngày lúc 2:00 AM UTC
+    trigger = TriggerResource(
         properties=ScheduleTrigger(
-            description="Trigger chạy ML orchestration hàng ngày",
+            description="Trigger chạy SalesAnalyticsPipeline hàng ngày",
             pipelines=[
                 TriggerPipelineReference(
                     pipeline_reference=PipelineReference(
-                        reference_name="MLOrchestration"
+                        type="PipelineReference",
+                        reference_name="SalesAnalyticsPipeline"
                     )
                 )
             ],
@@ -312,17 +310,19 @@ def main():
     create_data_factory(client)
     create_linked_services(client)
     create_datasets(client)
-    create_pipeline_copy_to_sql(client)
-    create_pipeline_ml_orchestration(client)
+    create_sales_analytics_pipeline(client)
     create_scheduled_trigger(client)
 
     print("\n" + "=" * 60)
     print("  DATA FACTORY TRIỂN KHAI HOÀN TẤT!")
-    print("  Pipelines:")
-    print("    - CopyStagingToSQL: Blob → SQL Database")
-    print("    - MLOrchestration: Prepare Data → Train ML → Update Forecasts")
+    print("  Pipeline:")
+    print("    - SalesAnalyticsPipeline (4 activities):")
+    print("      1. CopyBlobToSQL: Blob → SQL Database")
+    print("      2. PrepareTrainingData: sp_PrepareTrainingData")
+    print("      3. RunMLPipeline: Azure ML Pipeline")
+    print("      4. UpdateForecasts: sp_UpdateForecasts")
     print("  Trigger:")
-    print("    - DailyMLTrigger: Chạy MLOrchestration mỗi ngày 02:00 UTC")
+    print("    - DailyMLTrigger: Chạy SalesAnalyticsPipeline mỗi ngày 02:00 UTC")
     print("=" * 60)
 
 
