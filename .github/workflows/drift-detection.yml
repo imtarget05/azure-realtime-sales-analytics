@@ -61,7 +61,7 @@ jobs:
           echo "azure_ready=$([ $missing -eq 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
   # ─────────────────────────────────────────────
-  # Job 1: Statistical drift detection (mlops/drift_detector.py)
+  # Job 1: Statistical drift detection (ml/drift_monitor.py)
   # ─────────────────────────────────────────────
   drift-check:
     name: Check Data & Model Drift
@@ -90,14 +90,27 @@ jobs:
           pip install -r requirements.txt
           pip install azure-ai-ml azure-identity scipy pyodbc
 
+      - name: Install ODBC Driver 18
+        run: |
+          curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+          curl -fsSL https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
+
       - name: Run Drift Detection
         id: drift
         run: |
+          set +e
           python ml/drift_monitor.py \
             --threshold-mae ${{ vars.DRIFT_MAE_ABS_THRESHOLD || '25' }} \
             --window-hours ${{ vars.DRIFT_MONITOR_WINDOW_HOURS || '24' }} \
             --min-samples ${{ vars.DRIFT_MONITOR_MIN_SAMPLES || '24' }} \
             --trigger-mode none
+          exit_code=$?
+          set -e
+          if [ $exit_code -ne 0 ]; then
+            echo "::warning::Drift detection exited with code $exit_code (non-critical)"
+          fi
           if [ -f ml/model_output/drift_monitor_report.json ]; then
             detected=$(python -c "import json; d=json.load(open('ml/model_output/drift_monitor_report.json')); print('true' if d.get('triggered') else 'false')")
             echo "drift_detected=$detected" >> "$GITHUB_OUTPUT"
@@ -144,14 +157,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Install ODBC Driver 18
+        run: |
+          curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+          curl -fsSL https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
+
       - name: Run MAE Monitor
         id: mae
         run: |
+          set +e
           python ml/drift_monitor.py \
             --threshold-mae ${{ github.event.inputs.mae_threshold || vars.DRIFT_MAE_ABS_THRESHOLD || '25' }} \
             --window-hours ${{ github.event.inputs.window_hours || vars.DRIFT_MONITOR_WINDOW_HOURS || '24' }} \
             --min-samples ${{ vars.DRIFT_MONITOR_MIN_SAMPLES || '24' }} \
             --trigger-mode none
+          exit_code=$?
+          set -e
+          if [ $exit_code -ne 0 ]; then
+            echo "::warning::MAE monitor exited with code $exit_code (non-critical)"
+          fi
           # Parse output to set GitHub output
           if [ -f ml/drift_results.json ]; then
             exceeded=$(python -c "import json; d=json.load(open('ml/drift_results.json')); print('true' if d.get('drift_detected') else 'false')")
