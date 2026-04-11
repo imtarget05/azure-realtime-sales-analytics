@@ -67,11 +67,11 @@ def submit_training_job(
     # SQL credentials passed as environment variables so train_model.py can load real data
     from config.settings import SQL_SERVER, SQL_DATABASE, SQL_USERNAME, SQL_PASSWORD
     sql_env_vars = {
-        "SQL_SERVER":   SQL_SERVER   or "",
+        "SQL_SERVER": SQL_SERVER or "",
         "SQL_DATABASE": SQL_DATABASE or "SalesAnalyticsDB",
         "SQL_USERNAME": SQL_USERNAME or "",
         "SQL_PASSWORD": SQL_PASSWORD or "",
-        "SQL_DRIVER":   "{ODBC Driver 18 for SQL Server}",
+        "SQL_DRIVER": "{ODBC Driver 18 for SQL Server}",
         "KEY_VAULT_URI": "DISABLED",
     }
 

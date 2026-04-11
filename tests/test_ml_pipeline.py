@@ -65,7 +65,7 @@ def test_event_validation_failure_invalid_type():
         "timestamp": "2026-04-03T12:00:00Z",
         "store_id": "S01",
         "product_id": "COKE",
-        "quantity": "five", # Should be int
+        "quantity": "five",  # Should be int
         "price": 1.5
     }
     assert validate_event_mock(invalid_event) is False

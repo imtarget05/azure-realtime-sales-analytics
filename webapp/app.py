@@ -531,11 +531,12 @@ def api_predict():
         data = request.get_json(silent=True)
         if data is None:
             return jsonify({"status": "error", "message": "Invalid or missing JSON body"}), 400
+        if not isinstance(data, dict):
+            return jsonify({"status": "error", "message": "Request body must be a JSON object"}), 400
 
-        # Auto-fill time fields before validation so callers only need store_id + product_id
+        # Keep required fields strict (hour, month, store_id, product_id).
+        # Only auto-fill optional fields for convenience.
         now = datetime.now()
-        data.setdefault("hour", now.hour)
-        data.setdefault("month", now.month)
         data.setdefault("day_of_month", now.day)
         data.setdefault("is_weekend", 0)
         product = PRODUCT_MAP.get(data.get("product_id"), {})

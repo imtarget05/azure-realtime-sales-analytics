@@ -92,7 +92,18 @@ jobs:
 
       - name: Run Drift Detection
         id: drift
-        run: python mlops/drift_detector.py --output-github
+        run: |
+          python ml/drift_monitor.py \
+            --threshold-mae ${{ vars.DRIFT_MAE_ABS_THRESHOLD || '25' }} \
+            --window-hours ${{ vars.DRIFT_MONITOR_WINDOW_HOURS || '24' }} \
+            --min-samples ${{ vars.DRIFT_MONITOR_MIN_SAMPLES || '24' }} \
+            --trigger-mode none
+          if [ -f ml/model_output/drift_monitor_report.json ]; then
+            detected=$(python -c "import json; d=json.load(open('ml/model_output/drift_monitor_report.json')); print('true' if d.get('triggered') else 'false')")
+            echo "drift_detected=$detected" >> "$GITHUB_OUTPUT"
+          else
+            echo "drift_detected=false" >> "$GITHUB_OUTPUT"
+          fi
         env:
           AML_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           AML_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
@@ -101,6 +112,7 @@ jobs:
           SQL_DATABASE: ${{ secrets.SQL_DATABASE }}
           SQL_USERNAME: ${{ secrets.SQL_USERNAME }}
           SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+          KEY_VAULT_URI: DISABLED
 
   # ─────────────────────────────────────────────
   # Job 2: MAE-based monitoring (ml/drift_monitor.py)
@@ -136,8 +148,8 @@ jobs:
         id: mae
         run: |
           python ml/drift_monitor.py \
-            --threshold-mae ${{ inputs.mae_threshold || vars.DRIFT_MAE_ABS_THRESHOLD || '25' }} \
-            --window-hours ${{ inputs.window_hours || vars.DRIFT_MONITOR_WINDOW_HOURS || '24' }} \
+            --threshold-mae ${{ github.event.inputs.mae_threshold || vars.DRIFT_MAE_ABS_THRESHOLD || '25' }} \
+            --window-hours ${{ github.event.inputs.window_hours || vars.DRIFT_MONITOR_WINDOW_HOURS || '24' }} \
             --min-samples ${{ vars.DRIFT_MONITOR_MIN_SAMPLES || '24' }} \
             --trigger-mode none
           # Parse output to set GitHub output

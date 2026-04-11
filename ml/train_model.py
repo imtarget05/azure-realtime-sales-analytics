@@ -486,7 +486,8 @@ def main():
         except Exception as _reg_err:
             print(f"[WARN] AML model registration failed (non-fatal): {_reg_err}")
 
-    if run and hasattr(run, 'complete'):        run.complete()
+    if run and hasattr(run, 'complete'):
+        run.complete()
 
 
 if __name__ == "__main__":
