@@ -60,7 +60,9 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install system dependencies
-        run: sudo apt-get install -y unixodbc-dev
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y unixodbc-dev
 
       - name: Install dependencies into package
         working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
