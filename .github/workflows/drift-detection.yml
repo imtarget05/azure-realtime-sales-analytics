@@ -210,4 +210,5 @@ jobs:
     uses: ./.github/workflows/ci-cd-mlops.yml
     with:
       force_retrain: true
+      skip_terraform: true
     secrets: inherit

@@ -25,6 +25,16 @@ on:
         required: false
         default: false
         type: boolean
+      skip_terraform:
+        description: "Skip Terraform apply"
+        required: false
+        default: true
+        type: boolean
+      deploy_only:
+        description: "Skip training, deploy existing model"
+        required: false
+        default: false
+        type: boolean
   workflow_dispatch:
     inputs:
       force_retrain:
