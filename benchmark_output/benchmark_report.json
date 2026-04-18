@@ -1,41 +1,165 @@
 {
   "benchmark_info": {
-    "timestamp": "2026-04-09T10:15:30",
-    "data_size_gb": 4.52,
-    "total_rows": 38450000,
-    "description": "So sánh tốc độ xử lý dữ liệu bán hàng giữa máy local và Azure SQL Database"
-  },
-  "local_results": {
-    "local_read_time_sec": 87.34,
-    "local_rows": 38450000,
-    "local_total_revenue": 865230412.57,
-    "local_read_throughput_mbps": 52.96,
-    "local_compute_time_sec": 0.0312,
-    "local_total_time_sec": 87.37,
-    "top_store": ["S01", 312504820.45],
-    "avg_revenue_per_row": 22.50
-  },
-  "cloud_results": {
-    "cloud_insert_rows": 100000,
-    "cloud_insert_time_sec": 34.72,
-    "cloud_insert_rows_per_sec": 2880.0,
-    "cloud_query_times": {
-      "COUNT_ALL": 0.0124,
-      "SUM_REVENUE": 0.0187,
-      "GROUP_BY_STORE": 0.0456,
-      "GROUP_BY_CATEGORY": 0.0523,
-      "TOP_PRODUCTS": 0.0612
+    "timestamp": "2026-04-18T12:50:17.474633",
+    "system": {
+      "platform": "Windows-10-10.0.26200-SP0",
+      "cpu_physical_cores": 4,
+      "cpu_logical_cores": 8,
+      "ram_total_gb": 23.73,
+      "ram_available_gb": 9.59,
+      "python_version": "3.11.0"
     },
-    "cloud_total_query_time_sec": 0.1902
+    "dataset": {
+      "total_rows": 72500000,
+      "csv_size_gb": 4.5,
+      "parquet_size_gb": 1.3,
+      "compression_ratio": 3.46
+    },
+    "description": "Benchmark công bằng so sánh Local (CSV + Parquet) vs Cloud (Azure SQL). Cùng dataset, cùng phép tính: SUM(revenue), GROUP BY store, GROUP BY category."
+  },
+  "local_csv_results": {
+    "format": "CSV",
+    "file_size_gb": 4.5,
+    "read_time_sec": 114.03,
+    "compute_time_sec": 9.01,
+    "read_and_compute_time_sec": 123.03,
+    "rows": 72500000,
+    "total_revenue": 38614984372.25,
+    "total_time_sec": 123.03,
+    "read_throughput_mbps": 37.49,
+    "compute_throughput_rows_per_sec": 8047573,
+    "peak_memory_delta_mb": 194.9
+  },
+  "local_parquet_results": {
+    "format": "Parquet",
+    "file_size_gb": 1.3,
+    "read_time_sec": 2.88,
+    "rows": 72500000,
+    "read_throughput_mbps": 461.48,
+    "compute_time_sec": 0.974,
+    "total_revenue": 38614984372.25,
+    "total_time_sec": 3.86,
+    "compute_throughput_rows_per_sec": 74431858,
+    "peak_memory_delta_mb": 9801.6,
+    "lazy_total_time_sec": 2.3315,
+    "lazy_revenue": 38614984372.25,
+    "lazy_memory_delta_mb": -7009.8
+  },
+  "cloud_ingest_results": {
+    "initial_rows_in_cloud": 500000,
+    "target_rows": 500000,
+    "insert_rows": 0,
+    "insert_time_sec": 0.0,
+    "insert_rows_per_sec": 0,
+    "insert_throughput_mbps": 0,
+    "ingest_method": "skip (already at target)",
+    "final_rows_in_cloud": 500000,
+    "dataset_parity_ok": true
+  },
+  "cloud_query_results": {
+    "query_times": {
+      "COUNT_ALL": 1.3661,
+      "SUM_REVENUE": 1.982,
+      "GROUP_BY_STORE": 3.3446,
+      "GROUP_BY_CATEGORY": 3.8424,
+      "TOP_10_PRODUCTS": 3.3379
+    },
+    "total_query_time_sec": 13.873,
+    "total_rows_in_cloud": 500000
   },
   "comparison": {
-    "local_read_speed_mbps": 52.96,
-    "cloud_query_speed_ms_avg": 38.04,
-    "cloud_concurrent_advantage": "Azure SQL hỗ trợ hàng trăm kết nối đồng thời, local bị giới hạn RAM và I/O",
-    "cloud_scalability": "Azure SQL có thể scale từ Basic (5 DTU) lên Premium (4000 DTU) mà không downtime",
-    "local_advantage": "Local nhanh hơn ~2x cho batch read file CSV lớn (không có network overhead)",
-    "cloud_advantage": "Cloud nhanh hơn cho query phức tạp (index tối ưu, query optimizer), đặc biệt khi nhiều user truy cập cùng lúc",
-    "note": "Cloud có ưu thế khi: nhiều query đồng thời, scale-out, không giới hạn RAM/Disk. Local nhanh hơn cho batch processing file nhỏ.",
-    "verdict": "Với dữ liệu >4GB và yêu cầu real-time analytics, Azure SQL Database là lựa chọn tối ưu"
+    "local_csv_vs_parquet": {
+      "csv_total_sec": 123.03,
+      "parquet_total_sec": 3.86,
+      "speedup_x": 31.87,
+      "winner": "Parquet (Polars)"
+    },
+    "local_eager_vs_lazy": {
+      "note": "So sánh Polars eager (read_parquet) vs lazy (scan_parquet) mode.",
+      "eager_total_sec": 3.86,
+      "lazy_total_sec": 2.3315,
+      "eager_memory_delta_mb": 9801.6,
+      "lazy_memory_delta_mb": -7009.8
+    },
+    "local_compute_vs_cloud_query": {
+      "note": "So sánh compute time (không tính I/O read) vs cloud query time — cùng phép tính.",
+      "local_parquet_compute_sec": 0.974,
+      "cloud_query_total_sec": 13.873,
+      "cloud_rows": 500000,
+      "local_rows": 72500000
+    },
+    "data_ingestion": {
+      "note": "So sánh tốc độ nạp / đọc dữ liệu.",
+      "local_csv_read_mbps": 37.49,
+      "local_parquet_read_mbps": 461.48,
+      "cloud_insert_rows_per_sec": 0,
+      "cloud_insert_throughput_mbps": 0,
+      "cloud_ingest_method": "skip (already at target)",
+      "dataset_parity_ok": true
+    },
+    "throughput": {
+      "local_csv_read_mbps": 37.49,
+      "local_parquet_read_mbps": 461.48,
+      "cloud_insert_rows_per_sec": 0
+    },
+    "fair_comparison": {
+      "note": "So sánh trên cùng số dòng để đảm bảo rubric công bằng.",
+      "cloud_rows": 500000,
+      "local_full_rows": 72500000,
+      "dataset_parity_ok": false,
+      "local_subset_results": {
+        "rows": 500000,
+        "total_time_sec": 0.0944,
+        "total_revenue": 266620059.75
+      },
+      "cloud_query_total_sec": 13.873,
+      "normalized_per_million_rows": {
+        "local_parquet_full_sec": 0.0532,
+        "cloud_query_sec": 27.746,
+        "local_parquet_subset_sec": 0.1888
+      }
+    }
+  },
+  "analysis": {
+    "bottlenecks": [
+      "CSV pipeline: I/O+Parse chiếm 93%, compute chỉ 7%. Bottleneck chính là text parsing (CSV row-based → typed values), không phải disk bandwidth.",
+      "CSV chậm hơn Parquet 31.9x — do: (1) text parsing overhead row-by-row, (2) phải scan toàn bộ 4.5 GB vs columnar chỉ đọc cột cần (1.3 GB), (3) không compression (ratio 3.5x)."
+    ],
+    "recommendations": [
+      "Local: Dùng Parquet + Polars thay CSV + pandas → giảm I/O 3.5x (compression), tăng tốc 20x+ (columnar).",
+      "Local: Dùng Polars lazy mode (scan_parquet) khi dataset vượt RAM — projection pushdown chỉ đọc cột cần.",
+      "Local: Nếu cần SQL syntax trên local, dùng DuckDB trực tiếp trên Parquet file (zero-copy).",
+      "Cloud: Dùng BULK INSERT / bcp / Azure Data Factory thay vì pyodbc executemany để nạp data nhanh hơn.",
+      "Cloud: Tạo nonclustered index (store_id, category, product_id) để tối ưu GROUP BY queries.",
+      "Cloud: Columnstore Index cho analytical workload — giảm 10x I/O trên scan lớn.",
+      "Cloud: Azure Synapse serverless SQL pool → query trực tiếp Parquet trên Blob Storage, không cần ETL."
+    ],
+    "conclusion": "SO SÁNH FAIR (500,000 dòng cùng dataset): Local Polars 0.09s vs Cloud SQL 13.87s (Cloud chậm hơn 147.0x do network + SQL engine overhead). Full dataset (72,500,000 dòng): Local Polars chỉ 3.86s. Kết luận: Local vượt trội cho single-user analytics; Cloud ưu thế khi multi-user, HA, ACID, horizontal scale-out.",
+    "csv_io_percent": 92.7,
+    "csv_compute_percent": 7.3,
+    "parquet_io_percent": 74.7,
+    "parquet_compute_percent": 25.3,
+    "parquet_speedup_x": 31.87,
+    "cloud_query_per_million_rows_sec": 27.75,
+    "dataset_parity_ok": false,
+    "data_size_note": "⚠ Cloud có 500,000 dòng, local có 72,500,000 dòng. Query time không comparable trực tiếp — cần cùng data size để so sánh fair.",
+    "memory_comparison": {
+      "csv_chunked_peak_mb": 194.9,
+      "parquet_eager_peak_mb": 9801.6,
+      "parquet_lazy_peak_mb": -7009.8,
+      "note": "Eager load toàn bộ vào RAM; Lazy dùng projection pushdown chỉ đọc cột cần."
+    },
+    "scalability": {
+      "csv": "Tuyến tính O(n) — phải scan toàn bộ file, row-based parsing. 2x data ≈ 2x thời gian.",
+      "parquet_eager": "Sub-linear — columnar format, chỉ đọc cột cần, row group pruning. Nhưng bị giới hạn bởi RAM (phải load toàn bộ).",
+      "parquet_lazy": "Best scalability — Polars scan_parquet() tối ưu query plan, projection + predicate pushdown, streaming execution. Scale beyond RAM.",
+      "cloud_sql": "Horizontal scale — partition table, columnstore index, scale DTU/vCore. Phù hợp >50 GB, concurrent users, ACID transactions.",
+      "recommendation": "≤50 GB (vừa RAM): Parquet + Polars. >50 GB hoặc multi-user: Cloud SQL / Synapse / Databricks."
+    },
+    "normalized_per_million_rows": {
+      "local_parquet_full_sec": 0.0532,
+      "cloud_query_sec": 27.746,
+      "local_parquet_subset_sec": 0.1888
+    }
   }
 }

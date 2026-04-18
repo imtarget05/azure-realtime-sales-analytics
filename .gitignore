@@ -60,4 +60,8 @@ nul
 deploy_build.log
 adf_pipeline_current.json
 func_stage/
+
+# Large benchmark data files (exceed GitHub 100MB limit)
+benchmark_output/*.csv
+benchmark_output/*.parquet
 =

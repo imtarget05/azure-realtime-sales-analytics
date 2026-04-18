@@ -129,13 +129,8 @@ centroid_df = (
     norm_with_array
     .groupBy("category")
     .agg(
-        # Mean của mỗi dimension trong feature array
-        F.expr("""
-            transform(
-                sequence(0, 255),
-                i -> avg(feature_array[i])
-            )
-        """).alias("centroid_array")
+        # Mean of each dimension in feature array
+        F.array(*[F.avg(F.col("feature_array")[i]).cast("float") for i in range(256)]).alias("centroid_array")
     )
 )
 

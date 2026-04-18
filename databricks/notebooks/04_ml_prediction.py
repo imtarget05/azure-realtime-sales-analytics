@@ -30,6 +30,7 @@ import mlflow.spark
 from pyspark.sql import functions as F
 from pyspark.sql.types import DoubleType, IntegerType
 from pyspark.ml.feature import VectorAssembler, StringIndexer
+from pyspark.ml.functions import vector_to_array
 from pyspark.ml import Pipeline
 import numpy as np
 
@@ -179,7 +180,7 @@ if RUN_MODE == "train":
         # ── Log metrics ──
         mlflow.log_param("model_type", "GBTClassifier")
         mlflow.log_param("max_depth", best_model.getMaxDepth())
-        mlflow.log_param("max_iter", best_model.getMaxIter)
+        mlflow.log_param("max_iter", best_model.getMaxIter())
         mlflow.log_param("num_features", len(indexed_features))
         mlflow.log_param("train_size", train_df.count())
         mlflow.log_param("test_size", test_df.count())
@@ -228,7 +229,7 @@ if RUN_MODE == "train":
             .withColumn("is_viral_prediction", F.col("prediction").cast(IntegerType()))
             .withColumn(
                 "viral_probability",
-                F.round(F.element_at(F.col("probability"), 2), 4)
+                F.round(F.element_at(vector_to_array(F.col("probability")), 2), 4)
             )
             .select(
                 "transaction_id", "event_timestamp", "event_date",
@@ -268,7 +269,7 @@ if RUN_MODE == "inference":
             "viral_probability",
             # GBT probability: cột thứ 1 của probability vector
             F.round(
-                F.element_at(F.col("probability"), 2),  # P(viral=1)
+                F.element_at(vector_to_array(F.col("probability")), 2),  # P(viral=1)
                 4
             )
         )

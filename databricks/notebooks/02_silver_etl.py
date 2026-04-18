@@ -98,6 +98,7 @@ cleaned_df = (
         F.coalesce(
             F.to_timestamp(F.col("event_timestamp_str"), "yyyy-MM-dd'T'HH:mm:ss'Z'"),
             F.to_timestamp(F.col("event_timestamp_str"), "yyyy-MM-dd'T'HH:mm:ssXXX"),
+            F.to_timestamp(F.col("event_timestamp_str"), "yyyy-MM-dd'T'HH:mm:ss"),
             F.to_timestamp(F.col("event_timestamp_str"), "yyyy-MM-dd HH:mm:ss"),
         )
     )
