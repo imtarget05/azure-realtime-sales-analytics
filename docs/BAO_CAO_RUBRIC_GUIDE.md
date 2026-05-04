@@ -1,6 +1,9 @@
 # BÁO CÁO BÀI TẬP 10 — HỆ THỐNG PHÂN TÍCH BÁN HÀNG THỜI GIAN THỰC TRÊN AZURE
 # Hướng dẫn viết báo cáo theo rubric (8 điểm)
 
+> **Ghi chú:** Tài liệu này được cấu trúc theo đúng bố cục bảng rubric chấm điểm.  
+> Không chèn hình ảnh minh chứng (screenshot) — thay bằng đoạn mô tả kỹ thuật, bảng số liệu và đoạn code trích dẫn từ source code.
+
 ---
 
 ## CHƯƠNG 1: GIỚI THIỆU BÀI TOÁN (1.5 điểm)

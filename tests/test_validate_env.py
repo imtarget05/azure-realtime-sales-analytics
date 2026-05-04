@@ -4,7 +4,7 @@ Tests for validate_env.py — environment validation script.
 
 import os
 import pytest
-from validate_env import validate, _is_set
+from scripts.validate_env import validate, _is_set
 
 
 class TestIsSet:
