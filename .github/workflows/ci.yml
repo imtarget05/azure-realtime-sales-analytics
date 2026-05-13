@@ -112,6 +112,8 @@ jobs:
           pip install pytest pytest-cov
 
       - name: Run tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: |
           if [ -d "tests" ] && [ "$(find tests -name 'test_*.py' | head -1)" ]; then
             pytest tests/ -v --tb=short
