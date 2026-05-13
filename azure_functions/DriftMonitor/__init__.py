@@ -33,7 +33,7 @@ def main(timer: func.TimerRequest) -> None:
         window_hours = int(os.getenv("DRIFT_MONITOR_WINDOW_HOURS", "24"))
         min_samples = int(os.getenv("DRIFT_MONITOR_MIN_SAMPLES", "24"))
         cooldown_minutes = int(os.getenv("DRIFT_MONITOR_COOLDOWN_MINUTES", "120"))
-        trigger_mode = os.getenv("DRIFT_TRIGGER_MODE", "local")
+        trigger_mode = os.getenv("DRIFT_TRIGGER_MODE", "azureml")
 
         report = run_monitor(
             threshold_mae=threshold_mae,

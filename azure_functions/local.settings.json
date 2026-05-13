@@ -6,6 +6,7 @@
         "EVENT_HUB_CONNECTION_STRING": "<your-event-hub-connection-string>",
         "EVENT_HUB_NAME": "sales-events",
         "KEY_VAULT_URL": "https://<your-keyvault>.vault.azure.net/",
-        "APPINSIGHTS_INSTRUMENTATIONKEY": "<your-app-insights-key>"
+        "APPINSIGHTS_INSTRUMENTATIONKEY": "<your-app-insights-key>",
+        "DRIFT_TRIGGER_MODE": "azureml"
     }
 }
