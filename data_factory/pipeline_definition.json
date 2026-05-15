@@ -1,7 +1,17 @@
 {
     "name": "SalesAnalyticsPipeline",
     "properties": {
-        "description": "Pipeline tổng hợp: Copy dữ liệu Blob → SQL → ML Prediction → Power BI",
+        "description": "Pipeline ETL: Blob → SQL → SubmitMLJob → WaitForMLJob (Until) → CheckMLSuccess (If) → UpdateForecasts / FailMLJob",
+        "variables": {
+            "mlJobRunId": {
+                "type": "String",
+                "defaultValue": ""
+            },
+            "mlJobStatus": {
+                "type": "String",
+                "defaultValue": "NotStarted"
+            }
+        },
         "activities": [
             {
                 "name": "CopyBlobToSQL",
@@ -50,43 +60,169 @@
                 }
             },
             {
-                "name": "RunMLPipeline",
-                "type": "AzureMLExecutePipeline",
-                "description": "Trigger Azure ML pipeline để huấn luyện model",
+                "name": "SubmitMLJob",
+                "type": "WebActivity",
+                "description": "Gọi Azure ML REST API để submit training job, lấy về runId",
                 "dependsOn": [
                     {
                         "activity": "PrepareTrainingData",
                         "dependencyConditions": ["Succeeded"]
                     }
                 ],
-                "linkedServiceName": {
-                    "referenceName": "AzureMLServiceLS",
-                    "type": "LinkedServiceReference"
-                },
                 "typeProperties": {
-                    "mlPipelineId": "<ml-pipeline-id>",
-                    "experimentName": "sales-forecast-experiment"
+                    "url": "@concat('https://management.azure.com/subscriptions/', pipeline().parameters.subscriptionId, '/resourceGroups/', pipeline().parameters.resourceGroup, '/providers/Microsoft.MachineLearningServices/workspaces/', pipeline().parameters.amlWorkspace, '/jobs?api-version=2023-04-01')",
+                    "method": "POST",
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body": {
+                        "properties": {
+                            "jobType": "Pipeline",
+                            "componentId": "@pipeline().parameters.amlPipelineId",
+                            "displayName": "sales-forecast-retrain",
+                            "experimentName": "sales-forecast-experiment"
+                        }
+                    },
+                    "authentication": {
+                        "type": "MSI",
+                        "resource": "https://management.azure.com/"
+                    }
                 }
             },
             {
-                "name": "UpdateForecasts",
-                "type": "SqlServerStoredProcedure",
-                "description": "Cập nhật bảng dự đoán sau khi ML hoàn thành",
+                "name": "SetMLJobRunId",
+                "type": "SetVariable",
+                "description": "Lưu runId trả về từ SubmitMLJob vào pipeline variable",
                 "dependsOn": [
                     {
-                        "activity": "RunMLPipeline",
+                        "activity": "SubmitMLJob",
                         "dependencyConditions": ["Succeeded"]
                     }
                 ],
-                "linkedServiceName": {
-                    "referenceName": "AzureSqlDatabaseLS",
-                    "type": "LinkedServiceReference"
-                },
                 "typeProperties": {
-                    "storedProcedureName": "sp_UpdateForecasts"
+                    "variableName": "mlJobRunId",
+                    "value": "@activity('SubmitMLJob').output.name"
+                }
+            },
+            {
+                "name": "WaitForMLJob",
+                "type": "Until",
+                "description": "Poll trạng thái ML job cho đến khi hoàn thành hoặc thất bại",
+                "dependsOn": [
+                    {
+                        "activity": "SetMLJobRunId",
+                        "dependencyConditions": ["Succeeded"]
+                    }
+                ],
+                "typeProperties": {
+                    "expression": {
+                        "value": "@or(equals(variables('mlJobStatus'), 'Completed'), equals(variables('mlJobStatus'), 'Failed'), equals(variables('mlJobStatus'), 'Canceled'))",
+                        "type": "Expression"
+                    },
+                    "timeout": "0.04:00:00",
+                    "activities": [
+                        {
+                            "name": "PauseActivity",
+                            "type": "Wait",
+                            "description": "Chờ 60 giây trước khi poll lại",
+                            "typeProperties": {
+                                "waitTimeInSeconds": 60
+                            }
+                        },
+                        {
+                            "name": "GetMLJobStatus",
+                            "type": "WebActivity",
+                            "description": "Gọi Azure ML REST API để lấy trạng thái job hiện tại",
+                            "dependsOn": [
+                                {
+                                    "activity": "PauseActivity",
+                                    "dependencyConditions": ["Succeeded"]
+                                }
+                            ],
+                            "typeProperties": {
+                                "url": "@concat('https://management.azure.com/subscriptions/', pipeline().parameters.subscriptionId, '/resourceGroups/', pipeline().parameters.resourceGroup, '/providers/Microsoft.MachineLearningServices/workspaces/', pipeline().parameters.amlWorkspace, '/jobs/', variables('mlJobRunId'), '?api-version=2023-04-01')",
+                                "method": "GET",
+                                "authentication": {
+                                    "type": "MSI",
+                                    "resource": "https://management.azure.com/"
+                                }
+                            }
+                        },
+                        {
+                            "name": "SetMLJobStatus",
+                            "type": "SetVariable",
+                            "description": "Cập nhật biến mlJobStatus từ kết quả poll",
+                            "dependsOn": [
+                                {
+                                    "activity": "GetMLJobStatus",
+                                    "dependencyConditions": ["Succeeded"]
+                                }
+                            ],
+                            "typeProperties": {
+                                "variableName": "mlJobStatus",
+                                "value": "@activity('GetMLJobStatus').output.properties.status"
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "CheckMLSuccess",
+                "type": "IfCondition",
+                "description": "Kiểm tra ML job thành công hay thất bại",
+                "dependsOn": [
+                    {
+                        "activity": "WaitForMLJob",
+                        "dependencyConditions": ["Succeeded"]
+                    }
+                ],
+                "typeProperties": {
+                    "expression": {
+                        "value": "@equals(variables('mlJobStatus'), 'Completed')",
+                        "type": "Expression"
+                    },
+                    "ifTrueActivities": [
+                        {
+                            "name": "UpdateForecasts",
+                            "type": "SqlServerStoredProcedure",
+                            "description": "Cập nhật bảng dự đoán sau khi ML hoàn thành",
+                            "linkedServiceName": {
+                                "referenceName": "AzureSqlDatabaseLS",
+                                "type": "LinkedServiceReference"
+                            },
+                            "typeProperties": {
+                                "storedProcedureName": "sp_UpdateForecasts"
+                            }
+                        }
+                    ],
+                    "ifFalseActivities": [
+                        {
+                            "name": "FailMLJob",
+                            "type": "Fail",
+                            "description": "Báo lỗi pipeline khi ML job không thành công",
+                            "typeProperties": {
+                                "message": "@concat('ML job failed with status: ', variables('mlJobStatus'), '. RunId: ', variables('mlJobRunId'))",
+                                "errorCode": "ML_JOB_FAILED"
+                            }
+                        }
+                    ]
                 }
             }
-        ]
+        ],
+        "parameters": {
+            "subscriptionId": {
+                "type": "String"
+            },
+            "resourceGroup": {
+                "type": "String"
+            },
+            "amlWorkspace": {
+                "type": "String"
+            },
+            "amlPipelineId": {
+                "type": "String"
+            }
+        }
     },
     "linkedServices": [
         {

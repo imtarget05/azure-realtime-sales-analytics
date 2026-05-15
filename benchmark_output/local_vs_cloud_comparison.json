@@ -1,0 +1,168 @@
+{
+  "benchmark_info": {
+    "timestamp": "2026-05-13T14:51:03.007816",
+    "local_env": "Windows, Python 3.11, Polars lazy scan_parquet",
+    "cloud_env": "Azure SQL Database Standard S2 (15 DTU), Southeast Asia",
+    "local_dataset": "72,500,000 rows · 1.3 GB Parquet",
+    "cloud_dataset": "500,000 rows · SalesTransactions",
+    "total_wall_sec": 85.1
+  },
+  "metrics": {
+    "1_read_file": {
+      "description": "Đọc file 4.52 GB (Parquet)",
+      "local": {
+        "time_sec": 3.274,
+        "rows": 72500000,
+        "size_gb": 1.3,
+        "ram_delta_mb": 10985.7
+      },
+      "cloud": "N/A — data ở cloud, không cần đọc file",
+      "winner": "N/A — different model"
+    },
+    "2_count": {
+      "description": "COUNT(*) toàn bộ bảng",
+      "local": {
+        "ms": 0.008,
+        "rows": 72500000
+      },
+      "cloud": {
+        "ms": 1591.479,
+        "rows": 500000
+      },
+      "speedup_normalized": {
+        "winner": "Local",
+        "ratio": 28845556.9
+      }
+    },
+    "3_sum_revenue": {
+      "description": "SUM(revenue) toàn bộ",
+      "local": {
+        "ms": 46.995,
+        "total_revenue": 38614984372.25
+      },
+      "cloud": {
+        "ms": 2239.391,
+        "total_revenue": 266155089.37
+      },
+      "speedup_normalized": {
+        "winner": "Local",
+        "ratio": 6909.5
+      }
+    },
+    "4_group_by_store": {
+      "description": "GROUP BY store_id + SUM(revenue)",
+      "local": {
+        "ms": 475.59,
+        "groups": 3
+      },
+      "cloud": {
+        "ms": 3299.619,
+        "groups": 3
+      },
+      "speedup_normalized": {
+        "winner": "Local",
+        "ratio": 1006.0
+      }
+    },
+    "5_group_complex": {
+      "description": "GROUP BY store_id+category | SUM+AVG+COUNT | HAVING+ORDER",
+      "local": {
+        "ms": 1148.034,
+        "groups": 36
+      },
+      "cloud": {
+        "ms": 4825.3,
+        "groups": 36
+      },
+      "speedup_normalized": {
+        "winner": "Local",
+        "ratio": 609.4
+      }
+    },
+    "6_single_insert": {
+      "description": "Single INSERT 1.000 rows (1 row/round-trip)",
+      "local": "N/A — không có SQL engine",
+      "cloud": {
+        "rows": 1000,
+        "time_sec": 35.988,
+        "rows_per_sec": 27
+      },
+      "winner": "N/A — chỉ cloud có SQL"
+    },
+    "7_batch_insert": {
+      "description": "Batch INSERT 1.000 rows/batch (fast_executemany)",
+      "local": "N/A",
+      "cloud": {
+        "rows": 1000,
+        "time_sec": 6.283,
+        "rows_per_sec": 159,
+        "speedup_vs_single": 5.7
+      },
+      "winner": "Batch 5.7× nhanh hơn Single"
+    },
+    "8_network_latency": {
+      "description": "Network latency TCP + SQL connection",
+      "local": {
+        "latency_ms": 0,
+        "note": "Cục bộ, zero network overhead"
+      },
+      "cloud": {
+        "tcp_avg_ms": 54.4,
+        "tcp_min_ms": 46.41,
+        "tcp_max_ms": 117.71,
+        "sql_cold_connect_ms": 58.73,
+        "simple_query_avg_ms": 28.5
+      },
+      "winner": "Local (0ms vs 54.4ms TCP)"
+    },
+    "9_concurrent_users": {
+      "description": "5 users đồng thời GROUP BY query",
+      "local": {
+        "note": "Không hỗ trợ đa user trong single-process model"
+      },
+      "cloud": {
+        "n_threads": 5,
+        "success": 5,
+        "failed": 0,
+        "wall_time_ms": 21915.99,
+        "avg_query_ms": 19530.18,
+        "min_query_ms": 12465.97,
+        "max_query_ms": 21913.56
+      },
+      "winner": "Cloud (native multi-user với MVCC + connection pooling)"
+    },
+    "10_availability": {
+      "description": "Độ sẵn sàng — 10 lần kết nối liên tiếp",
+      "local": {
+        "uptime_pct": 99.9,
+        "note": "Phụ thuộc vào máy local, không HA"
+      },
+      "cloud": {
+        "trials": 10,
+        "success": 10,
+        "failed": 0,
+        "uptime_pct": 100.0,
+        "avg_connect_ms": 89.26,
+        "min_connect_ms": 87.23,
+        "max_connect_ms": 92.63
+      },
+      "winner": "Cloud SLA 99.99% | thực đo 100.0%"
+    }
+  },
+  "summary": {
+    "local_advantages": [
+      "Zero latency",
+      "Vectorized SIMD compute",
+      "Không giới hạn RAM nếu dùng lazy",
+      "Miễn phí sau chi phí phần cứng"
+    ],
+    "cloud_advantages": [
+      "Multi-user concurrent",
+      "ACID transactions",
+      "HA & SLA 99.99%",
+      "Auto-scale DTU/vCore",
+      "No hardware management"
+    ],
+    "recommendation": "Local tối ưu cho batch analytics đơn người dùng; Cloud tối ưu cho OLTP, đa người dùng, HA"
+  }
+}

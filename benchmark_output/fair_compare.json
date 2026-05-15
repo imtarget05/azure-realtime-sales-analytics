@@ -1,0 +1,17 @@
+{
+  "local_count_ms": 0.010800000382005237,
+  "local_sum_ms": 0.9939999999915017,
+  "local_group_ms": 15.67479999994248,
+  "local_complex_ms": 131.64359999973385,
+  "count_ms": 6093.0,
+  "sum_ms": 9605.3,
+  "group_ms": 29885.6,
+  "complex_ms": 22083.1,
+  "single_rps": 31.7,
+  "batch_rps": 735.8,
+  "tcp_ms": 36.8,
+  "concurrent5": 99649.3,
+  "avail_pct": 100.0,
+  "avail_ms": 220.1,
+  "n_rows": 2165410
+}

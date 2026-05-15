@@ -51,7 +51,7 @@ def get_realtime_summary_from_sql() -> list[dict]:
         f"Database={SQL_DATABASE};"
         f"Uid={SQL_USERNAME};"
         f"Pwd={SQL_PASSWORD};"
-        f"Encrypt=yes;TrustServerCertificate=no;"
+        f"Encrypt=yes;TrustServerCertificate=no;Connection Timeout=15;"
     )
 
     try:
