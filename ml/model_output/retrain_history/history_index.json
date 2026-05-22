@@ -166,5 +166,21 @@
     "revenue_r2": 0.8791,
     "quantity_r2": 0.8002,
     "path": "C:\\Users\\Admin\\azure-realtime-sales-analytics\\ml\\model_output\\retrain_history\\20260411_064400"
+  },
+  {
+    "run_id": "20260516_033558",
+    "timestamp": "2026-05-16T03:35:58.907685",
+    "decision": "PROMOTE",
+    "revenue_r2": 0.8771,
+    "quantity_r2": 0.7973,
+    "path": "c:\\Users\\Admin\\azure-realtime-sales-analytics\\ml\\model_output\\retrain_history\\20260516_033558"
+  },
+  {
+    "run_id": "20260516_034443",
+    "timestamp": "2026-05-16T03:44:43.974438",
+    "decision": "PROMOTE",
+    "revenue_r2": 0.8771,
+    "quantity_r2": 0.7973,
+    "path": "c:\\Users\\Admin\\azure-realtime-sales-analytics\\ml\\model_output\\retrain_history\\20260516_034443"
   }
 ]

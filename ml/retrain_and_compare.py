@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import Ridge
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.model_selection import GridSearchCV, train_test_split, cross_val_score
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -154,20 +154,78 @@ def train_ridge(X_train, y_train):
     return model
 
 
+def _print_grid_results_table(grid_search, label: str = "") -> None:
+    """In bảng so sánh tất cả tổ hợp tham số của Grid Search."""
+    results = grid_search.cv_results_
+    rows = []
+    for i in range(len(results["params"])):
+        p = results["params"][i]
+        rows.append({
+            "#": i + 1,
+            "n_estimators": p["n_estimators"],
+            "max_depth": p["max_depth"],
+            "learning_rate": p["learning_rate"],
+            "subsample": p["subsample"],
+            "CV R² mean": round(results["mean_test_score"][i], 4),
+            "CV R² std": round(results["std_test_score"][i], 4),
+            "rank": int(results["rank_test_score"][i]),
+        })
+
+    rows.sort(key=lambda r: r["rank"])
+
+    header_label = f"[GRID SEARCH] Kết quả tất cả {len(rows)} tổ hợp tham số" + (f" — {label}" if label else "")
+    print("\n" + "=" * 90)
+    print(header_label)
+    print("=" * 90)
+    header = f"{'#':>3}  {'n_est':>6}  {'depth':>5}  {'lr':>6}  {'sub':>5}  {'CV R² mean':>10}  {'CV R² std':>9}  {'rank':>4}"
+    print(header)
+    print("-" * 90)
+    for r in rows:
+        marker = " <<<" if r["rank"] == 1 else ""
+        print(
+            f"{r['#']:>3}  {r['n_estimators']:>6}  {r['max_depth']:>5}  "
+            f"{r['learning_rate']:>6.4f}  {r['subsample']:>5.2f}  "
+            f"{r['CV R² mean']:>10.4f}  {r['CV R² std']:>9.4f}  {r['rank']:>4}{marker}"
+        )
+    print("=" * 90)
+    print(f"[GRID SEARCH] >>> BEST: n_estimators={grid_search.best_params_['n_estimators']}, "
+          f"max_depth={grid_search.best_params_['max_depth']}, "
+          f"learning_rate={grid_search.best_params_['learning_rate']}, "
+          f"subsample={grid_search.best_params_['subsample']} "
+          f"→ CV R²={round(grid_search.best_score_, 4)}")
+    print("=" * 90 + "\n")
+
+
 def retrain_model(X_train, y_train, n_estimators=200, max_depth=6,
-                  learning_rate=0.1, subsample=0.8):
-    """Train một GradientBoosting mới với hyperparameters tuỳ chỉnh."""
-    model = GradientBoostingRegressor(
-        n_estimators=n_estimators,
-        max_depth=max_depth,
-        learning_rate=learning_rate,
-        subsample=subsample,
+                  learning_rate=0.1, subsample=0.8, label: str = ""):
+    """Train GradientBoosting bằng Grid Search để chọn hyperparameters tốt nhất."""
+    base_model = GradientBoostingRegressor(
         min_samples_split=10,
         min_samples_leaf=5,
         random_state=42,
     )
-    model.fit(X_train, y_train)
-    return model
+
+    param_grid = {
+        "n_estimators": [max(50, n_estimators - 50), n_estimators, n_estimators + 50],
+        "max_depth": [max(2, max_depth - 1), max_depth, max_depth + 1],
+        "learning_rate": [max(0.01, learning_rate / 2), learning_rate, min(0.3, learning_rate * 1.5)],
+        "subsample": [0.8, subsample, 1.0],
+    }
+
+    grid_search = GridSearchCV(
+        estimator=base_model,
+        param_grid=param_grid,
+        cv=3,
+        scoring="r2",
+        n_jobs=-1,
+        verbose=0,
+        refit=True,
+    )
+    grid_search.fit(X_train, y_train)
+
+    _print_grid_results_table(grid_search, label=label)
+
+    return grid_search.best_estimator_, grid_search.best_params_, round(grid_search.best_score_, 4)
 
 
 def evaluate_model(model, X_test, y_test, X_full, y_full):
@@ -432,14 +490,6 @@ def main():
         "algorithm": "Ridge Regression",
         "alpha": 1.0,
     }
-    new_config = {
-        "n_samples": args.new_samples,
-        "algorithm": "GradientBoosting",
-        "n_estimators": args.new_estimators,
-        "max_depth": args.new_depth,
-        "learning_rate": args.new_lr,
-    }
-
     # ── Step 2: Generate data (same dataset, fair comparison) ──
     n_samples = args.new_samples
     print(f"\n[DATA] Generating {n_samples} samples (same for both models)...")
@@ -465,14 +515,34 @@ def main():
     # ── Step 4: Train NEW model (GradientBoosting — improved) ──
     print(f"\n[NEW] Training NEW model: GradientBoosting ({args.new_estimators} est, "
           f"depth={args.new_depth}, lr={args.new_lr})...")
-    new_rev_model = retrain_model(X_train_r, y_train_rev,
-                                  n_estimators=args.new_estimators,
-                                  max_depth=args.new_depth,
-                                  learning_rate=args.new_lr)
-    new_qty_model = retrain_model(X_train_q, y_train_qty,
-                                  n_estimators=args.new_estimators,
-                                  max_depth=args.new_depth,
-                                  learning_rate=args.new_lr)
+    new_rev_model, new_rev_best_params, new_rev_grid_r2 = retrain_model(
+        X_train_r,
+        y_train_rev,
+        n_estimators=args.new_estimators,
+        max_depth=args.new_depth,
+        learning_rate=args.new_lr,
+        label="Revenue",
+    )
+    new_qty_model, new_qty_best_params, new_qty_grid_r2 = retrain_model(
+        X_train_q,
+        y_train_qty,
+        n_estimators=args.new_estimators,
+        max_depth=args.new_depth,
+        learning_rate=args.new_lr,
+        label="Quantity",
+    )
+
+    new_config = {
+        "n_samples": args.new_samples,
+        "algorithm": "GradientBoosting",
+        "n_estimators": args.new_estimators,
+        "max_depth": args.new_depth,
+        "learning_rate": args.new_lr,
+        "best_params_revenue": new_rev_best_params,
+        "best_params_quantity": new_qty_best_params,
+        "grid_search_cv_r2_revenue": new_rev_grid_r2,
+        "grid_search_cv_r2_quantity": new_qty_grid_r2,
+    }
 
     print("[EVAL] Evaluating new model on common test set...")
     new_rev_eval = evaluate_model(new_rev_model, X_test_r, y_test_rev, X_full, y_rev)
