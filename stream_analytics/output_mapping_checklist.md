@@ -1,5 +1,9 @@
 # Stream Analytics Output Mapping Checklist (Azure Portal)
 
+## Trạng thái
+
+Checklist này đã được đối chiếu với repo hiện tại. Các file query, schema SQL, và mock data liên quan đều đã tồn tại và khớp theo mapping bên dưới.
+
 Muc tieu: copy-paste nhanh de cau hinh outputs dung alias va schema.
 
 ## 1) Outputs can tao trong Stream Analytics Job
