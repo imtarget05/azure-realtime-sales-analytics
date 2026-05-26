@@ -1,13 +1,11 @@
 """Fix SQL schema: add forecast_datetime computed column and recreate view."""
+import sys
 import pyodbc
 
-conn_str = (
-    "DRIVER={ODBC Driver 18 for SQL Server};"
-    "SERVER=sql-sales-analytics-d9bt2m.database.windows.net;"
-    "DATABASE=SalesAnalyticsDB;"
-    "UID=sqladmin;PWD=SqlP@ssw0rd2026!;"
-    "Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30"
-)
+sys.path.insert(0, '..')
+from config.settings import get_sql_connection_string
+
+conn_str = get_sql_connection_string()
 conn = pyodbc.connect(conn_str)
 conn.autocommit = True
 cursor = conn.cursor()

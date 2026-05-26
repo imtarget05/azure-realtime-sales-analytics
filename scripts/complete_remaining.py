@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """Complete remaining steps 7-9 that failed in complete_setup.py"""
+import sys
 import pyodbc
 
-CS = (
-    "DRIVER={ODBC Driver 18 for SQL Server};"
-    "SERVER=sql-sales-analytics-d9bt2m.database.windows.net;"
-    "DATABASE=SalesAnalyticsDB;UID=sqladmin;PWD=SqlP@ssw0rd2026!;"
-    "Encrypt=yes;TrustServerCertificate=no"
-)
+sys.path.insert(0, '..')
+from config.settings import get_sql_connection_string
+
+CS = get_sql_connection_string()
 conn = pyodbc.connect(CS, timeout=60, autocommit=True)
 cur = conn.cursor()
 

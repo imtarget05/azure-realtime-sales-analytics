@@ -7,15 +7,15 @@ Complete all remaining setup that setup_demo_data.py missed:
 4. Create vw_PerformanceMetrics view
 5. Refresh HourlySalesSummary and DoD views
 """
-import pyodbc, random
+import sys
+import pyodbc
+import random
 from datetime import datetime, timedelta
 
-CS = (
-    "DRIVER={ODBC Driver 18 for SQL Server};"
-    "SERVER=sql-sales-analytics-d9bt2m.database.windows.net;"
-    "DATABASE=SalesAnalyticsDB;UID=sqladmin;PWD=SqlP@ssw0rd2026!;"
-    "Encrypt=yes;TrustServerCertificate=no"
-)
+sys.path.insert(0, '..')
+from config.settings import get_sql_connection_string
+
+CS = get_sql_connection_string()
 conn = pyodbc.connect(CS, timeout=60, autocommit=True)
 cur = conn.cursor()
 

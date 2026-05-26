@@ -48,7 +48,7 @@ Units Sold = SUM(SalesTransactions[units_sold])
 2. Server: `sql-sales-analytics-d9bt2m.database.windows.net`
 3. Database: `SalesAnalyticsDB`
 4. Mode: **DirectQuery** (real-time data)
-5. Login: `sqladmin` / `SqlP@ssw0rd2026!`
+5. Login: `sqladmin` / Use password from Azure Key Vault or environment variable `SQL_PASSWORD`
 
 ---
 

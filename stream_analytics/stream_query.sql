@@ -1,13 +1,18 @@
 -- ============================================================
 -- Stream Analytics Query – SINGLE PRODUCTION QUERY
--- Pipeline: Data Generators → Event Hub → THIS QUERY → Azure SQL + Power BI
+-- Pipeline: Data Generators → Event Hub → ValidateSalesEvent → 
+--           Validated Event Hub → THIS QUERY → Azure SQL + Power BI
 --
--- Input:  SalesInput (Event Hub: sales-events)
+-- Input:  SalesInput (Event Hub: sales-events-validated)
+--         [Validation already performed by ValidateSalesEvent function]
 -- Output: SalesTransactionsOutput  → Azure SQL: dbo.SalesTransactions
 --         HourlySalesSummaryOutput → Azure SQL: dbo.HourlySalesSummary
 --         SalesAlertsOutput        → Azure SQL: dbo.SalesAlerts
 -- ============================================================
 
+-- NOTE: Validation is now done BEFORE Stream Analytics
+-- Trust events from sales-events-validated hub
+-- No need to re-validate timestamp, store_id, product_id, quantity, price
 WITH Cleaned AS (
     SELECT
         TRY_CAST([timestamp] AS datetime) AS event_time,
@@ -21,6 +26,7 @@ WITH Cleaned AS (
         EventEnqueuedUtcTime AS enqueued_time
     FROM SalesInput TIMESTAMP BY [timestamp]
     WHERE
+        -- These should always be true from validated hub, but keep as safety net
         TRY_CAST([timestamp] AS datetime) IS NOT NULL
         AND store_id IS NOT NULL
         AND product_id IS NOT NULL

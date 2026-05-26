@@ -102,6 +102,40 @@ def _get_float(name: str, default: float) -> float:
     return float(value)
 
 
+def get_sql_connection_string() -> str:
+    """
+    Build secure SQL connection string from environment/Key Vault.
+    NEVER hardcode credentials in scripts — always use this function.
+    
+    Environment variables:
+    - SQL_SERVER: server hostname
+    - SQL_DATABASE: database name
+    - SQL_USERNAME: admin username (default: sqladmin)
+    - SQL_PASSWORD: admin password (from env or Key Vault)
+    - SQL_DRIVER: ODBC driver (default: ODBC Driver 18 for SQL Server)
+    """
+    driver = os.getenv("SQL_DRIVER", "{ODBC Driver 18 for SQL Server}")
+    server = SQL_SERVER
+    database = SQL_DATABASE
+    username = SQL_USERNAME or "sqladmin"
+    password = SQL_PASSWORD or ""
+    
+    if not password:
+        raise ValueError(
+            "SQL_PASSWORD not found in environment or Key Vault. "
+            "Set SQL_PASSWORD env var or configure Key Vault access."
+        )
+    
+    return (
+        f"DRIVER={driver};"
+        f"SERVER={server};"
+        f"DATABASE={database};"
+        f"UID={username};"
+        f"PWD={password};"
+        f"Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30"
+    )
+
+
 # ─────────────────────────────────────────────
 # Azure Event Hubs
 # ─────────────────────────────────────────────

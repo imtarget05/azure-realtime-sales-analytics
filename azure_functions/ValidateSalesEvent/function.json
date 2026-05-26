@@ -10,6 +10,21 @@
       "cardinality": "many",
       "consumerGroup": "$Default",
       "dataType": "string"
+    },
+    {
+      "type": "eventHub",
+      "name": "validatedEvents",
+      "direction": "out",
+      "eventHubName": "%VALIDATED_EVENT_HUB_NAME%",
+      "connection": "VALIDATED_EVENT_HUB_CONNECTION_STRING"
+    },
+    {
+      "type": "sql",
+      "name": "invalidEvents",
+      "direction": "out",
+      "commandText": "dbo.ValidationLogs",
+      "commandType": "StoredProcedure",
+      "connectionStringSetting": "SqlConnectionString"
     }
   ]
 }

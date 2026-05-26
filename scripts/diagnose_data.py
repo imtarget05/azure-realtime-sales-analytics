@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """Diagnose all Power BI data issues."""
+import sys
 import pyodbc
 
-conn = pyodbc.connect(
-    "DRIVER={ODBC Driver 18 for SQL Server};"
-    "SERVER=sql-sales-analytics-d9bt2m.database.windows.net;"
-    "DATABASE=SalesAnalyticsDB;UID=sqladmin;PWD=SqlP@ssw0rd2026!;"
-    "Encrypt=yes;TrustServerCertificate=no"
-)
+sys.path.insert(0, '..')
+from config.settings import get_sql_connection_string
+
+conn = pyodbc.connect(get_sql_connection_string())
 cur = conn.cursor()
 
 print("=== 1. Products table ===")

@@ -4,14 +4,16 @@ Normalize daily revenue to make DoD growth realistic (-5% to +15% range).
 Currently Apr3=$1.26M, Apr8=$1.49M while other days are $190K-$350K.
 Goal: all days in $200K-$350K range for smooth, credible charts.
 """
+import sys
+from pathlib import Path
 import pyodbc
 
-CS = (
-    "DRIVER={ODBC Driver 18 for SQL Server};"
-    "SERVER=sql-sales-analytics-d9bt2m.database.windows.net;"
-    "DATABASE=SalesAnalyticsDB;UID=sqladmin;PWD=SqlP@ssw0rd2026!;"
-    "Encrypt=yes;TrustServerCertificate=no"
-)
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from config.settings import get_sql_connection_string
+
+CS = get_sql_connection_string()
 conn = pyodbc.connect(CS, timeout=60, autocommit=True)
 cur = conn.cursor()
 

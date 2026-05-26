@@ -7,15 +7,16 @@ Complete setup for 5 demo scenarios:
 4. Create benchmark views (Scenario 5)
 5. Add realistic data spread for good-looking Power BI
 """
-import pyodbc, random, math
+import sys
+import pyodbc
+import random
+import math
 from datetime import datetime, timedelta
 
-CS = (
-    "DRIVER={ODBC Driver 18 for SQL Server};"
-    "SERVER=sql-sales-analytics-d9bt2m.database.windows.net;"
-    "DATABASE=SalesAnalyticsDB;UID=sqladmin;PWD=SqlP@ssw0rd2026!;"
-    "Encrypt=yes;TrustServerCertificate=no"
-)
+sys.path.insert(0, '..')
+from config.settings import get_sql_connection_string
+
+CS = get_sql_connection_string()
 conn = pyodbc.connect(CS, timeout=30, autocommit=True)
 cur = conn.cursor()
 

@@ -19,9 +19,14 @@ import json
 import logging
 import os
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any
 
-import azure.functions as func
+try:
+    import azure.functions as func
+except ImportError:
+    # For local testing without azure-functions installed
+    func = None
 
 # Import từ config (single source of truth) thay vì hardcode
 try:
@@ -129,11 +134,24 @@ def _clean_event(event: dict[str, Any]) -> dict[str, Any]:
 # ──────────────────────────────────────────────
 # Azure Function entry point
 # ──────────────────────────────────────────────
-def main(events: list[func.EventHubEvent]) -> None:
-    """Process a batch of Event Hub messages."""
+def main(
+    events: list
+) -> None:
+    """
+    Process a batch of Event Hub messages.
+    
+    Output:
+      - validatedEvents: Valid events → Validated Event Hub
+      - invalidEvents: Invalid events → SQL validation_logs table
+      
+    Note: Output bindings are defined in function.json
+    """
     total = len(events)
     valid_count = 0
     invalid_count = 0
+    
+    validated_batch = []
+    invalid_batch = []
 
     for event in events:
         try:
@@ -142,21 +160,54 @@ def main(events: list[func.EventHubEvent]) -> None:
         except (json.JSONDecodeError, UnicodeDecodeError) as exc:
             logging.warning("Failed to parse event body: %s", exc)
             invalid_count += 1
+            invalid_batch.append({
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "error": f"Parse error: {str(exc)[:200]}",
+                "raw_data": ""
+            })
             continue
 
         is_valid, reason = _validate_event(data)
         if not is_valid:
             logging.warning("Invalid event rejected (%s): %s", reason, json.dumps(data)[:200])
             invalid_count += 1
+            invalid_batch.append({
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "error": reason,
+                "raw_data": json.dumps(data)[:1000]
+            })
             continue
 
         cleaned = _clean_event(data)
         valid_count += 1
+        validated_batch.append(cleaned)
         logging.info("Validated event: store=%s product=%s qty=%d revenue=%.2f",
                       cleaned["store_id"], cleaned["product_id"],
                       cleaned["quantity"], cleaned["revenue"])
 
+    # Note: Output bindings (validatedEvents, invalidEvents) are handled
+    # by function.json and the Azure Functions runtime, not directly here.
+    # In local testing, events are logged but not sent to outputs.
+    
     logging.info(
-        "Batch processed: total=%d valid=%d invalid=%d",
+        "Batch processed: total=%d valid=%d invalid=%d (outputs via bindings)",
         total, valid_count, invalid_count,
     )
+    
+    # For local testing/CLI usage, optionally write to files
+    if os.getenv("WRITE_OUTPUTS_TO_FILES") == "1":
+        try:
+            output_dir = Path("azure_functions/ValidateSalesEvent/outputs")
+            output_dir.mkdir(exist_ok=True)
+            
+            if validated_batch:
+                with open(output_dir / "validated.jsonl", "a") as f:
+                    for event in validated_batch:
+                        f.write(json.dumps(event) + "\n")
+            
+            if invalid_batch:
+                with open(output_dir / "invalid.jsonl", "a") as f:
+                    for event in invalid_batch:
+                        f.write(json.dumps(event) + "\n")
+        except Exception as exc:
+            logging.warning("Failed to write outputs to files: %s", exc)

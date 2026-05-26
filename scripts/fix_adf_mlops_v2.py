@@ -28,6 +28,7 @@ os.environ.setdefault("KEY_VAULT_URI", "DISABLED")
 from azure.identity import DefaultAzureCredential
 from azure.ai.ml import MLClient, command
 from azure.ai.ml.entities import Environment
+from config.settings import SQL_SERVER, SQL_DATABASE, SQL_USERNAME, SQL_PASSWORD
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -54,11 +55,6 @@ ADF_BASE = (
     f"/providers/Microsoft.DataFactory/factories/{ADF}"
 )
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # project root
-
-SQL_SERVER   = os.environ.get("SQL_SERVER", "sql-sales-analytics-d9bt2m.database.windows.net")
-SQL_DATABASE = os.environ.get("SQL_DATABASE", "SalesAnalyticsDB")
-SQL_USERNAME = os.environ.get("SQL_USERNAME", "sqladmin")
-SQL_PASSWORD = os.environ.get("SQL_PASSWORD", "SqlP@ssw0rd2026!")
 
 
 def tok(credential) -> str:

@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Quick verification of current DB state after setup_demo_data.py"""
+import sys
+from pathlib import Path
 import pyodbc
 
-CS = (
-    "DRIVER={ODBC Driver 18 for SQL Server};"
-    "SERVER=sql-sales-analytics-d9bt2m.database.windows.net;"
-    "DATABASE=SalesAnalyticsDB;UID=sqladmin;PWD=SqlP@ssw0rd2026!;"
-    "Encrypt=yes;TrustServerCertificate=no"
-)
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from config.settings import get_sql_connection_string
+
+CS = get_sql_connection_string()
 conn = pyodbc.connect(CS, timeout=30)
 cur = conn.cursor()
 
